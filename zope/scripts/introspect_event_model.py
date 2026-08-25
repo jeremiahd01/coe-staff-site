@@ -128,7 +128,10 @@ for folder_id in ('announcements', 'calendar'):
             key = '%s = %s' % (pid, val)
             seen[key] = seen.get(key, 0) + 1
     if seen:
-        for key in sorted(seen.keys()):
+        # This instance does not expose sorted(); list.sort() is a method and works.
+        keys = list(seen.keys())
+        keys.sort()
+        for key in keys:
             out.append('    %-52s x%d' % (key, seen[key]))
     else:
         out.append('    no property with "type" in its name')

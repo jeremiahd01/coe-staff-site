@@ -211,7 +211,22 @@ the TAL sandbox. Traps hit so far, all now avoided in these scripts:
   friends restricted Python offers varies by instance, and a NameError takes down
   the whole page. `as_text()` formats through a unicode literal instead, and the
   tag check duck-types with `hasattr(x, 'strip')` rather than `isinstance`.
-- `getattr`, `hasattr`, `sorted` and `len` are available and used freely.
+- **`sorted()` is not available on this instance.** `list.sort()` is a method
+  rather than a builtin and works fine. This one bit us in the ZMI.
+
+Observed on this instance, from what actually ran before failing:
+
+| Builtin | Status |
+|---|---|
+| `getattr`, `hasattr`, `list`, `len`, `str`, `Exception` | Available — these executed successfully |
+| `sorted` | **Not available** — raised `global name 'sorted' is not defined` |
+| `callable`, `int`, `unicode`, `basestring`, `isinstance` | Untested; avoided on purpose |
+
+Given how tight this safe-builtins list turned out to be, these scripts now run
+using nothing beyond what they define themselves. Worth keeping to that bar for
+anything new: a missing builtin is a NameError at request time, and because the
+template calls the data script at its root, that would take the whole page down
+rather than degrade one widget.
 
 Two escaping traps worth knowing, both already handled:
 

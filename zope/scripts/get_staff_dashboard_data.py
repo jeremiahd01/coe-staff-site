@@ -76,11 +76,14 @@ def prop(obj, names, default=''):
             value = None
         if value is None:
             value = getattr(obj, name, None)
-            if callable(value):
+            if value is not None:
+                # Might be an accessor method rather than a plain attribute.
+                # Just try it: callable() is not exposed here, and calling a
+                # non-callable simply raises and leaves the value untouched.
                 try:
                     value = value()
                 except Exception:
-                    value = None
+                    pass
         if value not in (None, '', ()):
             return value
     return default
@@ -107,13 +110,18 @@ def as_text(value):
 
 
 def clock_parts(dt):
-    """(hour12, minute, AM/PM) from a Zope DateTime or a datetime."""
+    """(hour, minute, MERIDIEM) as strings, from a Zope DateTime or datetime.
+
+    Returns strings rather than ints so no int() call is needed — this instance
+    keeps a tight safe-builtins list and int() is not worth relying on.
+    """
     try:
-        return int(dt.h_12()), int(dt.minute()), dt.ampm().upper()
+        return (u'%s' % dt.h_12(), u'%02d' % dt.minute(), dt.ampm().upper())
     except Exception:
         pass
     try:
-        return int(dt.strftime('%I')), int(dt.strftime('%M')), dt.strftime('%p').upper()
+        hour = dt.strftime('%I').lstrip('0') or u'12'
+        return (u'%s' % hour, dt.strftime('%M'), dt.strftime('%p').upper())
     except Exception:
         return None
 
@@ -128,12 +136,12 @@ def fmt_when(start, end, all_day):
     ah, am, ap = a
     b = clock_parts(end) if end is not None else None
     if not b:
-        return u'%d:%02d %s' % (ah, am, ap)
+        return u'%s:%s %s' % (ah, am, ap)
     bh, bm, bp = b
     if ap == bp:
         # same meridiem reads better with it stated once, at the end
-        return u'%d:%02d%s%d:%02d %s' % (ah, am, DASH, bh, bm, bp)
-    return u'%d:%02d %s%s%d:%02d %s' % (ah, am, ap, DASH, bh, bm, bp)
+        return u'%s:%s%s%s:%s %s' % (ah, am, DASH, bh, bm, bp)
+    return u'%s:%s %s%s%s:%s %s' % (ah, am, ap, DASH, bh, bm, bp)
 
 
 def month_abbr(dt):
@@ -145,11 +153,11 @@ def month_abbr(dt):
 
 def day_number(dt):
     try:
-        return as_text(int(dt.day()))
+        return as_text(dt.day())
     except Exception:
         pass
     try:
-        return as_text(int(dt.strftime('%d')))
+        return as_text(dt.strftime('%d').lstrip('0'))
     except Exception:
         return u''
 
