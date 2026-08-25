@@ -87,18 +87,21 @@ def prop(obj, names, default=''):
 
 
 def as_text(value):
-    """Safe unicode, never raises. Handles text, bytes and numbers alike."""
+    """Safe text, never raises.
+
+    Deliberately avoids the unicode / basestring / isinstance builtins: which of
+    those restricted Python exposes varies by instance, and a NameError here
+    would take down the whole dashboard. Formatting through a unicode literal
+    handles text, byte strings and numbers alike.
+    """
     if value is None:
         return u''
-    if isinstance(value, unicode):
-        return value
-    if isinstance(value, str):
-        try:
-            return value.decode('utf-8', 'replace')
-        except Exception:
-            return u''
     try:
-        return unicode(value)
+        return u'%s' % (value,)
+    except Exception:
+        pass
+    try:
+        return value.decode('utf-8', 'replace')
     except Exception:
         return u''
 
@@ -159,8 +162,8 @@ def doctype_matches(obj, wanted):
 
 def pick_icon(obj):
     tags = prop(obj, F_TAGS, ())
-    if isinstance(tags, basestring):
-        tags = [tags]
+    if hasattr(tags, 'strip'):
+        tags = [tags]          # a bare string, not a sequence of them
     try:
         for tag in tags:
             key = as_text(tag).strip().lower()

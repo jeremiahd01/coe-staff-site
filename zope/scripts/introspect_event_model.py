@@ -34,6 +34,9 @@ def show(value, limit=70):
     return text
 
 
+# RestrictedPython forbids any attribute starting with '_', so __class__
+# and __name__ are unavailable here. meta_type is the identifier we
+# actually need anyway.
 out.append('Purdue Event model discovery')
 out.append('container : %s' % context.absolute_url())
 out.append('meta_type : %s' % getattr(context, 'meta_type', '?'))
@@ -56,10 +59,6 @@ for folder_id in ('announcements', 'calendar'):
         continue
 
     out.append('  meta_type  : %s' % getattr(folder, 'meta_type', '?'))
-    try:
-        out.append('  class      : %s' % folder.__class__.__name__)
-    except Exception:
-        pass
 
     present = []
     for name in CANDIDATE_METHODS:
@@ -93,10 +92,6 @@ for folder_id in ('announcements', 'calendar'):
     out.append('')
     out.append('  --- first document: %s ---' % show(doc.getId()))
     out.append('  meta_type  : %s' % getattr(doc, 'meta_type', '?'))
-    try:
-        out.append('  class      : %s' % doc.__class__.__name__)
-    except Exception:
-        pass
 
     out.append('')
     out.append('  PROPERTIES (id | type | value)')

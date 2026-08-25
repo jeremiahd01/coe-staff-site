@@ -201,6 +201,18 @@ logic into a Python Script instead. It costs portability (URLs are hard-coded to
 Written for **Zope 2.13.10 / Python 2.7.18**. Restricted Python only — no
 f-strings, `%` formatting throughout, and expressions kept traversal-safe.
 
+**Restricted Python** applies to Script (Python) objects, and it is stricter than
+the TAL sandbox. Traps hit so far, all now avoided in these scripts:
+
+- **No attribute starting with `_`.** `obj.__class__.__name__` raises
+  *"__name__ is an invalid attribute name because it starts with _"*. Use
+  `meta_type`, which is the Zope type identifier you actually want.
+- **Do not assume a builtin is exposed.** Which of `unicode`, `basestring` and
+  friends restricted Python offers varies by instance, and a NameError takes down
+  the whole page. `as_text()` formats through a unicode literal instead, and the
+  tag check duck-types with `hasattr(x, 'strip')` rather than `isinstance`.
+- `getattr`, `hasattr`, `sorted` and `len` are available and used freely.
+
 Two escaping traps worth knowing, both already handled:
 
 - The XML parser unescapes entities *before* TALES evaluates an expression, so
