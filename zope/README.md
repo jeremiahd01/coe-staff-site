@@ -156,10 +156,23 @@ announcements at all. The script does not filter by type — `announcements` and
 free-text string properties**. They are displayed **verbatim** — `10:00 - 11:00 AM`
 is the admin's wording, and reformatting it would only create ways to be wrong.
 
-Property sets vary between documents, and Zope property ids are case-sensitive,
-so the script tries `Time`/`time`/`event_time` and `Location`/`location`/
-`event_location` in turn. Neither is catalog metadata, so both are read off the
-object that is already being loaded for `redirect_url`.
+**They are not registered OFS properties.** They appear on the document's Edit
+tab but not its Properties tab, because the edit form stores them as plain
+instance attributes. `getProperty()` cannot see them and `propertyIds()` never
+mentions them — which is why they were missing from the discovery output.
+
+The script therefore falls back to `getattr`, reading through **`aq_base`**. A
+bare `getattr` would find the value but would also inherit a same-named value
+from a parent folder through acquisition, which would quietly attach the wrong
+location to an event. `aq_base` pins the lookup to the document itself, with a
+graceful fallback if restricted Python will not expose it.
+
+Names are case-sensitive, so `Time`/`time`/`event_time` and `Location`/
+`location`/`event_location` are each tried in turn. Neither is catalog metadata,
+so both come off the object already being loaded for `redirect_url`.
+
+The discovery script now probes these names directly and reports which are set,
+so you can confirm the exact spelling in one run.
 
 Order of preference for the time line:
 

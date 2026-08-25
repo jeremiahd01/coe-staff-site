@@ -138,6 +138,34 @@ for folder_id in ('announcements', 'calendar'):
         except Exception as e:
             out.append('    propertyIds() failed: %s' % show(e))
 
+        # Time and Location live on the Edit tab, not the Properties tab: the
+        # edit form stores them as plain instance attributes, so propertyIds()
+        # never mentions them. Probe candidate names directly, through aq_base
+        # so an inherited value from the parent folder cannot masquerade as the
+        # document's own.
+        out.append('  INSTANCE ATTRIBUTES (not registered properties)')
+        base = doc
+        try:
+            base = doc.aq_base
+        except Exception:
+            out.append('    (aq_base unavailable; values below may be acquired)')
+        hits = 0
+        for name in ('Time', 'time', 'event_time', 'eventTime', 'times',
+                     'Location', 'location', 'event_location', 'eventLocation',
+                     'place', 'room', 'building', 'venue', 'address',
+                     'all_day', 'allDay', 'contact', 'cost', 'sponsor',
+                     'audience', 'event_url', 'url', 'registration_url'):
+            try:
+                value = getattr(base, name, None)
+            except Exception:
+                continue
+            if value is None:
+                continue
+            hits = hits + 1
+            out.append('    %-22s %s' % (name, show(value)))
+        if not hits:
+            out.append('    none of the probed names are set on this document')
+
         out.append('  ACCESSORS PRESENT')
         present = []
         for name in ('Title', 'Description', 'getStartDate', 'getEndDate',

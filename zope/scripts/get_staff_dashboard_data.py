@@ -56,10 +56,12 @@ ICON_BY_KEYWORD = (
 # verbatim rather than parsed — "10:00-11:00 AM" is the admin's wording and
 # reformatting it would only introduce ways to be wrong.
 #
-# Property sets vary between documents (some carry wrap_version, some do not),
-# and Zope property ids are case-sensitive, so each name is tried in turn.
-# Neither property is catalog metadata, so both are read off the object — which
-# is already being loaded for redirect_url.
+# These live on the Edit tab, not the Properties tab: the edit form stores them
+# as plain instance attributes rather than registered OFS properties, so
+# getProperty() cannot see them and they must be read with getattr. Zope
+# property ids are case-sensitive, so each candidate is tried in turn. Neither
+# is catalog metadata, so both come off the object already being loaded for
+# redirect_url.
 F_TIME     = ('Time', 'time', 'event_time', 'eventTime')
 F_LOCATION = ('Location', 'location', 'event_location', 'place', 'room')
 
@@ -209,8 +211,42 @@ def resolve(brain):
     return (url, obj)
 
 
+def raw_attr(obj, name):
+    """Read an attribute set directly on the object, bypassing acquisition.
+
+    Time and Location are written by the document's own edit form as plain
+    instance attributes rather than registered OFS properties — which is why
+    they appear on the Edit tab but not the Properties tab, and why
+    getProperty() cannot see them.
+
+    A bare getattr() would find them, but would also happily inherit a
+    same-named value from a parent folder through acquisition. Reading through
+    aq_base pins the lookup to this object. If aq_base is not reachable from
+    restricted Python, fall back to the plain object rather than give up.
+    """
+    target = obj
+    try:
+        target = obj.aq_base
+    except Exception:
+        pass
+    try:
+        value = getattr(target, name, None)
+    except Exception:
+        return None
+    if value is None:
+        return None
+    try:
+        value = value()        # an accessor method rather than a plain value
+    except Exception:
+        pass                   # not callable: keep it as-is
+    return value
+
+
 def prop_of(obj, names):
-    """First non-empty property from a list of candidate ids."""
+    """First non-empty value from a list of candidate ids.
+
+    Registered properties first, then raw instance attributes.
+    """
     if obj is None:
         return u''
     for name in names:
@@ -218,6 +254,8 @@ def prop_of(obj, names):
             value = obj.getProperty(name, None)
         except Exception:
             value = None
+        if not value:
+            value = raw_attr(obj, name)
         if value:
             text = as_text(value).strip()
             if text:
