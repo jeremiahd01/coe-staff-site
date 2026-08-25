@@ -62,8 +62,14 @@ ICON_BY_KEYWORD = (
 # property ids are case-sensitive, so each candidate is tried in turn. Neither
 # is catalog metadata, so both come off the object already being loaded for
 # redirect_url.
-F_TIME     = ('Time', 'time', 'event_time', 'eventTime')
-F_LOCATION = ('Location', 'location', 'event_location', 'place', 'room')
+# Candidates widened using the rendered class names in the theme's
+# event_system.css (.event-location-name, .event-physical-address,
+# .event-date-time), which mirror the underlying field vocabulary.
+F_TIME     = ('Time', 'time', 'event_time', 'eventTime', 'event_date_time',
+              'date_time', 'time_text', 'event_time_text')
+F_LOCATION = ('Location', 'location', 'event_location', 'location_name',
+              'event_location_name', 'place', 'room', 'venue',
+              'physical_address', 'event_physical_address', 'address')
 
 
 # ---------------------------------------------------------------------------
@@ -211,38 +217,40 @@ def resolve(brain):
     return (url, obj)
 
 
-def raw_attr(obj, name):
-    """Read an attribute set directly on the object, bypassing acquisition.
+def raw_attr(obj, name, guards):
+    """Read an attribute set directly on the object.
 
-    Time and Location are written by the document's own edit form as plain
-    instance attributes rather than registered OFS properties — which is why
-    they appear on the Edit tab but not the Properties tab, and why
-    getProperty() cannot see them.
+    Time and Location are written by the document's edit form rather than
+    registered as OFS properties, so getProperty() cannot see them.
 
-    A bare getattr() would find them, but would also happily inherit a
-    same-named value from a parent folder through acquisition. Reading through
-    aq_base pins the lookup to this object. If aq_base is not reachable from
-    restricted Python, fall back to the plain object rather than give up.
+    aq_base turns out to be unavailable to restricted Python on this instance,
+    so acquisition cannot be switched off at the source. Instead the value is
+    rejected if it is identical to the same-named attribute on an ancestor,
+    which is what an acquired value looks like. Bound methods and object reprs
+    are rejected too: probing 'url' otherwise returns the document's URL as
+    though it were a field value.
     """
-    target = obj
     try:
-        target = obj.aq_base
-    except Exception:
-        pass
-    try:
-        value = getattr(target, name, None)
+        value = getattr(obj, name, None)
     except Exception:
         return None
     if value is None:
         return None
-    try:
-        value = value()        # an accessor method rather than a plain value
-    except Exception:
-        pass                   # not callable: keep it as-is
-    return value
+    for guard in guards:
+        if guard is None:
+            continue
+        try:
+            if getattr(guard, name, None) is value:
+                return None          # inherited from above, not this document
+        except Exception:
+            pass
+    text = as_text(value).strip()
+    if not text or text[:1] == '<':  # '<bound method ...>', '<EventDocument ...>'
+        return None
+    return text
 
 
-def prop_of(obj, names):
+def prop_of(obj, names, guards):
     """First non-empty value from a list of candidate ids.
 
     Registered properties first, then raw instance attributes.
@@ -254,27 +262,31 @@ def prop_of(obj, names):
             value = obj.getProperty(name, None)
         except Exception:
             value = None
-        if not value:
-            value = raw_attr(obj, name)
         if value:
             text = as_text(value).strip()
             if text:
                 return text
+        text = raw_attr(obj, name, guards)
+        if text:
+            return text
     return u''
 
 
 def query(folder_id, sort_on, sort_order):
+    """(folder, brains). The folder comes back so it can guard against values
+    acquired from the manager."""
     folder = getattr(context, folder_id, None)
     if folder is None:
-        return []
+        return (None, [])
     try:
-        return list(folder.searchResults(sort_on=sort_on, sort_order=sort_order))
+        return (folder, list(folder.searchResults(sort_on=sort_on,
+                                                  sort_order=sort_order)))
     except Exception:
         pass
     try:                       # catalog unhappy: fall back to an unsorted read
-        return list(folder.searchResults())
+        return (folder, list(folder.searchResults()))
     except Exception:
-        return []
+        return (folder, [])
 
 
 now = context.ZopeTime()
@@ -288,7 +300,9 @@ except Exception:
 # Upcoming events — /calendar, soonest first
 # ---------------------------------------------------------------------------
 events = []
-for brain in query('calendar', 'event_date', 'ascending'):
+cal_folder, cal_brains = query('calendar', 'event_date', 'ascending')
+cal_guards = (cal_folder, context)
+for brain in cal_brains:
     if len(events) >= event_limit:
         break
     if not visible(brain, now):
@@ -305,7 +319,7 @@ for brain in query('calendar', 'event_date', 'ascending'):
     # The admin-authored Time string wins. Only when it is absent do we derive
     # a time from event_date, which is stored at midnight unless someone has
     # entered one — in which case this reads "All day".
-    when = prop_of(obj, F_TIME)
+    when = prop_of(obj, F_TIME, cal_guards)
     if not when:
         when = fmt_when(start, meta(brain, 'event_end_date'))
     events.append({
@@ -313,7 +327,7 @@ for brain in query('calendar', 'event_date', 'ascending'):
         'day':   day_number(start),
         'title': as_text(meta(brain, 'title', u'')),
         'when':  when,
-        'where': prop_of(obj, F_LOCATION),
+        'where': prop_of(obj, F_LOCATION, cal_guards),
         'url':   url,
     })
 
@@ -326,7 +340,8 @@ for brain in query('calendar', 'event_date', 'ascending'):
 # "Closes <date>" line.
 # ---------------------------------------------------------------------------
 announcements = []
-for brain in query('announcements', 'show_date', 'descending'):
+ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
+for brain in ann_brains:
     if len(announcements) >= announcement_limit:
         break
     if not visible(brain, now):

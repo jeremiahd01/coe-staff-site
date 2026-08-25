@@ -150,11 +150,20 @@ for folder_id in ('announcements', 'calendar'):
         except Exception:
             out.append('    (aq_base unavailable; values below may be acquired)')
         hits = 0
+        # Names widened using the rendered class names in the theme's
+        # event_system.css: .event-location-name, .event-physical-address,
+        # .event-date-time, .event-contact-email, .event-college-calendar.
         for name in ('Time', 'time', 'event_time', 'eventTime', 'times',
+                     'event_date_time', 'date_time', 'time_text',
+                     'event_time_text', 'start_time', 'end_time',
                      'Location', 'location', 'event_location', 'eventLocation',
-                     'place', 'room', 'building', 'venue', 'address',
-                     'all_day', 'allDay', 'contact', 'cost', 'sponsor',
-                     'audience', 'event_url', 'url', 'registration_url'):
+                     'location_name', 'event_location_name', 'place', 'room',
+                     'building', 'venue', 'address', 'physical_address',
+                     'event_physical_address', 'map_embed', 'event_map_embed',
+                     'contact_email', 'event_contact_email', 'contact',
+                     'college_calendar', 'event_college_calendar',
+                     'all_day', 'allDay', 'cost', 'sponsor', 'audience',
+                     'registration_url', 'event_url', 'tags'):
             try:
                 value = getattr(base, name, None)
             except Exception:
@@ -165,6 +174,13 @@ for folder_id in ('announcements', 'calendar'):
             out.append('    %-22s %s' % (name, show(value)))
         if not hits:
             out.append('    none of the probed names are set on this document')
+
+        # getTemplate is the one accessor these documents expose; its value
+        # should name the document's template variant.
+        try:
+            out.append('  getTemplate() -> %s' % show(doc.getTemplate()))
+        except Exception as e:
+            out.append('  getTemplate() failed: %s' % show(e))
 
         out.append('  ACCESSORS PRESENT')
         present = []
