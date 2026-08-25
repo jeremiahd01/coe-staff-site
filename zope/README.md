@@ -5,17 +5,49 @@
 ## Installing it
 
 1. **Create the template.** In the ZMI, in the `/staff` folder, add a
-   **Page Template** with the id `dashboard_home`. Paste the full contents of
-   `dashboard_home.pt` into it and save.
-2. **Add the styles.** Append the contents of `../prototype/staff-dashboard.css`
-   to `/staff/local.css`. It consumes Wrap9's own custom properties, so it needs
-   no edits.
-3. **Embed it.** On `/staff/index_html?action=edit_blocks`, add a
-   **Page Template Embed** block pointing at `dashboard_home`.
+   **Page Template** and paste the contents of `dashboard_home.pt` into it.
+   The id is up to you — currently `pt_homepage`.
+2. **Point the block at it.** On `/staff/index_html?action=edit_blocks`, add a
+   **Page Template Embed** block and give it the template's *name only*. The
+   block resolves it from the same folder; it does not take a path, and it does
+   not take pasted template source.
+3. **Add the styles.** Append `../prototype/staff-dashboard.css` to
+   `/staff/local.css` (see below).
 4. **Remove the existing banner block.** `index_html` already carries a
    `banner_2025-01-01-00-00-00-000` block. This template renders its own banner
    (the approved design puts the search field inside it), so leaving both in
    place shows two banners.
+
+### The stylesheet
+
+Wrap9 already links `/staff/local.css` on every page — there is no `<link>` tag
+to add. The load order is:
+
+```html
+<link rel="stylesheet" href="/Wraps/wrap09/required/wrap_css.css">
+<link rel="stylesheet" href="/staff/local.css">
+```
+
+**That order matters.** Several rules in `staff-dashboard.css` beat the theme on
+an equal-specificity tie and only win because `local.css` loads second — the
+`--bg-light-gray` blue-link override and the focus-ring colours among them. Do
+not move our CSS anywhere that loads earlier.
+
+If `/staff/local.css` already exists, **append** to it rather than replacing it,
+so any existing site styles survive. If it does not exist, add a **File** object
+with the id `local.css`.
+
+Our stylesheet is ~22 KB / 766 lines and contains no DTML syntax, so it is safe
+in either a File or a DTML object.
+
+**If the styles still do not apply**, open the browser devtools Network tab and
+look at the `local.css` request:
+
+| What you see | Meaning |
+|---|---|
+| 404 | The object is not there, or is not named exactly `local.css` |
+| 200 but nothing styled, MIME warning in console | Content-Type is wrong. It must be `text/css` — browsers refuse stylesheets served as `application/octet-stream` or `text/plain` |
+| 200, correct type, still unstyled | Stale cache. Hard refresh with Cmd/Ctrl+Shift+R |
 
 ## The embed wrapper (resolved)
 
