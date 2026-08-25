@@ -53,11 +53,13 @@
   box-shadow: 0 0 0 3px var(--rush);
 }
 
+/* Gold, not black. A black submit button sitting in a white field on a black
+   banner reads as a hole punched through the field rather than a control. */
 .staff-search__submit {
   flex: 0 0 auto;
   border: 0;
-  background: #000;
-  color: var(--boiler-gold);
+  background: var(--boiler-gold);
+  color: #000;
   padding-inline: 1.25rem;
   cursor: pointer;
   display: grid;
@@ -66,8 +68,8 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 .staff-search__submit:hover {
-  background: var(--boiler-gold);
-  color: #000;
+  background: var(--aged-gold);
+  color: #fff;
 }
 
 .staff-search__note {
@@ -111,6 +113,20 @@
   font-size: 0.9375rem;
   letter-spacing: 2.2px;
   padding: 0.5rem 1.25rem;
+  /* The skewed parallelogram is a single-line shape; letting the label wrap
+     inside it doubles its height and breaks the silhouette. */
+  white-space: nowrap;
+}
+
+/* Between lg and xl the rail is at its narrowest, and "Upcoming Events" plus
+   its view-all link only just fit. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .staff-card .motion-heading {
+    font-size: 0.875rem;
+    letter-spacing: 1.6px;
+    padding-inline: 1rem;
+  }
+  .staff-card__more { font-size: 0.75rem; }
 }
 
 .staff-card__more {
@@ -565,37 +581,117 @@
 
 /* ==========================================================================
    14. Banner sizing
-   The stock split-motion banner runs 6rem of vertical padding with a 3rem
-   headline, which reads as a hero rather than the "narrow banner" the brief
-   asks for. These trim it without leaving the theme's visual language.
+   The stock split-motion banner is a full hero: 6rem of vertical padding, a
+   3rem headline, and a 50/50 image. The brief asks for a narrow banner, so:
+     - the image is dropped entirely below 992px
+     - on desktop it shrinks from half the banner to a ~26% accent panel
+     - the headline/tagline and the search sit side by side rather than
+       stacked, which is what actually removes the height
    ========================================================================== */
-.block .banner.staff-banner .split-motion-content {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
-}
-.block .banner.staff-banner h1 {
-  font-size: 2.25rem;
-  line-height: 2.25rem;
-  margin: 0;
-}
-.block .banner.staff-banner .intro-text {
-  margin-bottom: 0;
-  font-size: 1rem;
-}
-.block .banner.staff-banner .hgroup {
-  gap: 1.15rem;
-  margin-bottom: 1rem;
+
+/* ---- Mobile and tablet: no image, single stacked column ---- */
+.block .banner.staff-banner .split-motion-image {
+  display: none;
 }
 
+.block .banner.staff-banner {
+  min-height: 0;
+}
+
+.block .banner.staff-banner .split-motion-content {
+  padding: 1.75rem 1.25rem 2rem;
+}
+
+.staff-banner__row {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.staff-banner__intro { min-width: 0; }
+
+.block .banner.staff-banner h1 {
+  font-size: 1.875rem;
+  line-height: 1.95rem;
+  margin: 0;
+}
+
+.block .banner.staff-banner .intro-text {
+  margin-bottom: 0;
+  font-size: 0.9375rem;
+}
+
+.block .banner.staff-banner .hgroup {
+  gap: 0.9rem;
+  margin: 0 0 0.85rem;
+}
+
+.block .banner.staff-banner .motion-heading {
+  font-size: 0.8125rem;
+  padding: 0.4rem 1rem;
+}
+
+.staff-banner__row .staff-search {
+  margin-top: 0;
+  max-width: 30rem;
+}
+
+/* ---- Desktop: narrow accent image, two-column content ---- */
 @media screen and (min-width: 992px) {
-  .block .banner.staff-banner .split-motion-content {
-    padding: 3.25rem 1.5rem 3.25rem 4rem;
-  }
-  .block .banner.staff-banner h1 {
-    font-size: 3rem;
-    line-height: 3rem;
-  }
   .block .banner.staff-banner .split-motion-image {
+    display: block;
+    flex: 0 0 26%;
+    width: 26%;
     aspect-ratio: auto;
   }
+
+  /* Stock rule gives the copy container max-width 50%; the image is now an
+     accent panel, so the content takes the rest. */
+  .block .banner.staff-banner .container {
+    max-width: 74%;
+    width: 74%;
+  }
+
+  /* The diagonal wedge is scaled to the narrower panel so it stays a wedge
+     instead of swallowing the image. */
+  .block .banner.staff-banner .split-motion-image:before {
+    width: 5rem;
+  }
+
+  .block .banner.staff-banner .split-motion-content {
+    padding: 1.75rem 1.5rem 1.75rem 3.5rem;
+  }
+
+  .staff-banner__row {
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+
+  .staff-banner__intro { flex: 1 1 auto; }
+
+  .staff-banner__row .staff-search {
+    flex: 0 0 auto;
+    width: 22rem;
+  }
+
+  .block .banner.staff-banner h1 {
+    font-size: 2.25rem;
+    line-height: 2.35rem;
+  }
+
+  .block .banner.staff-banner .motion-heading {
+    font-size: 0.875rem;
+    padding: 0.45rem 1.1rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .block .banner.staff-banner h1 {
+    font-size: 2.625rem;
+    line-height: 2.7rem;
+  }
+  .staff-banner__row .staff-search { width: 24rem; }
 }
