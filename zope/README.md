@@ -150,49 +150,54 @@ empty string in `announcements`, so filtering on it would return no
 announcements at all. The script does not filter by type — `announcements` and
 `calendar` are separate managers, so the folder already is the filter.
 
-### Time and Location
+### Time and Location — resolved
 
-`eventOrFunction` documents in `calendar` carry **`Time` and `Location` as
-free-text string properties**. They are displayed **verbatim** — `10:00 - 11:00 AM`
-is the admin's wording, and reformatting it would only create ways to be wrong.
+`EventDocument` keeps its template fields in a **mapping keyed by human-readable
+labels**, exposed through `keys()`:
 
-**They are not registered OFS properties.** They appear on the document's Edit
-tab but not its Properties tab, because the edit form stores them as plain
-instance attributes. `getProperty()` cannot see them and `propertyIds()` never
-mentions them — which is why they were missing from the discovery output.
+```
+Hosted By, Time, Location, Contact Name, Contact Phone, Contact Email,
+Open To, Priority, School or Program, College Calendar, Physical Address
+```
 
-The script therefore falls back to `getattr`, reading through **`aq_base`**. A
-bare `getattr` would find the value but would also inherit a same-named value
-from a parent folder through acquisition, which would quietly attach the wrong
-location to an event. `aq_base` pins the lookup to the document itself, with a
-graceful fallback if restricted Python will not expose it.
+That is why no attribute name ever matched — `Contact Name` cannot be an
+attribute id. Note `values()` and `items()` are ObjectManager's and return the
+document's **sub-objects** (its image and its .ics), not these field values.
 
-Names are case-sensitive, so `Time`/`time`/`event_time` and `Location`/
-`location`/`event_location` are each tried in turn. Neither is catalog metadata,
-so both come off the object already being loaded for `redirect_url`.
+The card reads `Time` for the time line and `Location`, falling back to
+`Physical Address`, for the venue. `Time` is free text and is shown verbatim:
+the template renders it as `<formatted event_date> at <Time>`, so the stored
+value is just the fragment (`5PM`).
 
-The discovery script now probes these names directly and reports which are set,
-so you can confirm the exact spelling in one run.
+Which accessor reads a field by key is not documented, so `field_value()` tries
+`get`, `getValue`, `value`, `getField`, `field`, `getFieldValue`, `getItem`,
+`item` and `obj[key]`, taking the first usable answer and rejecting object
+reprs. Once we know which one this product exposes, that list can collapse to one.
 
-Order of preference for the time line:
+Nine other fields are available and currently unused — `Hosted By`,
+`Contact Email`, `Open To`, `School or Program` and the rest — if the calendar
+page ever wants them.
 
-1. the `Time` string, used exactly as written
-2. failing that, a range derived from `event_date` / `event_end_date`, if a real
-   time has been entered rather than the default midnight
-3. otherwise `All day`
+### Add to Outlook — solved, for free
 
-Announcements have no Location, which is correct — the design does not show one.
-They do carry `event_length` (int, `1` meaning one day); it is available but
-currently unused, since the announcement card shows no duration.
+Each event document **auto-generates its own `.ics` file** as a sub-object:
 
-**Worth checking:** neither of the two calendar documents sampled during
-discovery had `Time` or `Location` set, so they will render as "All day" with no
-location until someone fills them in. Existing content may need a backfill pass.
+```
+staff-award-nominations-2026/
+  staff-awards2-712x400.jpg
+  staff-award-nominations-2026.ics     <- BEGIN:VCALENDAR ... DTSTART;TZID=US/Eastern:20261002T170000
+```
 
-**One consistency note:** an admin-authored `Time` of `10:00 - 11:00 AM` keeps
-its spaced hyphen, while a derived range renders with the design's en dash
-(`2:30-4:00 PM`). If that matters, it is a content-style decision rather than a
-code one.
+The DTSTART already reflects the `Time` field. `ics_url()` finds it by scanning
+`objectIds()` for a `.ics` suffix, and the card links straight to it — which
+works with Outlook desktop, OWA, Apple Calendar and Google. Nothing to generate,
+no deep-link fiddling.
+
+The link is wrapped in `tal:condition="event/ics | nothing"`, so an event without
+an .ics simply shows no button rather than a dead one. The dummy fallback content
+carries no .ics either, so those rows show no button until live data arrives.
+
+Events also carry an image sub-object, if the calendar page ever wants thumbnails.
 
 ### Two things needing your input
 

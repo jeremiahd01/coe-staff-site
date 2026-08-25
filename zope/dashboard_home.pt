@@ -267,9 +267,12 @@
                 </p>
               </div>
 
-              <!-- Add-to-calendar: Wrap9's event system provides this natively
-                   (.add-to-calendar-icons). Wire to the real export next pass. -->
-              <a class="staff-event__outlook" tal:attributes="href event/url">
+              <!-- Each event document auto-generates its own .ics sub-object,
+                   so this links straight to it: works with Outlook desktop,
+                   OWA, Apple Calendar and Google. Hidden when absent. -->
+              <a class="staff-event__outlook"
+                 tal:condition="event/ics | nothing"
+                 tal:attributes="href event/ics">
                 <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span
                   class="staff-visually-hidden"
                   tal:content="string:: ${event/title}">: Event title</span>
