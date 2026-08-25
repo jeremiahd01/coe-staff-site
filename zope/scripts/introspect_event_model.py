@@ -144,34 +144,50 @@ for folder_id in ('announcements', 'calendar'):
         # so an inherited value from the parent folder cannot masquerade as the
         # document's own.
         out.append('  INSTANCE ATTRIBUTES (not registered properties)')
-        base = doc
-        try:
-            base = doc.aq_base
-        except Exception:
-            out.append('    (aq_base unavailable; values below may be acquired)')
+        # aq_base is not exposed to restricted Python on this instance, so
+        # acquired values are flagged by comparison instead.
+        base_obj = doc
+        # Build candidates systematically rather than guessing one at a time:
+        # every prefix x base combination, plus a few one-offs. The rendered
+        # markup shows .event-location-name and .event-date-time, and the time
+        # renders as "<formatted date> at <Time>", so the stored value is just
+        # the time fragment.
+        prefixes = ('', 'event_', 'Event', 'event', 'evt_', 'the_')
+        bases = ('time', 'Time', 'time_text', 'timeText', 'date_time',
+                 'dateTime', 'times', 'start_time', 'startTime',
+                 'location', 'Location', 'location_name', 'locationName',
+                 'LocationName', 'place', 'Place', 'venue', 'room',
+                 'address', 'Address', 'physical_address', 'physicalAddress',
+                 'map_embed', 'contact_email', 'contact', 'cost', 'sponsor',
+                 'audience', 'college_calendar', 'registration_url')
+        names = []
+        seen_names = {}
+        for prefix in prefixes:
+            for base in bases:
+                candidate = prefix + base
+                if candidate not in seen_names:
+                    seen_names[candidate] = 1
+                    names.append(candidate)
         hits = 0
-        # Names widened using the rendered class names in the theme's
-        # event_system.css: .event-location-name, .event-physical-address,
-        # .event-date-time, .event-contact-email, .event-college-calendar.
-        for name in ('Time', 'time', 'event_time', 'eventTime', 'times',
-                     'event_date_time', 'date_time', 'time_text',
-                     'event_time_text', 'start_time', 'end_time',
-                     'Location', 'location', 'event_location', 'eventLocation',
-                     'location_name', 'event_location_name', 'place', 'room',
-                     'building', 'venue', 'address', 'physical_address',
-                     'event_physical_address', 'map_embed', 'event_map_embed',
-                     'contact_email', 'event_contact_email', 'contact',
-                     'college_calendar', 'event_college_calendar',
-                     'all_day', 'allDay', 'cost', 'sponsor', 'audience',
-                     'registration_url', 'event_url', 'tags'):
+        for name in names:
             try:
-                value = getattr(base, name, None)
+                value = getattr(base_obj, name, None)
             except Exception:
                 continue
             if value is None:
                 continue
+            text = show(value)
+            if text[:1] == '<':
+                continue          # bound method or object repr, not a field
+            # Flag anything inherited from the manager rather than set here
+            marker = ''
+            try:
+                if getattr(folder, name, None) is value:
+                    marker = '   [ACQUIRED from manager, not this document]'
+            except Exception:
+                pass
             hits = hits + 1
-            out.append('    %-22s %s' % (name, show(value)))
+            out.append('    %-28s %s%s' % (name, text, marker))
         if not hits:
             out.append('    none of the probed names are set on this document')
 
