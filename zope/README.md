@@ -120,40 +120,50 @@ live data is flowing.
 | Upcoming Events | `calendar/` | Document Type contains `event` | Soonest first, 5, unfinished only |
 | Quick Links / Explore | Static in the template | — | — |
 
-### What discovery confirmed
+### The confirmed content model
 
-- A **Purdue Event Manager is its own ZCatalog** — it exposes `searchResults`,
-  `indexes` and `objectIds`.
-- Because of that, `objectValues()` returns **more than documents**: a
-  `ZCTextIndex Lexicon` and a `Page Template` sit alongside them.
-- The `calendar` manager contains a **nested Purdue Event Manager**, so documents
-  live more than one level down.
-- The manager's `available_templates` property is exactly
-  `('Event/Function', 'News Item')` — the Document Type vocabulary, confirmed.
+A **Purdue Event Manager** is its own ZCatalog. Documents live in year
+subfolders (`calendar/2026/...`) and the catalog indexes them all, so the script
+queries `searchResults()` rather than walking objects — the catalog sorts on
+`event_date`, returns metadata without waking each object, and finds the nested
+folders for free. Only the handful of documents actually displayed get loaded,
+and only to read `redirect_url`, which is not catalog metadata.
 
-The script therefore selects documents by `meta_type == 'Purdue Event Document'`
-and recurses into nested managers. Filtering on the Document Type property alone
-would be unsafe: acquisition lets an unrelated object answer `getProperty()` with
-the manager's values, which would admit the Lexicon as a phantom announcement.
+**Purdue Event Document properties:**
 
-### Still outstanding: the document field names
+| Property | Used for |
+|---|---|
+| `title` | Card title |
+| `intro` | Summary line |
+| `event_date` | Event date; on announcements it is the deadline, giving "Closes Oct 2" |
+| `event_end_date` | Catalog metadata only; used for a time range when present |
+| `show_date` / `hide_date` | Publication window, honoured by both widgets |
+| `keywords` | Drives the announcement icon via substring match |
+| `redirect_url` | Overrides the card link when set |
+| `event_length`, `priority`, `people`, `author`, `source` | Available, unused so far |
 
-Discovery v1 reported the *manager's* properties rather than a document's,
-because it inspected whichever object came back first — which was the Lexicon.
-v2 filters on meta_type, recurses, and also dumps the catalog indexes and
-metadata. Run it once more and send the output.
+Announcements sort on `show_date` descending, because `event_date` is empty on
+news items. Events sort on `event_date` ascending and drop anything before today.
 
-Until then the field map (`F_TITLE`, `F_START`, `F_LOCATION` and friends at the
-top of the script) tries candidate names and takes the first non-empty one. Once
-we know the real names, each tuple should be pruned to the single correct one —
-and the catalog indexes may let us replace the walk with a `searchResults()`
-query, which would be faster and would do the sorting for us.
+**On Document Type:** the `type` index reads `eventOrFunction` in `calendar` and
+empty string in `announcements`, so filtering on it would return no
+announcements at all. The script does not filter by type — `announcements` and
+`calendar` are separate managers, so the folder already is the filter.
 
-### Before it will work: confirm the field names
+### Two content gaps to raise with the project lead
 
-`introspect_event_model.py` (v2) reports them. Install as a Script (Python) in
-`/staff`, visit `https://engineering.purdue.edu/staff/introspect_event_model`,
-send the output, then delete it. It reads only.
+The approved design shows `10:00-11:00 AM | ARMS 1010`. The content model
+currently supports neither:
+
+1. **No location field.** Purdue Event Document has no `location` property, so
+   `where` renders empty on every real event.
+2. **No time of day.** `event_date` is stored at midnight, so every event
+   renders "All day".
+
+The script is built so both light up the moment the data exists — enter a real
+time on an event and it formats as a range; add a location property and it
+appears. But someone has to decide whether to extend the content type, put the
+detail in `intro`, or drop location and time from the card design.
 
 ### Two things needing your input
 

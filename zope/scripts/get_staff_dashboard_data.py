@@ -4,105 +4,65 @@
 # ============================================================================
 # Feeds the Staff Hub dashboard.
 #
-# Install: ZMI -> /staff -> Add Script (Python), id "get_staff_dashboard_data",
-#          paste this whole file in, save.
+# Install: ZMI -> /staff -> Add Script (Python), id "get_staff_dashboard_data".
 #
 # Returns:
 #   {'announcements': [ {icon, title, summary, due, url}, ... ],
 #    'events':        [ {month, day, title, when, where, url}, ... ]}
 #
-# Those keys are exactly what pt_homepage already iterates, so wiring it up is
-# one tal:define change per widget.
+# Those keys are exactly what pt_homepage iterates.
 #
-# Sources, both resolved from the same container as index_html:
-#   announcements/  Purdue Event Manager, Document Type "News Item"
-#   calendar/       Purdue Event Manager, Document Type "Event/Function"
+# Reads through each Purdue Event Manager's own ZCatalog rather than walking
+# objects. The catalog already indexes documents inside the year subfolders
+# (calendar/2026/...), sorts on event_date, and returns metadata without waking
+# each object. Only the handful of documents actually displayed get loaded, and
+# only to read redirect_url, which is not in the catalog metadata.
 #
-# Zope 2.13 / Python 2.7, restricted Python only.
+# Confirmed catalog schema on both managers:
+#   indexes  : event_date, event_end_date, getStatus, hide_date, id, keywords,
+#              kwKeywords, path, position, priority, show_date, sort_index,
+#              title, type
+#   metadata : the above plus intro, tags, meta_type
+#
+# Zope 2.13 / Python 2.7 restricted Python: no sorted(), int(), callable(),
+# isinstance(), unicode(), basestring, and no attribute starting with '_'.
 # ============================================================================
 
-# ---------------------------------------------------------------------------
-# FIELD MAP
-# Each entry lists candidate property names, tried in order, first non-empty
-# wins. Run introspect_event_model once and prune each tuple to the single
-# real name — the tolerance is scaffolding, not a permanent design.
-# ---------------------------------------------------------------------------
-F_TITLE    = ('title', 'Title')
-F_SUMMARY  = ('introduction', 'intro', 'summary', 'description', 'Description')
-F_START    = ('start_date', 'startDate', 'event_date', 'start')
-F_END      = ('end_date', 'endDate', 'end')
-F_LOCATION = ('location', 'event_location', 'place', 'room')
-F_ALLDAY   = ('all_day', 'allDay', 'is_all_day')
-F_DOCTYPE  = ('document_type', 'documentType', 'doc_type', 'type')
-F_TAGS     = ('tags', 'Subject', 'keywords', 'categories')
-
-# Confirmed by discovery: the manager's `available_templates` property is
-# ('Event/Function', 'News Item'), matched loosely so casing/punctuation drift
-# does not break it.
-DOCTYPE_NEWS  = 'news'
-DOCTYPE_EVENT = 'event'
-
-DOC_META = 'Purdue Event Document'
-MGR_META = 'Purdue Event Manager'
-
-# Announcement icons. The native documents carry no icon field, so we map from
-# the document's tags and fall back to a neutral glyph.
-ICON_BY_TAG = {
-    'award':       'fa-trophy',
-    'awards':      'fa-trophy',
-    'recognition': 'fa-trophy',
-    'bravo':       'fa-trophy',
-    'pesla':       'fa-medal',
-    'leadership':  'fa-medal',
-    'ai':          'fa-wand-magic-sparkles',
-    'technology':  'fa-wand-magic-sparkles',
-    'benefits':    'fa-shield-halved',
-    'hr':          'fa-shield-halved',
-    'policy':      'fa-shield-halved',
-    'people':      'fa-user-group',
-    'staff':       'fa-user-group',
-    'welcome':     'fa-user-group',
-    'training':    'fa-chart-line',
-}
+DASH = u'–'          # en dash, matches the approved design
 DEFAULT_ICON = 'fa-circle-info'
 
-DASH = u'–'   # en dash, matches the approved design
+# Announcement icons. Purdue Event Documents carry no icon field, so map from
+# the `keywords` property. Matching is on substrings, so 'new-staff' hits
+# 'staff' and a compound keyword still resolves.
+ICON_BY_KEYWORD = (
+    ('bravo',       'fa-trophy'),
+    ('award',       'fa-trophy'),
+    ('recognition', 'fa-trophy'),
+    ('pesla',       'fa-medal'),
+    ('leadership',  'fa-medal'),
+    ('ai',          'fa-wand-magic-sparkles'),
+    ('benefit',     'fa-shield-halved'),
+    ('enrollment',  'fa-shield-halved'),
+    ('policy',      'fa-shield-halved'),
+    ('staff',       'fa-user-group'),
+    ('welcome',     'fa-user-group'),
+    ('people',      'fa-user-group'),
+    ('training',    'fa-chart-line'),
+    ('career',      'fa-chart-line'),
+)
+
+# Location is NOT a field on Purdue Event Document. These are tried in case some
+# documents carry one anyway; see the note in README about the content gap.
+F_LOCATION = ('location', 'event_location', 'place', 'room', 'building')
 
 
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 
-def prop(obj, names, default=''):
-    """First non-empty property from a list of candidate names."""
-    for name in names:
-        try:
-            value = obj.getProperty(name, None)
-        except Exception:
-            value = None
-        if value is None:
-            value = getattr(obj, name, None)
-            if value is not None:
-                # Might be an accessor method rather than a plain attribute.
-                # Just try it: callable() is not exposed here, and calling a
-                # non-callable simply raises and leaves the value untouched.
-                try:
-                    value = value()
-                except Exception:
-                    pass
-        if value not in (None, '', ()):
-            return value
-    return default
-
-
 def as_text(value):
-    """Safe text, never raises.
-
-    Deliberately avoids the unicode / basestring / isinstance builtins: which of
-    those restricted Python exposes varies by instance, and a NameError here
-    would take down the whole dashboard. Formatting through a unicode literal
-    handles text, byte strings and numbers alike.
-    """
+    """Safe text, never raises. Avoids unicode/basestring/isinstance, which
+    restricted Python may withhold."""
     if value is None:
         return u''
     try:
@@ -115,12 +75,22 @@ def as_text(value):
         return u''
 
 
-def clock_parts(dt):
-    """(hour, minute, MERIDIEM) as strings, from a Zope DateTime or datetime.
+def meta(brain, name, default=None):
+    """Catalog metadata off a brain, tolerant of a missing column."""
+    try:
+        value = getattr(brain, name, default)
+    except Exception:
+        return default
+    if value is None:
+        return default
+    # Missing DateIndex values come back as the string 'None'
+    if value == '' or value == 'None':
+        return default
+    return value
 
-    Returns strings rather than ints so no int() call is needed — this instance
-    keeps a tight safe-builtins list and int() is not worth relying on.
-    """
+
+def clock_parts(dt):
+    """(hour, minute, MERIDIEM) as strings, or None."""
     try:
         return (u'%s' % dt.h_12(), u'%02d' % dt.minute(), dt.ampm().upper())
     except Exception:
@@ -132,20 +102,34 @@ def clock_parts(dt):
         return None
 
 
-def fmt_when(start, end, all_day):
-    """'10:00-11:00 AM', '11:30 AM-1:00 PM', or 'All day'."""
-    if all_day or start is None:
+def is_midnight(dt):
+    parts = clock_parts(dt)
+    if not parts:
+        return 1
+    hour, minute, ampm = parts
+    return (hour == u'12' and minute == u'00' and ampm == u'AM')
+
+
+def fmt_when(start, end):
+    """'10:00-11:00 AM', '9:05 AM-4:30 PM', or 'All day'.
+
+    Purdue Event Documents store event_date at midnight when no time has been
+    entered, which is currently every event. Those render as 'All day'; the
+    moment real times are entered this starts formatting them.
+    """
+    if start is None or is_midnight(start):
         return u'All day'
     a = clock_parts(start)
     if not a:
         return u'All day'
     ah, am, ap = a
-    b = clock_parts(end) if end is not None else None
+    b = None
+    if end is not None and not is_midnight(end):
+        b = clock_parts(end)
     if not b:
         return u'%s:%s %s' % (ah, am, ap)
     bh, bm, bp = b
     if ap == bp:
-        # same meridiem reads better with it stated once, at the end
         return u'%s:%s%s%s:%s %s' % (ah, am, DASH, bh, bm, bp)
     return u'%s:%s %s%s%s:%s %s' % (ah, am, ap, DASH, bh, bm, bp)
 
@@ -168,125 +152,144 @@ def day_number(dt):
         return u''
 
 
-def doctype_matches(obj, wanted):
-    """Loose match so 'News Item' and 'news_item' both work."""
-    raw = as_text(prop(obj, F_DOCTYPE)).lower()
-    return wanted in raw
-
-
-def pick_icon(obj):
-    tags = prop(obj, F_TAGS, ())
-    if hasattr(tags, 'strip'):
-        tags = [tags]          # a bare string, not a sequence of them
-    try:
-        for tag in tags:
-            key = as_text(tag).strip().lower()
-            if key in ICON_BY_TAG:
-                return ICON_BY_TAG[key]
-    except Exception:
-        pass
+def pick_icon(keywords):
+    text = as_text(keywords).lower()
+    for pair in ICON_BY_KEYWORD:
+        if pair[0] in text:
+            return pair[1]
     return DEFAULT_ICON
 
 
-def sort_key(pair):
-    return pair[0]
+def visible(brain, now):
+    """Respect the show_date / hide_date publication window."""
+    show = meta(brain, 'show_date')
+    hide = meta(brain, 'hide_date')
+    if show is not None:
+        try:
+            if show > now:
+                return 0
+        except Exception:
+            pass
+    if hide is not None:
+        try:
+            if hide < now:
+                return 0
+        except Exception:
+            pass
+    return 1
 
 
-def collect_docs(folder, depth):
-    """Every Purdue Event Document at or below this folder.
-
-    A Purdue Event Manager is its own ZCatalog, so objectValues() also returns
-    a ZCTextIndex Lexicon and a Page Template. Filtering on meta_type keeps
-    those out — relying on the Document Type check alone is unsafe, because
-    acquisition can make an unrelated object appear to carry the property.
-    The calendar manager also contains a nested manager, so recurse.
-    """
-    found = []
+def resolve(brain):
+    """(url, object-or-None). redirect_url is not catalog metadata, so the
+    object is loaded — but only for the few documents actually displayed."""
+    url = u''
     try:
-        children = folder.objectValues()
+        url = as_text(brain.getURL())
     except Exception:
-        return found
-    for child in children:
-        kind = getattr(child, 'meta_type', '')
-        if kind == DOC_META:
-            found.append(child)
-        elif kind == MGR_META and depth > 0:
-            for nested in collect_docs(child, depth - 1):
-                found.append(nested)
-    return found
+        pass
+    obj = None
+    try:
+        obj = brain.getObject()
+    except Exception:
+        return (url, None)
+    try:
+        target = obj.getProperty('redirect_url', '')
+        if target:
+            url = as_text(target)
+    except Exception:
+        pass
+    return (url, obj)
 
 
-def documents(folder_id):
+def location_of(obj):
+    if obj is None:
+        return u''
+    for name in F_LOCATION:
+        try:
+            value = obj.getProperty(name, None)
+        except Exception:
+            value = None
+        if value:
+            return as_text(value)
+    return u''
+
+
+def query(folder_id, sort_on, sort_order):
     folder = getattr(context, folder_id, None)
     if folder is None:
         return []
-    return collect_docs(folder, 2)
+    try:
+        return list(folder.searchResults(sort_on=sort_on, sort_order=sort_order))
+    except Exception:
+        pass
+    try:                       # catalog unhappy: fall back to an unsorted read
+        return list(folder.searchResults())
+    except Exception:
+        return []
 
 
 now = context.ZopeTime()
+try:
+    today = now.earliestTime()          # midnight, so today's events still show
+except Exception:
+    today = now
 
 
 # ---------------------------------------------------------------------------
-# Upcoming events: future only, soonest first
+# Upcoming events — /calendar, soonest first
 # ---------------------------------------------------------------------------
-dated = []
-for obj in documents('calendar'):
-    if not doctype_matches(obj, DOCTYPE_EVENT):
+events = []
+for brain in query('calendar', 'event_date', 'ascending'):
+    if len(events) >= event_limit:
+        break
+    if not visible(brain, now):
         continue
-    start = prop(obj, F_START, None)
+    start = meta(brain, 'event_date')
     if start is None:
         continue
     try:
-        # keep anything that has not finished yet
-        finish = prop(obj, F_END, None) or start
-        if finish < now:
+        if start < today:
             continue
     except Exception:
-        pass          # incomparable dates: fail open rather than hide an event
-    dated.append((start, obj))
-
-dated.sort(key=sort_key)
-
-events = []
-for start, obj in dated[:event_limit]:
-    end = prop(obj, F_END, None)
+        pass                            # incomparable: fail open
+    url, obj = resolve(brain)
     events.append({
         'month': month_abbr(start),
         'day':   day_number(start),
-        'title': as_text(prop(obj, F_TITLE)),
-        'when':  fmt_when(start, end, prop(obj, F_ALLDAY, 0)),
-        'where': as_text(prop(obj, F_LOCATION)),
-        'url':   obj.absolute_url(),
+        'title': as_text(meta(brain, 'title', u'')),
+        'when':  fmt_when(start, meta(brain, 'event_end_date')),
+        'where': location_of(obj),
+        'url':   url,
     })
 
 
 # ---------------------------------------------------------------------------
-# Announcements: newest first
+# Announcements — /announcements, newest first
+#
+# event_date is empty on news items, so these sort on show_date. When an
+# announcement does carry an event_date it is a deadline, and becomes the
+# "Closes <date>" line.
 # ---------------------------------------------------------------------------
-dated = []
-for obj in documents('announcements'):
-    if not doctype_matches(obj, DOCTYPE_NEWS):
-        continue
-    dated.append((prop(obj, F_START, None), obj))
-
-dated.sort(key=sort_key)
-dated.reverse()
-
 announcements = []
-for start, obj in dated[:announcement_limit]:
-    closes = prop(obj, F_END, None)
+for brain in query('announcements', 'show_date', 'descending'):
+    if len(announcements) >= announcement_limit:
+        break
+    if not visible(brain, now):
+        continue
+    deadline = meta(brain, 'event_date')
     due = u''
-    if closes is not None:
-        month = month_abbr(closes)
-        day = day_number(closes)
+    if deadline is not None:
+        month = month_abbr(deadline)
+        day = day_number(deadline)
         if month and day:
             due = u'Closes %s %s' % (month, day)
+    url, obj = resolve(brain)
     announcements.append({
-        'icon':    pick_icon(obj),
-        'title':   as_text(prop(obj, F_TITLE)),
-        'summary': as_text(prop(obj, F_SUMMARY)),
+        'icon':    pick_icon(meta(brain, 'keywords', ())),
+        'title':   as_text(meta(brain, 'title', u'')),
+        'summary': as_text(meta(brain, 'intro', u'')),
         'due':     due,
-        'url':     obj.absolute_url(),
+        'url':     url,
     })
 
 
