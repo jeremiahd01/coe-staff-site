@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editor / OS cruft
+*.swp
+Thumbs.db
+
+# Saved copy of the auth-protected Wrap9 dev site.
+# Kept local only: it contains a live CSRF token and internal admin-bar markup,
+# and this repo is public. Reference copy for development, not for publishing.
+dev_site/
