@@ -1,6 +1,9 @@
 <div class="staff-embed-root"
      xmlns:tal="http://xml.zope.org/namespaces/tal"
-     xmlns:metal="http://xml.zope.org/namespaces/metal">
+     xmlns:metal="http://xml.zope.org/namespaces/metal"
+     tal:define="dashboard here/get_staff_dashboard_data | nothing;
+                 live_news python:dashboard and dashboard.get('announcements') or [];
+                 live_events python:dashboard and dashboard.get('events') or []">
 <!--
   ============================================================================
   Staff Hub — dashboard home
@@ -9,10 +12,11 @@
   Embedded into /staff/index_html via a "Page Template Embed" block.
   Companion styles live in /staff/local.css (see prototype/staff-dashboard.css).
 
-  DATA: every widget below draws from a list defined in a single tal:define at
-  the top of its section. Right now those lists hold the approved dummy content.
-  Swapping in live data means replacing one define per widget — the markup
-  underneath does not change. The intended sources are noted at each one.
+  DATA: get_staff_dashboard_data (Script (Python) in this folder) supplies both
+  live lists. Each widget uses "live_x or [ ...dummy... ]", so real content wins
+  as soon as the Purdue Event Managers hold documents, and the page still renders
+  the approved dummy content if the script is missing or the managers are empty.
+  Delete the dummy literals once live data is flowing.
 
   Target: Zope 2.13.10 / Python 2.7.18. Restricted Python only: no f-strings,
   use % formatting, and keep expressions traversal-safe.
@@ -82,7 +86,7 @@
              this container, filtered to Document Type "News Item".
              Replace the define below with the query; keys stay the same.        -->
         <div class="staff-card"
-             tal:define="announcements python:[
+             tal:define="announcements python:live_news or [
                {'icon': 'fa-trophy',
                 'title': 'Bravo+ Nominations Open',
                 'summary': 'Recognize a colleague who went above and beyond.',
@@ -222,7 +226,7 @@
              'month' and 'day' become formatted from the event date; 'when' and
              'where' come from the event's date/time and location fields.        -->
         <div class="staff-card"
-             tal:define="events python:[
+             tal:define="events python:live_events or [
                {'month': 'Sep', 'day': '3',
                 'title': 'Staff Council Meeting',
                 'when': '10:00&#8211;11:00 AM', 'where': 'ARMS 1010', 'url': '#'},

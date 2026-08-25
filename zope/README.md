@@ -100,25 +100,65 @@ modifier, so our bands paint normally.
 
 ## How the data is wired
 
-Every widget draws from a list defined in a single `tal:define` at the top of its
-section, currently holding the approved dummy content. Going live means replacing
-one define per widget — the markup underneath does not change.
+`scripts/get_staff_dashboard_data.py` — a Script (Python) in `/staff` — returns
+both lists in one call:
 
-| Widget | Define | Intended source |
-|---|---|---|
-| New & Important | `announcements` | `announcements` Purdue Event Manager, Document Type `News Item` |
-| Upcoming Events | `events` | `calendar` Purdue Event Manager, Document Type `Event/Function` |
-| Quick Links | `quick_links` | Static. Add a dict to add a link. |
-| Explore | `explore` | Static. Add a dict to add a tile. |
+```python
+{'announcements': [{icon, title, summary, due, url}, ...],
+ 'events':        [{month, day, title, when, where, url}, ...]}
+```
 
-Keys the templates expect:
+The template calls it once at the root and each widget uses
+`live_x or [ ...dummy... ]`, so **real content wins as soon as the Event Managers
+hold documents, and the page still renders the approved dummy content if the
+script is missing or the managers are empty.** Delete the dummy literals once
+live data is flowing.
 
-- **announcements**: `icon`, `title`, `summary`, `due` (may be empty), `url`
-- **events**: `month`, `day`, `title`, `when`, `where` (may be empty), `url`
+| Widget | Source | Filter | Order |
+|---|---|---|---|
+| New & Important | `announcements/` | Document Type contains `news` | Newest first, 5 |
+| Upcoming Events | `calendar/` | Document Type contains `event` | Soonest first, 5, unfinished only |
+| Quick Links / Explore | Static in the template | — | — |
 
-Sort order, tag filtering and the date formatting that produces `month` / `day`
-are the next piece of work, along with wiring `Add to Outlook` to the event
-system's native calendar export.
+### Before it will work: confirm the field names
+
+`introspect_event_model.py` reports the real property names on your Purdue Event
+Documents. Install it as a Script (Python) in `/staff`, visit
+`https://engineering.purdue.edu/staff/introspect_event_model`, send me the
+output, then delete it. It reads only.
+
+Until then the production script tries a list of candidate names per field
+(`F_TITLE`, `F_START`, `F_LOCATION` and friends at the top of the file) and takes
+the first non-empty one. That tolerance is scaffolding — once we know the real
+names, each tuple should be pruned to the single correct one.
+
+### Two things needing your input
+
+- **Announcement icons.** Native Event Documents have no icon field, so the
+  script maps from the document's tags via `ICON_BY_TAG`, falling back to
+  `fa-circle-info`. Either confirm the tag vocabulary or tell me you would rather
+  drive icons another way.
+- **Sort and tag rules.** Currently newest-first for announcements and
+  soonest-first for unfinished events. You mentioned wanting to work through
+  ascending/tags properly — this is the place.
+
+### Verified
+
+Run against mock Event Documents covering same-meridiem and cross-meridiem time
+ranges, all-day events, past events, untagged items, and documents filed under
+the wrong Document Type:
+
+```
+Sep 3   Staff Council Meeting                  10:00-11:00 AM   ARMS 1010
+Sep 12  Lunch & Learn                          11:30 AM-1:00 PM PMU 118
+Sep 15  Performance Review Self-Assessment Due All day
+Sep 30  College of Engineering Town Hall       9:00-10:00 AM    Fowler Hall
+```
+
+Past events and mis-filed documents are excluded, time ranges state the meridiem
+once when both ends share it, and `Closes Sep 30` is derived from the end date.
+Both template paths were rendered through `zope.pagetemplate`: script absent
+yields the 5 dummy items, script present yields live data only.
 
 ## Troubleshooting
 
