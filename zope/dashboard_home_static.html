@@ -1,0 +1,374 @@
+<!--
+  Staff Hub dashboard — STATIC fallback
+  ============================================================================
+  This is dashboard_home.pt already rendered: identical markup, but with every
+  tal: attribute and python: expression resolved away. Plain HTML.
+
+  Use this only if the Page Template Embed block rejects the TAL version.
+  Trade-offs vs dashboard_home.pt:
+    - URLs are hard-coded to https://engineering.purdue.edu/staff rather than
+      derived from here/absolute_url, so this is not portable to another folder.
+    - Content is inline, so there is no single tal:define to swap when the
+      Purdue Event Manager queries are wired up.
+  Prefer the TAL version once we know why it was rejected.
+  ============================================================================
+-->
+<div class="staff-embed-root">
+
+<!-- ═══════════════════════════ BANNER ═══════════════════════════
+     Native Wrap9 banner-split-motion block plus the MVP search field.
+     NOTE: /staff/index_html already carries a separate banner block. Remove or
+     disable that one when this template goes live, or the page shows two.     -->
+<section class="block no-pad --bg-black">
+
+  <div class="banner banner-split-motion staff-banner">
+
+    <div class="container">
+      <div class="split-motion-content">
+        <div class="staff-banner__row">
+
+          <div class="staff-banner__intro">
+            <div class="hgroup hg-reverse">
+              <h1 class="hg-heading">Welcome, Engineering Staff!</h1>
+              <span class="motion-heading mh-gold">Staff Hub</span>
+            </div>
+            <div class="intro-text">
+              Your one-stop destination for information, tools, and support
+            </div>
+          </div>
+
+          <form class="staff-search" role="search" method="get" action="https://engineering.purdue.edu/staff/search">
+            <label class="staff-search__label" for="staff-search-input">How can we help?</label>
+            <div class="staff-search__field">
+              <input class="staff-search__input" id="staff-search-input" type="search" name="q" placeholder="Search site resources…" autocomplete="off" />
+              <button class="staff-search__submit" type="submit">
+                <span class="staff-visually-hidden">Search</span>
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p class="staff-search__note">Searches guides, forms, policies and staff resources.</p>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="split-motion-image">
+      <img loading="lazy" alt="" src="https://engineering.purdue.edu/staff/controls/block_settings/banner_2025-01-01-00-00-00-000/pu-banner-1920x960.jpg" />
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ DASHBOARD ═══════════════════════════ -->
+<section class="block --bg-light-gray staff-dashboard">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- ───────── MAIN COLUMN ───────── -->
+      <div class="col-lg-8 staff-col-main d-flex flex-column gap-4">
+
+        <!-- ════ New & Important ════
+             LIVE SOURCE (next pass): the "announcements" Purdue Event Manager in
+             this container, filtered to Document Type "News Item".
+             Replace the define below with the query; keys stay the same.        -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">New &amp; Important</h2>
+            <a class="staff-card__more" href="https://engineering.purdue.edu/staff/announcements">View all</a>
+          </div>
+
+          <ul class="staff-news">
+            <li class="staff-news__item">
+              <a class="staff-news__link" href="#">
+                <i class="fa-solid fa-trophy staff-news__icon" aria-hidden="true"></i>
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+                <p class="staff-news__desc">Recognize a colleague who went above and beyond.</p>
+                <span class="staff-news__due">Closes Sep 30</span>
+              </a>
+            </li>
+            <li class="staff-news__item">
+              <a class="staff-news__link" href="#">
+                <i class="fa-solid fa-medal staff-news__icon" aria-hidden="true"></i>
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+                <p class="staff-news__desc">Apply to the Engineering Staff Leadership Academy.</p>
+                <span class="staff-news__due">Closes Oct 10</span>
+              </a>
+            </li>
+            <li class="staff-news__item">
+              <a class="staff-news__link" href="#">
+                <i class="fa-solid fa-wand-magic-sparkles staff-news__icon" aria-hidden="true"></i>
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+                <p class="staff-news__desc">What's approved, what isn't, and where to get trained.</p>
+                
+              </a>
+            </li>
+            <li class="staff-news__item">
+              <a class="staff-news__link" href="#">
+                <i class="fa-solid fa-shield-halved staff-news__icon" aria-hidden="true"></i>
+                <span class="staff-news__title">Benefits Open Enrollment</span>
+                <p class="staff-news__desc">Review your elections for the 2027 plan year.</p>
+                <span class="staff-news__due">Closes Oct 24</span>
+              </a>
+            </li>
+            <li class="staff-news__item">
+              <a class="staff-news__link" href="#">
+                <i class="fa-solid fa-user-group staff-news__icon" aria-hidden="true"></i>
+                <span class="staff-news__title">Welcome, New Staff</span>
+                <p class="staff-news__desc">Meet the colleagues who joined the College this month.</p>
+                
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Quick Links ════
+             Static by design. To add a link, add one dict below.               -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Quick Links</h2>
+            <span class="staff-card__note">Opens in a new tab</span>
+          </div>
+
+          <ul class="staff-quick">
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://engineering.purdue.edu/Engr/People/ptDirectory">
+                <i class="fa-solid fa-address-book staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">Purdue Directory</span>
+              </a>
+            </li>
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://service.purdue.edu/TDClient/32/Purdue/Home/">
+                <i class="fa-solid fa-headset staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">IT Help</span>
+              </a>
+            </li>
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://service.purdue.edu/TDClient/32/Purdue/Requests/Service/84/Human-Resources-Service-Center/Request">
+                <i class="fa-solid fa-id-card staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">HR Request</span>
+              </a>
+            </li>
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://www.purdue.edu/operations/procurement/supplier-resources/">
+                <i class="fa-solid fa-cart-shopping staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">Purchasing Resources</span>
+              </a>
+            </li>
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://www.purdue.edu/operations/travel/">
+                <i class="fa-solid fa-plane staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">Travel Resources</span>
+              </a>
+            </li>
+            <li>
+              <a class="staff-quick__link" target="_blank" rel="noopener" href="https://engineering.purdue.edu/staff/toolkit#forms">
+                <i class="fa-solid fa-clipboard-list staff-quick__icon" aria-hidden="true"></i>
+                <span class="staff-quick__label">Engineering Forms</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Extension slot: "How Do I…?" (Phase 2) ════
+             Delete this div when the widget is built.                          -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
+          <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
+        </div>
+
+        <!-- ════ Explore ════ -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Explore</h2>
+          </div>
+
+          <ul class="staff-explore">
+            <li>
+              <a class="staff-explore__link" href="https://engineering.purdue.edu/staff/resources#ai">
+                <i class="fa-solid fa-microchip staff-explore__icon" aria-hidden="true"></i>
+                <span class="staff-explore__title">AI Resources</span>
+                <p class="staff-explore__desc">Find trainings, policies and tools related to AI.</p>
+              </a>
+            </li>
+            <li>
+              <a class="staff-explore__link" href="https://engineering.purdue.edu/staff/recognition">
+                <i class="fa-solid fa-trophy staff-explore__icon" aria-hidden="true"></i>
+                <span class="staff-explore__title">Recognize Great Work</span>
+                <p class="staff-explore__desc">Celebrate achievements and recognize great work of our staff.</p>
+              </a>
+            </li>
+            <li>
+              <a class="staff-explore__link" href="https://engineering.purdue.edu/staff/training">
+                <i class="fa-solid fa-chart-line staff-explore__icon" aria-hidden="true"></i>
+                <span class="staff-explore__title">Grow Your Career</span>
+                <p class="staff-explore__desc">Explore professional development programs and training opportunities.</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div><!-- /main column -->
+
+      <!-- ───────── RIGHT RAIL ───────── -->
+      <div class="col-lg-4 staff-col-rail d-flex flex-column gap-4">
+
+        <!-- ════ Upcoming Events ════
+             LIVE SOURCE (next pass): the "calendar" Purdue Event Manager in this
+             container, filtered to Document Type "Event/Function", ascending by
+             start date, limited to 5. Sort/tag rules still to be defined.
+             'month' and 'day' become formatted from the event date; 'when' and
+             'where' come from the event's date/time and location fields.        -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Upcoming Events</h2>
+            <a class="staff-card__more" href="https://engineering.purdue.edu/staff/calendar">View calendar</a>
+          </div>
+
+          <ul class="staff-events">
+            <li class="staff-event">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month">Sep</span>
+                <span class="staff-event__day">3</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title">Staff Council Meeting</h3>
+                <p class="staff-event__meta">
+                  10:00–11:00 AM
+                  <span class="sep">|</span>ARMS 1010
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" href="#">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: Staff Council Meeting</span>
+              </a>
+
+            </li>
+            <li class="staff-event">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month">Sep</span>
+                <span class="staff-event__day">9</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title">LinkedIn Learning: Managing Up</h3>
+                <p class="staff-event__meta">
+                  1:00–2:00 PM
+                  <span class="sep">|</span>Online (Teams)
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" href="#">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: LinkedIn Learning: Managing Up</span>
+              </a>
+
+            </li>
+            <li class="staff-event">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month">Sep</span>
+                <span class="staff-event__day">15</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title">Performance Review Self-Assessment Due</h3>
+                <p class="staff-event__meta">
+                  All day
+                  
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" href="#">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: Performance Review Self-Assessment Due</span>
+              </a>
+
+            </li>
+            <li class="staff-event">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month">Sep</span>
+                <span class="staff-event__day">22</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title">New Employee Orientation</h3>
+                <p class="staff-event__meta">
+                  9:00–11:30 AM
+                  <span class="sep">|</span>POTR 234
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" href="#">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: New Employee Orientation</span>
+              </a>
+
+            </li>
+            <li class="staff-event">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month">Sep</span>
+                <span class="staff-event__day">30</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title">College of Engineering Town Hall</h3>
+                <p class="staff-event__meta">
+                  9:00–10:00 AM
+                  <span class="sep">|</span>Fowler Hall
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" href="#">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: College of Engineering Town Hall</span>
+              </a>
+
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Extension slot: calendar snapshot (Phase 2) ════ -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
+          <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
+        </div>
+
+      </div><!-- /right rail -->
+
+    </div><!-- /row -->
+  </div><!-- /container -->
+</section>
+
+
+<!-- ═══════════════════════ HAVE A SUGGESTION? ═══════════════════════
+     TODO: feedback form URL still outstanding.                                 -->
+<section class="block --bg-black">
+  <div class="container">
+    <div class="staff-feedback-inner">
+      <p class="staff-feedback__text">
+        <span class="staff-feedback__lead">Have a suggestion?</span>
+        <span class="staff-feedback__sub">Let us know how to improve this site.</span>
+      </p>
+      <a class="purdue-btn btn-gold" href="#">Share Feedback</a>
+    </div>
+  </div>
+</section>
+
+</div><!-- /.staff-embed-root -->

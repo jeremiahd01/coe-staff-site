@@ -88,6 +88,42 @@ Sort order, tag filtering and the date formatting that produces `month` / `day`
 are the next piece of work, along with wiring `Add to Outlook` to the event
 system's native calendar export.
 
+## Troubleshooting
+
+### "Security Validation Failed: CSRF token is missing or invalid."
+
+This is the CMS rejecting the *save request*, not a problem with the template
+itself — nothing in TAL can produce this message. Wrap9 puts a per-session token
+in a page-level `<meta name="csrf-token">` and its JavaScript attaches that token
+to save requests, so the usual causes are:
+
+1. **Stale token.** The edit page sat open long enough for the session to roll,
+   or you logged in again in another tab. Reload the edit page and save again.
+2. **Truncated POST.** If the payload exceeds a size limit at the server or a
+   proxy, the request can arrive without the token field, which reads as
+   "missing". `dashboard_home.pt` is ~14.5 KB.
+3. **A filter objecting to the payload.** Some Zope setups refuse
+   `python:` expressions submitted through the web.
+
+To tell them apart, in order — each takes under a minute:
+
+| Test | Paste | If it fails | If it works |
+|---|---|---|---|
+| A | `<p>hello</p>` on a freshly reloaded edit page | Session/token issue, unrelated to our code | Go to B |
+| B | Just the banner `<section>` (~40 lines) | Content pattern, go to C | Size limit — go to C anyway to confirm |
+| C | `dashboard_home_static.html` | Size limit confirmed | `python:` expressions were the blocker |
+
+**Do not disable CSRF protection to work around this.** It guards every editing
+form on the site.
+
+### Static fallback
+
+`dashboard_home_static.html` is the same markup with every `tal:` attribute and
+`python:` expression already resolved — plain HTML, no template features. If test
+C is the one that succeeds, use it to get the design live, and we move the data
+logic into a Python Script instead. It costs portability (URLs are hard-coded to
+`/staff`) and the single-`tal:define`-per-widget swap point.
+
 ## Platform notes
 
 Written for **Zope 2.13.10 / Python 2.7.18**. Restricted Python only — no
