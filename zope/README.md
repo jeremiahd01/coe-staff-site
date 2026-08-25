@@ -120,17 +120,40 @@ live data is flowing.
 | Upcoming Events | `calendar/` | Document Type contains `event` | Soonest first, 5, unfinished only |
 | Quick Links / Explore | Static in the template | — | — |
 
+### What discovery confirmed
+
+- A **Purdue Event Manager is its own ZCatalog** — it exposes `searchResults`,
+  `indexes` and `objectIds`.
+- Because of that, `objectValues()` returns **more than documents**: a
+  `ZCTextIndex Lexicon` and a `Page Template` sit alongside them.
+- The `calendar` manager contains a **nested Purdue Event Manager**, so documents
+  live more than one level down.
+- The manager's `available_templates` property is exactly
+  `('Event/Function', 'News Item')` — the Document Type vocabulary, confirmed.
+
+The script therefore selects documents by `meta_type == 'Purdue Event Document'`
+and recurses into nested managers. Filtering on the Document Type property alone
+would be unsafe: acquisition lets an unrelated object answer `getProperty()` with
+the manager's values, which would admit the Lexicon as a phantom announcement.
+
+### Still outstanding: the document field names
+
+Discovery v1 reported the *manager's* properties rather than a document's,
+because it inspected whichever object came back first — which was the Lexicon.
+v2 filters on meta_type, recurses, and also dumps the catalog indexes and
+metadata. Run it once more and send the output.
+
+Until then the field map (`F_TITLE`, `F_START`, `F_LOCATION` and friends at the
+top of the script) tries candidate names and takes the first non-empty one. Once
+we know the real names, each tuple should be pruned to the single correct one —
+and the catalog indexes may let us replace the walk with a `searchResults()`
+query, which would be faster and would do the sorting for us.
+
 ### Before it will work: confirm the field names
 
-`introspect_event_model.py` reports the real property names on your Purdue Event
-Documents. Install it as a Script (Python) in `/staff`, visit
-`https://engineering.purdue.edu/staff/introspect_event_model`, send me the
-output, then delete it. It reads only.
-
-Until then the production script tries a list of candidate names per field
-(`F_TITLE`, `F_START`, `F_LOCATION` and friends at the top of the file) and takes
-the first non-empty one. That tolerance is scaffolding — once we know the real
-names, each tuple should be pruned to the single correct one.
+`introspect_event_model.py` (v2) reports them. Install as a Script (Python) in
+`/staff`, visit `https://engineering.purdue.edu/staff/introspect_event_model`,
+send the output, then delete it. It reads only.
 
 ### Two things needing your input
 

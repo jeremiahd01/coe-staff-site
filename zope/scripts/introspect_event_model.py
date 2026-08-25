@@ -1,25 +1,33 @@
 ##parameters=
-##title=Discovery: report the Purdue Event Manager / Event Document model
+##title=Discovery v2: report the Purdue Event Document model
 ##
 # ============================================================================
-# Discovery script — run once, paste the output back, then delete.
+# Discovery script v2 — run once, paste the output back, then delete.
+#
+# v1 inspected whatever objectValues() returned first, which was a
+# ZCTextIndex Lexicon belonging to the manager's own catalog, so the properties
+# it reported were the manager's (acquired), not a document's. This version
+# filters on meta_type, recurses into nested managers, and reports the catalog
+# schema as well.
 #
 # Install: ZMI -> /staff -> Add Script (Python), id "introspect_event_model",
 #          paste this whole file in, save, then visit
 #          https://engineering.purdue.edu/staff/introspect_event_model
 #
-# Reports the meta_types, callables and property names of the announcements
-# and calendar managers so the production scripts can target real field names
-# instead of guesses. Reads only — changes nothing.
+# Reads only. Restricted Python: no sorted(), int(), callable(), isinstance(),
+# and no attribute starting with an underscore.
 # ============================================================================
 
 request = context.REQUEST
 request.RESPONSE.setHeader('Content-Type', 'text/plain; charset=utf-8')
 
+DOC_META = 'Purdue Event Document'
+MGR_META = 'Purdue Event Manager'
+
 out = []
 
 
-def show(value, limit=70):
+def show(value, limit=90):
     """Coerce anything to a short printable string without raising."""
     try:
         text = str(value)
@@ -34,120 +42,115 @@ def show(value, limit=70):
     return text
 
 
-# RestrictedPython forbids any attribute starting with '_', so __class__
-# and __name__ are unavailable here. meta_type is the identifier we
-# actually need anyway.
-out.append('Purdue Event model discovery')
-out.append('container : %s' % context.absolute_url())
-out.append('meta_type : %s' % getattr(context, 'meta_type', '?'))
+def sort_list(values):
+    items = list(values)
+    items.sort()
+    return items
 
-CANDIDATE_METHODS = (
-    'objectValues', 'objectIds', 'listFolderContents', 'contentValues',
-    'getEvents', 'getItems', 'getDocuments', 'getUpcomingEvents',
-    'getEventDocuments', 'searchResults', 'queryCatalog', 'getObjects',
-)
+
+def collect_docs(folder, depth):
+    """Every Purdue Event Document at or below this folder."""
+    found = []
+    try:
+        children = folder.objectValues()
+    except Exception:
+        return found
+    for child in children:
+        kind = getattr(child, 'meta_type', '')
+        if kind == DOC_META:
+            found.append(child)
+        elif kind == MGR_META and depth > 0:
+            for nested in collect_docs(child, depth - 1):
+                found.append(nested)
+    return found
+
 
 for folder_id in ('announcements', 'calendar'):
-    out.append('')
-    out.append('=' * 72)
+    out.append('=' * 74)
     out.append('FOLDER: %s' % folder_id)
-    out.append('=' * 72)
+    out.append('=' * 74)
 
     folder = getattr(context, folder_id, None)
     if folder is None:
-        out.append('  NOT FOUND in this container.')
+        out.append('  NOT FOUND')
+        out.append('')
         continue
 
-    out.append('  meta_type  : %s' % getattr(folder, 'meta_type', '?'))
-
-    present = []
-    for name in CANDIDATE_METHODS:
-        if hasattr(folder, name):
-            present.append(name)
-    out.append('  callables  : %s' % (', '.join(present) or 'none of the usual ones'))
-
-    items = []
-    for getter in ('objectValues', 'listFolderContents', 'contentValues'):
-        if not hasattr(folder, getter):
-            continue
-        try:
-            items = list(getattr(folder, getter)())
-            out.append('  listed via : %s()  -> %d item(s)' % (getter, len(items)))
-            break
-        except Exception as e:
-            out.append('  %s() failed: %s' % (getter, show(e)))
-
-    if not items:
-        out.append('  No items to inspect. Add one dummy document and re-run.')
-        continue
-
-    # meta_types present in the folder
-    kinds = {}
-    for obj in items:
-        mt = getattr(obj, 'meta_type', '?')
-        kinds[mt] = kinds.get(mt, 0) + 1
-    out.append('  meta_types : %s' % show(kinds, 200))
-
-    doc = items[0]
-    out.append('')
-    out.append('  --- first document: %s ---' % show(doc.getId()))
-    out.append('  meta_type  : %s' % getattr(doc, 'meta_type', '?'))
-
-    out.append('')
-    out.append('  PROPERTIES (id | type | value)')
+    out.append('  meta_type : %s' % getattr(folder, 'meta_type', '?'))
     try:
-        for pid in doc.propertyIds():
-            try:
-                ptype = doc.getPropertyType(pid)
-            except Exception:
-                ptype = '?'
-            try:
-                pval = doc.getProperty(pid)
-            except Exception:
-                pval = '<unreadable>'
-            out.append('    %-26s %-10s %s' % (pid, ptype, show(pval)))
+        out.append('  contents  : %s' % show(folder.objectIds(), 200))
     except Exception as e:
-        out.append('    propertyIds() failed: %s' % show(e))
+        out.append('  objectIds() failed: %s' % show(e))
 
-    # Distinct Document Type values, so we learn the exact strings to match on
+    # ---- the manager is its own ZCatalog; report its schema -------------
     out.append('')
-    out.append('  DOCUMENT TYPE VALUES ACROSS ALL ITEMS')
-    seen = {}
-    for obj in items:
-        try:
-            pids = obj.propertyIds()
-        except Exception:
-            continue
-        for pid in pids:
-            if 'type' not in pid.lower():
-                continue
+    out.append('  CATALOG')
+    index_names = []
+    try:
+        index_names = list(folder.indexes())
+        out.append('    indexes  : %s' % show(sort_list(index_names), 400))
+    except Exception as e:
+        out.append('    indexes() failed: %s' % show(e))
+    try:
+        out.append('    metadata : %s' % show(sort_list(folder.schema()), 400))
+    except Exception as e:
+        out.append('    schema() failed: %s' % show(e))
+    try:
+        out.append('    searchResults() count: %s' % len(folder.searchResults()))
+    except Exception as e:
+        out.append('    searchResults() failed: %s' % show(e))
+
+    # Any index that might hold the document type — show its distinct values
+    for name in index_names:
+        low = name.lower()
+        if ('type' in low) or ('template' in low) or ('tag' in low) or ('subject' in low):
             try:
-                val = show(obj.getProperty(pid), 40)
-            except Exception:
-                continue
-            key = '%s = %s' % (pid, val)
-            seen[key] = seen.get(key, 0) + 1
-    if seen:
-        # This instance does not expose sorted(); list.sort() is a method and works.
-        keys = list(seen.keys())
-        keys.sort()
-        for key in keys:
-            out.append('    %-52s x%d' % (key, seen[key]))
-    else:
-        out.append('    no property with "type" in its name')
+                out.append('    values of %-22s %s' % (name, show(folder.uniqueValuesFor(name), 220)))
+            except Exception as e:
+                out.append('    uniqueValuesFor(%s) failed: %s' % (name, show(e)))
 
-    # Common accessor methods worth knowing about
+    # ---- a real Purdue Event Document -----------------------------------
+    docs = collect_docs(folder, 2)
     out.append('')
-    out.append('  ACCESSORS PRESENT ON THE DOCUMENT')
-    found = []
-    for name in ('Title', 'Description', 'getStartDate', 'getEndDate', 'start',
-                 'end', 'getLocation', 'getTags', 'Subject', 'getIcsUrl',
-                 'getAddToCalendarLinks', 'absolute_url', 'getIntroduction'):
-        if hasattr(doc, name):
-            found.append(name)
-    out.append('    %s' % (', '.join(found) or 'none of the usual ones'))
+    out.append('  DOCUMENTS FOUND: %s' % len(docs))
+    if not docs:
+        out.append('    None. Add one document of each Document Type and re-run.')
+        out.append('')
+        continue
 
-out.append('')
+    for doc in docs[:2]:
+        out.append('')
+        out.append('  --- %s ---' % show(doc.getId()))
+        out.append('  url       : %s' % show(doc.absolute_url()))
+        out.append('  meta_type : %s' % getattr(doc, 'meta_type', '?'))
+        out.append('  PROPERTIES (id | type | value)')
+        try:
+            for pid in doc.propertyIds():
+                try:
+                    ptype = doc.getPropertyType(pid)
+                except Exception:
+                    ptype = '?'
+                try:
+                    pval = doc.getProperty(pid)
+                except Exception:
+                    pval = '<unreadable>'
+                out.append('    %-26s %-20s %s' % (pid, ptype, show(pval)))
+        except Exception as e:
+            out.append('    propertyIds() failed: %s' % show(e))
+
+        out.append('  ACCESSORS PRESENT')
+        present = []
+        for name in ('Title', 'Description', 'getStartDate', 'getEndDate',
+                     'start', 'end', 'getLocation', 'getTags', 'Subject',
+                     'getIcsUrl', 'getAddToCalendarLinks', 'getIntroduction',
+                     'getDocumentType', 'getTemplate', 'getEventDate',
+                     'CookedBody', 'getIcon', 'getImage'):
+            if hasattr(doc, name):
+                present.append(name)
+        out.append('    %s' % (', '.join(present) or 'none of the usual ones'))
+
+    out.append('')
+
 out.append('End of report.')
 
 return '\n'.join(out)

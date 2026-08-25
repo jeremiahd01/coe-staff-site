@@ -36,8 +36,14 @@ F_ALLDAY   = ('all_day', 'allDay', 'is_all_day')
 F_DOCTYPE  = ('document_type', 'documentType', 'doc_type', 'type')
 F_TAGS     = ('tags', 'Subject', 'keywords', 'categories')
 
-DOCTYPE_NEWS  = 'news'          # matched loosely against "News Item"
-DOCTYPE_EVENT = 'event'         # matched loosely against "Event/Function"
+# Confirmed by discovery: the manager's `available_templates` property is
+# ('Event/Function', 'News Item'), matched loosely so casing/punctuation drift
+# does not break it.
+DOCTYPE_NEWS  = 'news'
+DOCTYPE_EVENT = 'event'
+
+DOC_META = 'Purdue Event Document'
+MGR_META = 'Purdue Event Manager'
 
 # Announcement icons. The native documents carry no icon field, so we map from
 # the document's tags and fall back to a neutral glyph.
@@ -186,17 +192,35 @@ def sort_key(pair):
     return pair[0]
 
 
-def contents(folder_id):
+def collect_docs(folder, depth):
+    """Every Purdue Event Document at or below this folder.
+
+    A Purdue Event Manager is its own ZCatalog, so objectValues() also returns
+    a ZCTextIndex Lexicon and a Page Template. Filtering on meta_type keeps
+    those out — relying on the Document Type check alone is unsafe, because
+    acquisition can make an unrelated object appear to carry the property.
+    The calendar manager also contains a nested manager, so recurse.
+    """
+    found = []
+    try:
+        children = folder.objectValues()
+    except Exception:
+        return found
+    for child in children:
+        kind = getattr(child, 'meta_type', '')
+        if kind == DOC_META:
+            found.append(child)
+        elif kind == MGR_META and depth > 0:
+            for nested in collect_docs(child, depth - 1):
+                found.append(nested)
+    return found
+
+
+def documents(folder_id):
     folder = getattr(context, folder_id, None)
     if folder is None:
         return []
-    for getter in ('objectValues', 'listFolderContents', 'contentValues'):
-        if hasattr(folder, getter):
-            try:
-                return list(getattr(folder, getter)())
-            except Exception:
-                continue
-    return []
+    return collect_docs(folder, 2)
 
 
 now = context.ZopeTime()
@@ -206,7 +230,7 @@ now = context.ZopeTime()
 # Upcoming events: future only, soonest first
 # ---------------------------------------------------------------------------
 dated = []
-for obj in contents('calendar'):
+for obj in documents('calendar'):
     if not doctype_matches(obj, DOCTYPE_EVENT):
         continue
     start = prop(obj, F_START, None)
@@ -240,7 +264,7 @@ for start, obj in dated[:event_limit]:
 # Announcements: newest first
 # ---------------------------------------------------------------------------
 dated = []
-for obj in contents('announcements'):
+for obj in documents('announcements'):
     if not doctype_matches(obj, DOCTYPE_NEWS):
         continue
     dated.append((prop(obj, F_START, None), obj))
