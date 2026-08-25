@@ -737,3 +737,30 @@
   }
   .staff-search__field:focus-within { outline: 3px solid Highlight; }
 }
+
+
+/* ==========================================================================
+   16. Page Template Embed breakout
+   The embed block wraps our output like this:
+
+     <section class="block no-pad" id="page_template_embed_…">
+       <div class="page-template-embed">
+         <div class="container">   <-- caps width at 1320px
+           … our template …
+
+   That container traps the full-bleed bands (banner, dashboard, feedback)
+   72px inside each viewport edge at 1440px, so the design loses its
+   edge-to-edge character. Neutralise it — but only when it actually contains
+   our dashboard, so any other Page Template Embed block on the site is left
+   alone. Each of our own sections carries its own .container for inner content.
+
+   :has() has been baseline since 2023. On a browser without it the rule is
+   skipped and the dashboard renders inset rather than full-bleed — degraded,
+   not broken. See zope/README.md for an id-scoped alternative.
+   ========================================================================== */
+.page-template-embed > .container:has(> .staff-embed-root) {
+  max-width: none;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}

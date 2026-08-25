@@ -17,14 +17,51 @@
    (the approved design puts the search field inside it), so leaving both in
    place shows two banners.
 
+## The embed wrapper (resolved)
+
+The Page Template Embed block wraps our output like this:
+
+```html
+<section class="block no-pad" id="page_template_embed_2026-08-25-18-18-20-381">
+  <div class="page-template-embed">
+    <div class="container">
+      … our template renders here …
+```
+
+That `.container` caps width at 1320px, which trapped the full-bleed bands
+(banner, dashboard, feedback) 72px inside each viewport edge at 1440px and lost
+the edge-to-edge character of the approved design.
+
+**Handled.** The template renders inside a single `<div class="staff-embed-root">`,
+and `staff-dashboard.css` neutralises the wrapping container only when it holds
+that root:
+
+```css
+.page-template-embed > .container:has(> .staff-embed-root) {
+  max-width: none; width: 100%; padding-left: 0; padding-right: 0;
+}
+```
+
+Scoping it with `:has()` means any *other* Page Template Embed block on the site
+is untouched. `:has()` has been baseline since 2023; on a browser without it the
+rule is skipped and the dashboard renders inset rather than full-bleed — degraded,
+not broken.
+
+If you would rather not depend on `:has()`, swap in an id-scoped rule once the
+real block exists (its id is stable after creation):
+
+```css
+#page_template_embed_YOUR-ID > .page-template-embed > .container {
+  max-width: none; width: 100%; padding-left: 0; padding-right: 0;
+}
+```
+
+Nesting our `<section class="block --bg-*">` elements inside their
+`<section class="block no-pad">` is fine — the outer carries no background
+modifier, so our bands paint normally.
+
 ## Verify on first paste
 
-- **No double-wrapping.** This template emits its own
-  `<section class="block --bg-light-gray">` / `--bg-black` wrappers, because the
-  CSS depends on those classes for link colours and focus rings. If the Page
-  Template Embed block adds its own `.block` wrapper around the embedded output,
-  we will need to drop ours. This is the one thing I could not determine without
-  access to the block's settings.
 - **Banner image path.** The template builds it from `here/absolute_url` plus
   `controls/block_settings/banner_2025-01-01-00-00-00-000/pu-banner-1920x960.jpg`.
   Confirm that resolves, or point `banner_image` at whatever asset is intended.
@@ -66,8 +103,9 @@ Two escaping traps worth knowing, both already handled:
 
 ## Verification performed
 
-Rendered through `zope.pagetemplate` (the actual Zope engine) and checked against
-the approved prototype: 3 block sections, 5 announcements, 6 quick links, 3
+Rendered through `zope.pagetemplate` (the actual Zope engine), placed inside a
+byte-exact copy of the embed wrapper above, and checked against the approved
+prototype: 3 block sections, 5 announcements, 6 quick links, 3
 explore tiles, 5 events, 5 add-to-calendar links, 5 motion headings, 2 extension
 slots. Visually identical. axe-core reports 0 violations across wcag2a/aa,
 wcag21aa, wcag22aa and best-practice, with heading order H1 → H2×4 → H3×5.

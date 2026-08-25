@@ -1,5 +1,6 @@
-<tal:dashboard xmlns:tal="http://xml.zope.org/namespaces/tal"
-               xmlns:metal="http://xml.zope.org/namespaces/metal">
+<div class="staff-embed-root"
+     xmlns:tal="http://xml.zope.org/namespaces/tal"
+     xmlns:metal="http://xml.zope.org/namespaces/metal">
 <!--
   ============================================================================
   Staff Hub — dashboard home
@@ -303,4 +304,4 @@
   </div>
 </section>
 
-</tal:dashboard>
+</div><!-- /.staff-embed-root -->
