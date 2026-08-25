@@ -1,0 +1,306 @@
+<tal:dashboard xmlns:tal="http://xml.zope.org/namespaces/tal"
+               xmlns:metal="http://xml.zope.org/namespaces/metal">
+<!--
+  ============================================================================
+  Staff Hub — dashboard home
+  Purdue University, College of Engineering
+
+  Embedded into /staff/index_html via a "Page Template Embed" block.
+  Companion styles live in /staff/local.css (see prototype/staff-dashboard.css).
+
+  DATA: every widget below draws from a list defined in a single tal:define at
+  the top of its section. Right now those lists hold the approved dummy content.
+  Swapping in live data means replacing one define per widget — the markup
+  underneath does not change. The intended sources are noted at each one.
+
+  Target: Zope 2.13.10 / Python 2.7.18. Restricted Python only: no f-strings,
+  use % formatting, and keep expressions traversal-safe.
+  ============================================================================
+-->
+
+<!-- ═══════════════════════════ BANNER ═══════════════════════════
+     Native Wrap9 banner-split-motion block plus the MVP search field.
+     NOTE: /staff/index_html already carries a separate banner block. Remove or
+     disable that one when this template goes live, or the page shows two.     -->
+<section class="block no-pad --bg-black"
+         tal:define="banner_image string:controls/block_settings/banner_2025-01-01-00-00-00-000/pu-banner-1920x960.jpg">
+
+  <div class="banner banner-split-motion staff-banner">
+
+    <div class="container">
+      <div class="split-motion-content">
+        <div class="staff-banner__row">
+
+          <div class="staff-banner__intro">
+            <div class="hgroup hg-reverse">
+              <h1 class="hg-heading">Welcome, Engineering Staff!</h1>
+              <span class="motion-heading mh-gold">Staff Hub</span>
+            </div>
+            <div class="intro-text">
+              Your one-stop destination for information, tools, and support
+            </div>
+          </div>
+
+          <form class="staff-search" role="search" method="get"
+                tal:attributes="action string:${here/absolute_url}/search">
+            <label class="staff-search__label" for="staff-search-input">How can we help?</label>
+            <div class="staff-search__field">
+              <input class="staff-search__input" id="staff-search-input" type="search"
+                     name="q" placeholder="Search site resources&#8230;" autocomplete="off" />
+              <button class="staff-search__submit" type="submit">
+                <span class="staff-visually-hidden">Search</span>
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p class="staff-search__note">Searches guides, forms, policies and staff resources.</p>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="split-motion-image">
+      <img loading="lazy" alt=""
+           tal:attributes="src string:${here/absolute_url}/${banner_image}" />
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════ DASHBOARD ═══════════════════════════ -->
+<section class="block --bg-light-gray staff-dashboard">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- ───────── MAIN COLUMN ───────── -->
+      <div class="col-lg-8 staff-col-main d-flex flex-column gap-4">
+
+        <!-- ════ New & Important ════
+             LIVE SOURCE (next pass): the "announcements" Purdue Event Manager in
+             this container, filtered to Document Type "News Item".
+             Replace the define below with the query; keys stay the same.        -->
+        <div class="staff-card"
+             tal:define="announcements python:[
+               {'icon': 'fa-trophy',
+                'title': 'Bravo+ Nominations Open',
+                'summary': 'Recognize a colleague who went above and beyond.',
+                'due': 'Closes Sep 30',
+                'url': '#'},
+               {'icon': 'fa-medal',
+                'title': 'PESLA Cohort 9 Applications',
+                'summary': 'Apply to the Engineering Staff Leadership Academy.',
+                'due': 'Closes Oct 10',
+                'url': '#'},
+               {'icon': 'fa-wand-magic-sparkles',
+                'title': 'New AI Guidance for Staff',
+                'summary': &quot;What's approved, what isn't, and where to get trained.&quot;,
+                'due': '',
+                'url': '#'},
+               {'icon': 'fa-shield-halved',
+                'title': 'Benefits Open Enrollment',
+                'summary': 'Review your elections for the 2027 plan year.',
+                'due': 'Closes Oct 24',
+                'url': '#'},
+               {'icon': 'fa-user-group',
+                'title': 'Welcome, New Staff',
+                'summary': 'Meet the colleagues who joined the College this month.',
+                'due': '',
+                'url': '#'}]">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">New &amp; Important</h2>
+            <a class="staff-card__more"
+               tal:attributes="href string:${here/absolute_url}/announcements">View all</a>
+          </div>
+
+          <ul class="staff-news">
+            <li class="staff-news__item" tal:repeat="item announcements">
+              <a class="staff-news__link" tal:attributes="href item/url">
+                <i class="staff-news__icon" aria-hidden="true"
+                   tal:attributes="class string:fa-solid ${item/icon} staff-news__icon"></i>
+                <span class="staff-news__title" tal:content="item/title">Announcement title</span>
+                <p class="staff-news__desc" tal:content="item/summary">One-line summary.</p>
+                <span class="staff-news__due"
+                      tal:condition="item/due|nothing"
+                      tal:content="item/due">Closes Jan 1</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Quick Links ════
+             Static by design. To add a link, add one dict below.               -->
+        <div class="staff-card"
+             tal:define="quick_links python:[
+               {'label': 'Purdue Directory',
+                'icon': 'fa-address-book',
+                'url': 'https://engineering.purdue.edu/Engr/People/ptDirectory'},
+               {'label': 'IT Help',
+                'icon': 'fa-headset',
+                'url': 'https://service.purdue.edu/TDClient/32/Purdue/Home/'},
+               {'label': 'HR Request',
+                'icon': 'fa-id-card',
+                'url': 'https://service.purdue.edu/TDClient/32/Purdue/Requests/Service/84/Human-Resources-Service-Center/Request'},
+               {'label': 'Purchasing Resources',
+                'icon': 'fa-cart-shopping',
+                'url': 'https://www.purdue.edu/operations/procurement/supplier-resources/'},
+               {'label': 'Travel Resources',
+                'icon': 'fa-plane',
+                'url': 'https://www.purdue.edu/operations/travel/'},
+               {'label': 'Engineering Forms',
+                'icon': 'fa-clipboard-list',
+                'url': 'toolkit#forms'}]">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Quick Links</h2>
+            <span class="staff-card__note">Opens in a new tab</span>
+          </div>
+
+          <ul class="staff-quick">
+            <li tal:repeat="link quick_links">
+              <a class="staff-quick__link" target="_blank" rel="noopener"
+                 tal:attributes="href python:link['url'].startswith('http') and link['url'] or '%s/%s' % (here.absolute_url(), link['url'])">
+                <i class="staff-quick__icon" aria-hidden="true"
+                   tal:attributes="class string:fa-solid ${link/icon} staff-quick__icon"></i>
+                <span class="staff-quick__label" tal:content="link/label">Link label</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Extension slot: "How Do I…?" (Phase 2) ════
+             Delete this div when the widget is built.                          -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
+          <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
+        </div>
+
+        <!-- ════ Explore ════ -->
+        <div class="staff-card"
+             tal:define="explore python:[
+               {'title': 'AI Resources',
+                'icon': 'fa-microchip',
+                'summary': 'Find trainings, policies and tools related to AI.',
+                'url': 'resources#ai'},
+               {'title': 'Recognize Great Work',
+                'icon': 'fa-trophy',
+                'summary': 'Celebrate achievements and recognize great work of our staff.',
+                'url': 'recognition'},
+               {'title': 'Grow Your Career',
+                'icon': 'fa-chart-line',
+                'summary': 'Explore professional development programs and training opportunities.',
+                'url': 'training'}]">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Explore</h2>
+          </div>
+
+          <ul class="staff-explore">
+            <li tal:repeat="item explore">
+              <a class="staff-explore__link"
+                 tal:attributes="href string:${here/absolute_url}/${item/url}">
+                <i class="staff-explore__icon" aria-hidden="true"
+                   tal:attributes="class string:fa-solid ${item/icon} staff-explore__icon"></i>
+                <span class="staff-explore__title" tal:content="item/title">Section</span>
+                <p class="staff-explore__desc" tal:content="item/summary">Tagline.</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div><!-- /main column -->
+
+      <!-- ───────── RIGHT RAIL ───────── -->
+      <div class="col-lg-4 staff-col-rail d-flex flex-column gap-4">
+
+        <!-- ════ Upcoming Events ════
+             LIVE SOURCE (next pass): the "calendar" Purdue Event Manager in this
+             container, filtered to Document Type "Event/Function", ascending by
+             start date, limited to 5. Sort/tag rules still to be defined.
+             'month' and 'day' become formatted from the event date; 'when' and
+             'where' come from the event's date/time and location fields.        -->
+        <div class="staff-card"
+             tal:define="events python:[
+               {'month': 'Sep', 'day': '3',
+                'title': 'Staff Council Meeting',
+                'when': '10:00&#8211;11:00 AM', 'where': 'ARMS 1010', 'url': '#'},
+               {'month': 'Sep', 'day': '9',
+                'title': 'LinkedIn Learning: Managing Up',
+                'when': '1:00&#8211;2:00 PM', 'where': 'Online (Teams)', 'url': '#'},
+               {'month': 'Sep', 'day': '15',
+                'title': 'Performance Review Self-Assessment Due',
+                'when': 'All day', 'where': '', 'url': '#'},
+               {'month': 'Sep', 'day': '22',
+                'title': 'New Employee Orientation',
+                'when': '9:00&#8211;11:30 AM', 'where': 'POTR 234', 'url': '#'},
+               {'month': 'Sep', 'day': '30',
+                'title': 'College of Engineering Town Hall',
+                'when': '9:00&#8211;10:00 AM', 'where': 'Fowler Hall', 'url': '#'}]">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Upcoming Events</h2>
+            <a class="staff-card__more"
+               tal:attributes="href string:${here/absolute_url}/calendar">View calendar</a>
+          </div>
+
+          <ul class="staff-events">
+            <li class="staff-event" tal:repeat="event events">
+
+              <div class="staff-event__date">
+                <span class="staff-event__month" tal:content="event/month">Sep</span>
+                <span class="staff-event__day" tal:content="event/day">1</span>
+              </div>
+
+              <div>
+                <h3 class="staff-event__title" tal:content="event/title">Event title</h3>
+                <p class="staff-event__meta">
+                  <tal:when tal:content="event/when">All day</tal:when>
+                  <tal:where tal:condition="event/where|nothing"
+                    ><span class="sep">|</span><tal:loc tal:content="event/where">Location</tal:loc
+                  ></tal:where>
+                </p>
+              </div>
+
+              <!-- Add-to-calendar: Wrap9's event system provides this natively
+                   (.add-to-calendar-icons). Wire to the real export next pass. -->
+              <a class="staff-event__outlook" tal:attributes="href event/url">
+                <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span
+                  class="staff-visually-hidden"
+                  tal:content="string:: ${event/title}">: Event title</span>
+              </a>
+
+            </li>
+          </ul>
+        </div>
+
+        <!-- ════ Extension slot: calendar snapshot (Phase 2) ════ -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
+          <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
+        </div>
+
+      </div><!-- /right rail -->
+
+    </div><!-- /row -->
+  </div><!-- /container -->
+</section>
+
+
+<!-- ═══════════════════════ HAVE A SUGGESTION? ═══════════════════════
+     TODO: feedback form URL still outstanding.                                 -->
+<section class="block --bg-black"
+         tal:define="feedback_url string:#">
+  <div class="container">
+    <div class="staff-feedback-inner">
+      <p class="staff-feedback__text">
+        <span class="staff-feedback__lead">Have a suggestion?</span>
+        <span class="staff-feedback__sub">Let us know how to improve this site.</span>
+      </p>
+      <a class="purdue-btn btn-gold"
+         tal:attributes="href feedback_url">Share Feedback</a>
+    </div>
+  </div>
+</section>
+
+</tal:dashboard>
