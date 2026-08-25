@@ -102,6 +102,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Wraps rather than overflows. Under the WCAG 1.4.12 text-spacing overrides
+     the nowrap heading outgrows its box; without this the label spills off the
+     gold parallelogram and collides with the view-all link. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   gap: 1rem;
   width: calc(100% + 3rem);
   margin: 0 -1.5rem 1.35rem;
@@ -116,6 +121,7 @@
   /* The skewed parallelogram is a single-line shape; letting the label wrap
      inside it doubles its height and breaks the silhouette. */
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 /* Between lg and xl the rail is at its narrowest, and "Upcoming Events" plus
@@ -130,6 +136,7 @@
 }
 
 .staff-card__more {
+  flex: 0 1 auto;
   font-family: var(--acumin-pro);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -694,4 +701,39 @@
     line-height: 2.7rem;
   }
   .staff-banner__row .staff-search { width: 24rem; }
+}
+
+
+/* ==========================================================================
+   15. Focus indicators
+   Wrap9 sets `a:focus-visible { outline: auto !important }`, which Chrome
+   paints in the element's own colour. On the black banner and feedback bands
+   that resolves to a black ring on a black background — an invisible focus
+   indicator (WCAG 2.4.7) that also fails non-text contrast (1.4.11).
+   These pin an explicit ring colour per band.
+   ========================================================================== */
+.staff-dashboard a:focus-visible,
+.staff-dashboard button:focus-visible {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px;
+}
+
+.block.--bg-black a:focus-visible,
+.block.--bg-black button:focus-visible,
+.block.--bg-black input:focus-visible {
+  outline: 3px solid var(--rush) !important;
+  outline-offset: 2px;
+}
+
+/* The search field signals focus with a box-shadow ring, which forced-colors
+   mode discards. Give it a real outline there. */
+@media (forced-colors: active) {
+  .staff-dashboard a:focus-visible,
+  .staff-dashboard button:focus-visible,
+  .block.--bg-black a:focus-visible,
+  .block.--bg-black button:focus-visible,
+  .block.--bg-black input:focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+  .staff-search__field:focus-within { outline: 3px solid Highlight; }
 }
