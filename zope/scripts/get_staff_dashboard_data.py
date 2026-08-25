@@ -51,9 +51,17 @@ ICON_BY_KEYWORD = (
     ('career',      'fa-chart-line'),
 )
 
-# Location is NOT a field on Purdue Event Document. These are tried in case some
-# documents carry one anyway; see the note in README about the content gap.
-F_LOCATION = ('location', 'event_location', 'place', 'room', 'building')
+# eventOrFunction documents carry Time and Location as free-text STRING
+# properties, authored by whoever created the event. They are displayed
+# verbatim rather than parsed — "10:00-11:00 AM" is the admin's wording and
+# reformatting it would only introduce ways to be wrong.
+#
+# Property sets vary between documents (some carry wrap_version, some do not),
+# and Zope property ids are case-sensitive, so each name is tried in turn.
+# Neither property is catalog metadata, so both are read off the object — which
+# is already being loaded for redirect_url.
+F_TIME     = ('Time', 'time', 'event_time', 'eventTime')
+F_LOCATION = ('Location', 'location', 'event_location', 'place', 'room')
 
 
 # ---------------------------------------------------------------------------
@@ -201,16 +209,19 @@ def resolve(brain):
     return (url, obj)
 
 
-def location_of(obj):
+def prop_of(obj, names):
+    """First non-empty property from a list of candidate ids."""
     if obj is None:
         return u''
-    for name in F_LOCATION:
+    for name in names:
         try:
             value = obj.getProperty(name, None)
         except Exception:
             value = None
         if value:
-            return as_text(value)
+            text = as_text(value).strip()
+            if text:
+                return text
     return u''
 
 
@@ -253,12 +264,18 @@ for brain in query('calendar', 'event_date', 'ascending'):
     except Exception:
         pass                            # incomparable: fail open
     url, obj = resolve(brain)
+    # The admin-authored Time string wins. Only when it is absent do we derive
+    # a time from event_date, which is stored at midnight unless someone has
+    # entered one — in which case this reads "All day".
+    when = prop_of(obj, F_TIME)
+    if not when:
+        when = fmt_when(start, meta(brain, 'event_end_date'))
     events.append({
         'month': month_abbr(start),
         'day':   day_number(start),
         'title': as_text(meta(brain, 'title', u'')),
-        'when':  fmt_when(start, meta(brain, 'event_end_date')),
-        'where': location_of(obj),
+        'when':  when,
+        'where': prop_of(obj, F_LOCATION),
         'url':   url,
     })
 

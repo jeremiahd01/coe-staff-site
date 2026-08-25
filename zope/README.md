@@ -150,20 +150,36 @@ empty string in `announcements`, so filtering on it would return no
 announcements at all. The script does not filter by type — `announcements` and
 `calendar` are separate managers, so the folder already is the filter.
 
-### Two content gaps to raise with the project lead
+### Time and Location
 
-The approved design shows `10:00-11:00 AM | ARMS 1010`. The content model
-currently supports neither:
+`eventOrFunction` documents in `calendar` carry **`Time` and `Location` as
+free-text string properties**. They are displayed **verbatim** — `10:00 - 11:00 AM`
+is the admin's wording, and reformatting it would only create ways to be wrong.
 
-1. **No location field.** Purdue Event Document has no `location` property, so
-   `where` renders empty on every real event.
-2. **No time of day.** `event_date` is stored at midnight, so every event
-   renders "All day".
+Property sets vary between documents, and Zope property ids are case-sensitive,
+so the script tries `Time`/`time`/`event_time` and `Location`/`location`/
+`event_location` in turn. Neither is catalog metadata, so both are read off the
+object that is already being loaded for `redirect_url`.
 
-The script is built so both light up the moment the data exists — enter a real
-time on an event and it formats as a range; add a location property and it
-appears. But someone has to decide whether to extend the content type, put the
-detail in `intro`, or drop location and time from the card design.
+Order of preference for the time line:
+
+1. the `Time` string, used exactly as written
+2. failing that, a range derived from `event_date` / `event_end_date`, if a real
+   time has been entered rather than the default midnight
+3. otherwise `All day`
+
+Announcements have no Location, which is correct — the design does not show one.
+They do carry `event_length` (int, `1` meaning one day); it is available but
+currently unused, since the announcement card shows no duration.
+
+**Worth checking:** neither of the two calendar documents sampled during
+discovery had `Time` or `Location` set, so they will render as "All day" with no
+location until someone fills them in. Existing content may need a backfill pass.
+
+**One consistency note:** an admin-authored `Time` of `10:00 - 11:00 AM` keeps
+its spaced hyphen, while a derived range renders with the design's en dash
+(`2:30-4:00 PM`). If that matters, it is a content-style decision rather than a
+code one.
 
 ### Two things needing your input
 
