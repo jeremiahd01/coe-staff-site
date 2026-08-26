@@ -195,6 +195,95 @@ def is_featured(keywords):
     return 0
 
 
+def count_of(value):
+    """Leading integer from an int or a string, or None.
+
+    event_length arrives as an int property, but going through text avoids
+    comparing a str to an int, which in Python 2 succeeds and gives nonsense.
+    """
+    text = as_text(value).strip()
+    if not text:
+        return None
+    total = None
+    for ch in text:
+        if ch in DIGITS:
+            if total is None:
+                total = 0
+            total = total * 10 + DIGITS[ch]
+        else:
+            if total is not None:
+                break
+    return total
+
+
+def day_key(dt):
+    """Comparable YYYY/MM/DD string, for deciding whether two dates differ."""
+    try:
+        return as_text(dt.Date())
+    except Exception:
+        pass
+    try:
+        return as_text(dt.strftime('%Y-%m-%d'))
+    except Exception:
+        return u''
+
+
+def span_end(brain, obj, start):
+    """Last day of a multi-day item, or None when it is a single day.
+
+    Prefers event_end_date, which is catalog metadata. event_length is not, so
+    it is only read off the object as a fallback — and it counts days
+    inclusively, so a length of 3 starting Sep 3 ends Sep 5.
+    """
+    end = meta(brain, 'event_end_date')
+    if end is not None:
+        start_key = day_key(start)
+        end_key = day_key(end)
+        if end_key and start_key:
+            if end_key > start_key:
+                return end
+        return None
+
+    length = None
+    if obj is not None:
+        try:
+            length = obj.getProperty('event_length', None)
+        except Exception:
+            length = None
+    days = count_of(length)
+    if days is None:
+        return None
+    if days < 2:
+        return None
+    try:
+        return start + (days - 1)
+    except Exception:
+        return None
+
+
+def date_display(start, end):
+    """'Sep 30', 'Sep 3-5' within a month, or 'Sep 30 - Oct 2' across one."""
+    if start is None:
+        return u''
+    start_month = month_abbr(start)
+    start_day = day_number(start)
+    if not start_month:
+        return u''
+    if not start_day:
+        return u''
+    if end is None:
+        return u'%s %s' % (start_month, start_day)
+    end_month = month_abbr(end)
+    end_day = day_number(end)
+    if not end_month:
+        return u'%s %s' % (start_month, start_day)
+    if not end_day:
+        return u'%s %s' % (start_month, start_day)
+    if end_month == start_month:
+        return u'%s %s%s%s' % (start_month, start_day, DASH, end_day)
+    return u'%s %s %s %s %s' % (start_month, start_day, DASH, end_month, end_day)
+
+
 def priority_rank(value):
     """Leading digit of "2 - medium". 0 is lowest, 4 is highest."""
     text = as_text(value).strip()
@@ -443,17 +532,14 @@ try:
     for row in ordered[:announcement_limit]:
         brain = row[4]
         is_first_featured = (featured_row is not None and row is featured_row)
-        deadline = meta(brain, 'event_date')
-        due = u''
-        if deadline is not None:
-            month = month_abbr(deadline)
-            day = day_number(deadline)
-            if month and day:
-                due = u'Closes %s %s' % (month, day)
         title = as_text(meta(brain, 'title', u''))
         if not title:
             continue          # unreadable or untitled: better absent than blank
         url, obj = resolve(brain)
+        # 'due' holds a plain date or date range, not only a deadline: the
+        # "Closes" wording is gone and event_length may widen it to a span.
+        start = meta(brain, 'event_date')
+        due = date_display(start, span_end(brain, obj, start))
         announcements.append({
             'icon':     is_first_featured and ICON_FEATURED or ICON_STANDARD,
             'featured': is_first_featured and 1 or 0,
