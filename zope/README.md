@@ -201,14 +201,16 @@ Events also carry an image sub-object, if the calendar page ever wants thumbnail
 
 ### New & Important: ordering, featuring and icons
 
-**Order:** the featured item first, then by `priority` (the leading digit, so
-`1 - high` outranks `2 - medium`), then newest by `show_date`. Everything
-visible is collected before sorting, so a high-priority item deep in the catalog
-can still reach position one.
+**Order:** the featured item first, then by `priority` **descending**, then
+newest by `show_date`. Everything visible is collected before sorting, so a
+high-priority item deep in the catalog can still reach position one.
 
-Parsing the leading digit rather than matching the whole string means new
-priority values work without a code change. A missing or unparseable priority
-sorts as if middle.
+`priority` is a dropdown from **0 (lowest) to 4 (highest)**, stored as strings
+like `2 - medium`. Only the leading digit is read, so the wording of the labels
+can change without touching the code. A missing or unparseable priority is
+treated as **2** — the middle of the range and the dropdown's default — rather
+than as lowest, which would bury an announcement whose priority simply was not
+set.
 
 **Featured:** an announcement whose `keywords` contains `featured` is pinned to
 position one and gets a star. Matched case-insensitively against the **whole**

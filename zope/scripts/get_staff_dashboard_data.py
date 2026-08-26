@@ -41,10 +41,15 @@ ICON_FEATURED = 'fa-star'
 # count. If several carry it, the newest wins.
 FEATURED_KEYWORD = 'featured'
 
-# priority is a selection like "2 - medium". The leading digit is the rank and
-# sorts ascending, so 1 outranks 2. Parsing the digit rather than matching the
-# whole string means new values work without a code change.
-PRIORITY_UNSET = 5
+# priority is a dropdown from 0 (lowest) to 4 (highest), rendered as strings
+# like "2 - medium". The leading digit is the rank and sorts DESCENDING, so 4
+# comes first. Parsing the digit rather than matching the whole label means the
+# wording can change without touching this.
+#
+# A missing or unparseable priority is treated as 2, the middle of the range
+# and what the dropdown defaults to — rather than as lowest, which would bury
+# an announcement whose priority simply was not set.
+PRIORITY_DEFAULT = 2
 DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
           '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
 
@@ -191,10 +196,10 @@ def is_featured(keywords):
 
 
 def priority_rank(value):
-    """Leading digit of "2 - medium". Unset or unparseable sorts as middle."""
+    """Leading digit of "2 - medium". 0 is lowest, 4 is highest."""
     text = as_text(value).strip()
     if not text:
-        return PRIORITY_UNSET
+        return PRIORITY_DEFAULT
     rank = None
     for ch in text:
         if ch in DIGITS:
@@ -205,7 +210,7 @@ def priority_rank(value):
             if rank is not None:
                 break
     if rank is None:
-        return PRIORITY_UNSET
+        return PRIORITY_DEFAULT
     return rank
 
 
@@ -372,8 +377,8 @@ for brain in cal_brains:
 # ---------------------------------------------------------------------------
 # Announcements — /announcements
 #
-# Order: the featured item first, then by priority (1 outranks 2), then newest
-# first. event_date is empty on news items, so recency comes from show_date;
+# Order: the featured item first, then by priority (4 highest down to 0), then
+# newest first. event_date is empty on news items, so recency comes from show_date;
 # when an announcement does carry an event_date it is a deadline and becomes
 # the "Closes <date>" line.
 #
@@ -389,7 +394,8 @@ for brain in ann_brains:
         continue
     keywords = meta(brain, 'keywords', ())
     featured = is_featured(keywords)
-    rows.append((priority_rank(meta(brain, 'priority')),
+    # negated: the list sorts ascending, and higher priority must come first
+    rows.append((0 - priority_rank(meta(brain, 'priority')),
                  -stamp(meta(brain, 'show_date')),
                  as_text(meta(brain, 'id', u'')),   # stable tie-break
                  featured,
