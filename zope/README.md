@@ -280,6 +280,41 @@ yields the 5 dummy items, script present yields live data only.
 
 ## Troubleshooting
 
+### The Page Template Embed renders nothing at all
+
+Almost always the data script raising, not the template.
+
+The template calls `here/get_staff_dashboard_data` from a `tal:define` on its
+**root element**. TALES `| nothing` catches a failed *lookup* — the script not
+existing — but does **not** catch an exception raised inside the script. So a
+script error fails the root define and the whole template renders empty. Before
+the script is installed the page looks fine, because `| nothing` catches the
+missing name; installing a script that then errors is what turns the page blank.
+
+To see the actual error, request the script on its own:
+
+```
+https://engineering.purdue.edu/staff/get_staff_dashboard_data
+```
+
+It returns the dict when healthy, and a full traceback when not. Then check the
+template on its own, which renders standalone and reports its own errors:
+
+```
+https://engineering.purdue.edu/staff/pt_homepage
+```
+
+Also confirm the Page Template Embed block still names the template correctly —
+`pt_homepage`, the name only, not a path.
+
+The script now guards each widget separately, so this failure mode should not
+recur: an exception yields empty lists, the template falls back to its
+placeholder content, and one widget cannot take the other down. A widget showing
+stale placeholder copy where live content is expected means that widget's block
+caught an error — check the script URL above.
+
+
+
 ### "Security Validation Failed: CSRF token is missing or invalid."
 
 This is the CMS rejecting the *save request*, not a problem with the template

@@ -331,6 +331,19 @@ def query(folder_id, sort_on, sort_order):
         return (folder, [])
 
 
+# ---------------------------------------------------------------------------
+# Why the two blocks below are wrapped in try/except
+#
+# The template calls this script from a tal:define on its ROOT element. TALES
+# "| nothing" only catches a failed *lookup* — the script not existing — and
+# does NOT catch an exception raised inside it. So an error here would fail the
+# root define and the whole template would render nothing at all.
+#
+# Returning empty lists instead lets the template fall back to its placeholder
+# content, so a broken widget shows stale copy rather than blanking the page,
+# and one widget cannot take the other down with it.
+# ---------------------------------------------------------------------------
+
 now = context.ZopeTime()
 try:
     today = now.earliestTime()          # midnight, so today's events still show
@@ -342,36 +355,43 @@ except Exception:
 # Upcoming events — /calendar, soonest first
 # ---------------------------------------------------------------------------
 events = []
-cal_folder, cal_brains = query('calendar', 'event_date', 'ascending')
-for brain in cal_brains:
-    if len(events) >= event_limit:
-        break
-    if not visible(brain, now):
-        continue
-    start = meta(brain, 'event_date')
-    if start is None:
-        continue
-    try:
-        if start < today:
+try:
+    cal_folder, cal_brains = query('calendar', 'event_date', 'ascending')
+    for brain in cal_brains:
+        if len(events) >= event_limit:
+            break
+        if not visible(brain, now):
             continue
-    except Exception:
-        pass                            # incomparable: fail open
-    url, obj = resolve(brain)
-    # The admin-authored Time string wins. Only when it is absent do we derive
-    # a time from event_date, which is stored at midnight unless someone has
-    # entered one — in which case this reads "All day".
-    when = field_value(obj, FIELD_TIME)
-    if not when:
-        when = fmt_when(start, meta(brain, 'event_end_date'))
-    events.append({
-        'month': month_abbr(start),
-        'day':   day_number(start),
-        'title': as_text(meta(brain, 'title', u'')),
-        'when':  when,
-        'where': field_value(obj, FIELD_LOCATION),
-        'ics':   ics_url(obj),
-        'url':   url,
-    })
+        start = meta(brain, 'event_date')
+        if start is None:
+            continue
+        try:
+            if start < today:
+                continue
+        except Exception:
+            pass                            # incomparable: fail open
+        title = as_text(meta(brain, 'title', u''))
+        if not title:
+            continue          # unreadable or untitled: better absent than blank
+        url, obj = resolve(brain)
+        # The admin-authored Time string wins. Only when it is absent do we derive
+        # a time from event_date, which is stored at midnight unless someone has
+        # entered one — in which case this reads "All day".
+        when = field_value(obj, FIELD_TIME)
+        if not when:
+            when = fmt_when(start, meta(brain, 'event_end_date'))
+        events.append({
+            'month': month_abbr(start),
+            'day':   day_number(start),
+            'title': title,
+            'when':  when,
+            'where': field_value(obj, FIELD_LOCATION),
+            'ics':   ics_url(obj),
+            'url':   url,
+        })
+except Exception:
+    # one widget failing must not take the page down; see note above
+    events = []
 
 
 # ---------------------------------------------------------------------------
@@ -386,58 +406,65 @@ for brain in cal_brains:
 # limit, because a featured or high-priority item further down the catalog
 # result has to be able to reach position one.
 # ---------------------------------------------------------------------------
-ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
+try:
+    ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
 
-rows = []
-for brain in ann_brains:
-    if not visible(brain, now):
-        continue
-    keywords = meta(brain, 'keywords', ())
-    featured = is_featured(keywords)
-    # negated: the list sorts ascending, and higher priority must come first
-    rows.append((0 - priority_rank(meta(brain, 'priority')),
-                 -stamp(meta(brain, 'show_date')),
-                 as_text(meta(brain, 'id', u'')),   # stable tie-break
-                 featured,
-                 brain))
+    rows = []
+    for brain in ann_brains:
+        if not visible(brain, now):
+            continue
+        keywords = meta(brain, 'keywords', ())
+        featured = is_featured(keywords)
+        # negated: the list sorts ascending, and higher priority must come first
+        rows.append((0 - priority_rank(meta(brain, 'priority')),
+                     -stamp(meta(brain, 'show_date')),
+                     as_text(meta(brain, 'id', u'')),   # stable tie-break
+                     featured,
+                     brain))
 
-rows.sort(key=order_key)
+    rows.sort(key=order_key)
 
-# Pin the newest featured item. Sorting by -show_date already put the newest
-# first among equals, so the first featured row encountered is the newest one.
-featured_row = None
-for row in rows:
-    if row[3]:
-        featured_row = row
-        break
-if featured_row is not None:
-    ordered = [featured_row]
+    # Pin the newest featured item. Sorting by -show_date already put the newest
+    # first among equals, so the first featured row encountered is the newest one.
+    featured_row = None
     for row in rows:
-        if row is not featured_row:
-            ordered.append(row)
-else:
-    ordered = rows
+        if row[3]:
+            featured_row = row
+            break
+    if featured_row is not None:
+        ordered = [featured_row]
+        for row in rows:
+            if row is not featured_row:
+                ordered.append(row)
+    else:
+        ordered = rows
 
-announcements = []
-for row in ordered[:announcement_limit]:
-    brain = row[4]
-    is_first_featured = (featured_row is not None and row is featured_row)
-    deadline = meta(brain, 'event_date')
-    due = u''
-    if deadline is not None:
-        month = month_abbr(deadline)
-        day = day_number(deadline)
-        if month and day:
-            due = u'Closes %s %s' % (month, day)
-    url, obj = resolve(brain)
-    announcements.append({
-        'icon':     is_first_featured and ICON_FEATURED or ICON_STANDARD,
-        'featured': is_first_featured and 1 or 0,
-        'title':    as_text(meta(brain, 'title', u'')),
-        'summary':  as_text(meta(brain, 'intro', u'')),
-        'due':      due,
-        'url':      url,
-    })
+    announcements = []
+    for row in ordered[:announcement_limit]:
+        brain = row[4]
+        is_first_featured = (featured_row is not None and row is featured_row)
+        deadline = meta(brain, 'event_date')
+        due = u''
+        if deadline is not None:
+            month = month_abbr(deadline)
+            day = day_number(deadline)
+            if month and day:
+                due = u'Closes %s %s' % (month, day)
+        title = as_text(meta(brain, 'title', u''))
+        if not title:
+            continue          # unreadable or untitled: better absent than blank
+        url, obj = resolve(brain)
+        announcements.append({
+            'icon':     is_first_featured and ICON_FEATURED or ICON_STANDARD,
+            'featured': is_first_featured and 1 or 0,
+            'title':    title,
+            'summary':  as_text(meta(brain, 'intro', u'')),
+            'due':      due,
+            'url':      url,
+        })
+except Exception:
+    # one widget failing must not take the page down; see note above
+    announcements = []
 
 
 return {'announcements': announcements, 'events': events}
