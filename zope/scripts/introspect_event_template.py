@@ -11,7 +11,7 @@
 # Why: getTemplate() returns <EventTemplate at eventOrFunction>, so an
 # EventDocument delegates its field set to a template object. Time and Location
 # are therefore neither registered properties nor plain attributes on the
-# document — roughly 180 candidate names came back empty. This inspects the
+# document -- roughly 180 candidate names came back empty. This inspects the
 # template itself, and the sub-objects and containers the document may be using
 # to hold per-template values.
 #

@@ -1,7 +1,7 @@
 /* ==========================================================================
-   Purdue Engineering — Staff Hub dashboard
+   Purdue Engineering -- Staff Hub dashboard
    Additive layer for /staff/local.css. Consumes Wrap9's own custom properties
-   (--boiler-gold, --acumin-pro, …) rather than redeclaring the palette, so a
+   (--boiler-gold, --acumin-pro, ...) rather than redeclaring the palette, so a
    theme-side colour change flows through here automatically.
 
    Everything is prefixed .staff- and scoped under .staff-dashboard.
@@ -85,7 +85,7 @@
 .staff-dashboard { padding-block: 3rem; }
 
 /* ==========================================================================
-   3. Card chrome — shared by every widget
+   3. Card chrome -- shared by every widget
    ========================================================================== */
 .staff-card {
   background: #fff;
@@ -178,7 +178,7 @@
   padding: 0;
   display: grid;
   /* Explicit column counts, never auto-fit: the 5th item must not orphan
-     onto a row of its own. Cadence is 5 → 3 → 2 → 1. */
+     onto a row of its own. Cadence is 5 -> 3 -> 2 -> 1. */
   grid-template-columns: repeat(2, 1fr);
   row-gap: 1.4rem;
 }
@@ -543,7 +543,7 @@
 .staff-feedback-inner .purdue-btn { margin: 0; }
 
 /* ==========================================================================
-   9. Extension slots — prototype scaffolding, removed before ship
+   9. Extension slots -- prototype scaffolding, removed before ship
    ========================================================================== */
 .staff-slot {
   border: 2px dashed var(--railway-gray);
@@ -581,7 +581,7 @@
 }
 
 /* ==========================================================================
-   11. Motion — one staggered reveal on load, nothing scattered
+   11. Motion -- one staggered reveal on load, nothing scattered
    ========================================================================== */
 @keyframes staff-rise {
   from { opacity: 0; transform: translateY(12px); }
@@ -649,7 +649,7 @@
    Wrap9 styles links per block background, at specificity (0,3,1):
      .block.--bg-light-gray a { color: rgb(0, 0, 238); }
    That browser-blue would win over a plain .staff-* class selector, so these
-   rules match that specificity exactly and rely on load order — local.css is
+   rules match that specificity exactly and rely on load order -- local.css is
    linked after wrap_css.css, so an equal-specificity rule here wins.
    ========================================================================== */
 .block.--bg-light-gray .staff-news__link,
@@ -804,7 +804,7 @@
    15. Focus indicators
    Wrap9 sets `a:focus-visible { outline: auto !important }`, which Chrome
    paints in the element's own colour. On the black banner and feedback bands
-   that resolves to a black ring on a black background — an invisible focus
+   that resolves to a black ring on a black background -- an invisible focus
    indicator (WCAG 2.4.7) that also fails non-text contrast (1.4.11).
    These pin an explicit ring colour per band.
    ========================================================================== */
@@ -839,19 +839,19 @@
    16. Page Template Embed breakout
    The embed block wraps our output like this:
 
-     <section class="block no-pad" id="page_template_embed_…">
+     <section class="block no-pad" id="page_template_embed_...">
        <div class="page-template-embed">
          <div class="container">   <-- caps width at 1320px
-           … our template …
+           ... our template ...
 
    That container traps the full-bleed bands (banner, dashboard, feedback)
    72px inside each viewport edge at 1440px, so the design loses its
-   edge-to-edge character. Neutralise it — but only when it actually contains
+   edge-to-edge character. Neutralise it -- but only when it actually contains
    our dashboard, so any other Page Template Embed block on the site is left
    alone. Each of our own sections carries its own .container for inner content.
 
    :has() has been baseline since 2023. On a browser without it the rule is
-   skipped and the dashboard renders inset rather than full-bleed — degraded,
+   skipped and the dashboard renders inset rather than full-bleed -- degraded,
    not broken. See zope/README.md for an id-scoped alternative.
    ========================================================================== */
 .page-template-embed > .container:has(> .staff-embed-root) {

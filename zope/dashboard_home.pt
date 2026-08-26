@@ -6,7 +6,7 @@
                  live_events python:dashboard and dashboard.get('events') or []">
 <!--
   ============================================================================
-  Staff Hub — dashboard home
+  Staff Hub  -  dashboard home
   Purdue University, College of Engineering
 
   Embedded into /staff/index_html via a "Page Template Embed" block.
@@ -23,7 +23,7 @@
   ============================================================================
 -->
 
-<!-- ═══════════════════════════ BANNER ═══════════════════════════
+<!-- =========================== BANNER ===========================
      Native Wrap9 banner-split-motion block plus the MVP search field.
      NOTE: /staff/index_html already carries a separate banner block. Remove or
      disable that one when this template goes live, or the page shows two.     -->
@@ -73,15 +73,15 @@
 </section>
 
 
-<!-- ═══════════════════════════ DASHBOARD ═══════════════════════════ -->
+<!-- =========================== DASHBOARD =========================== -->
 <section class="block --bg-light-gray staff-dashboard">
   <div class="container">
     <div class="row g-4">
 
-      <!-- ───────── MAIN COLUMN ───────── -->
+      <!-- ========= MAIN COLUMN ========= -->
       <div class="col-lg-8 staff-col-main d-flex flex-column gap-4">
 
-        <!-- ════ New & Important ════
+        <!-- ==== New & Important ====
              LIVE SOURCE (next pass): the "announcements" Purdue Event Manager in
              this container, filtered to Document Type "News Item".
              Replace the define below with the query; keys stay the same.        -->
@@ -158,7 +158,7 @@
           </ul>
         </div>
 
-        <!-- ════ Quick Links ════
+        <!-- ==== Quick Links ====
              Static by design. To add a link, add one dict below.               -->
         <div class="staff-card"
              tal:define="quick_links python:[
@@ -198,14 +198,14 @@
           </ul>
         </div>
 
-        <!-- ════ Extension slot: "How Do I…?" (Phase 2) ════
+        <!-- ==== Extension slot: "How Do I...?" (Phase 2) ====
              Delete this div when the widget is built.                          -->
         <div class="staff-slot">
           <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
           <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
         </div>
 
-        <!-- ════ Explore ════ -->
+        <!-- ==== Explore ==== -->
         <div class="staff-card"
              tal:define="explore python:[
                {'title': 'AI Resources',
@@ -240,10 +240,10 @@
 
       </div><!-- /main column -->
 
-      <!-- ───────── RIGHT RAIL ───────── -->
+      <!-- ========= RIGHT RAIL ========= -->
       <div class="col-lg-4 staff-col-rail d-flex flex-column gap-4">
 
-        <!-- ════ Upcoming Events ════
+        <!-- ==== Upcoming Events ====
              LIVE SOURCE (next pass): the "calendar" Purdue Event Manager in this
              container, filtered to Document Type "Event/Function", ascending by
              start date, limited to 5. Sort/tag rules still to be defined.
@@ -306,7 +306,7 @@
           </ul>
         </div>
 
-        <!-- ════ Extension slot: calendar snapshot (Phase 2) ════ -->
+        <!-- ==== Extension slot: calendar snapshot (Phase 2) ==== -->
         <div class="staff-slot">
           <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
           <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
@@ -319,7 +319,7 @@
 </section>
 
 
-<!-- ═══════════════════════ HAVE A SUGGESTION? ═══════════════════════
+<!-- ======================= HAVE A SUGGESTION? =======================
      TODO: feedback form URL still outstanding.                                 -->
 <section class="block --bg-black"
          tal:define="feedback_url string:#">

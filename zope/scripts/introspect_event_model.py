@@ -2,7 +2,7 @@
 ##title=Discovery v2: report the Purdue Event Document model
 ##
 # ============================================================================
-# Discovery script v2 — run once, paste the output back, then delete.
+# Discovery script v2 -- run once, paste the output back, then delete.
 #
 # v1 inspected whatever objectValues() returned first, which was a
 # ZCTextIndex Lexicon belonging to the manager's own catalog, so the properties
@@ -100,7 +100,7 @@ for folder_id in ('announcements', 'calendar'):
     except Exception as e:
         out.append('    searchResults() failed: %s' % show(e))
 
-    # Any index that might hold the document type — show its distinct values
+    # Any index that might hold the document type -- show its distinct values
     for name in index_names:
         low = name.lower()
         if ('type' in low) or ('template' in low) or ('tag' in low) or ('subject' in low):

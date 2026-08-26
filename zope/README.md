@@ -416,6 +416,23 @@ Two escaping traps worth knowing, both already handled:
   collapses newlines before compiling, Zope 2.13 does not, and the ZMI stores
   CRLF line endings which makes it certain.
 
+- **Never put a non-ASCII character in a delivered source file.** The ZMI
+  stores pasted source as Latin-1, so a literal en dash in a Python script comes
+  back as mojibake: `Oct 27 a Nov 10` instead of `Oct 27 - Nov 10`. The same
+  applies to templates, and to CSS, which the wrap serves as `iso-8859-15`.
+  Write it as an escape instead:
+
+  | Where | Write |
+  |---|---|
+  | Python | `u'\u2013'` |
+  | Template | `&#8211;` |
+  | CSS | `\2013` |
+
+  Every delivered file is pure ASCII, and the checker enforces it.
+
+- `--` is illegal inside an XML comment, so em dashes in template comments
+  cannot simply become `--`.
+
 **Run `tools/check_template.py` before pasting a template into the ZMI.** It
 compiles every `python:` expression the way Zope 2.13 will, so these get caught
 locally instead of at the paste:

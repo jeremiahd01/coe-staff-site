@@ -28,7 +28,10 @@
 # isinstance(), unicode(), basestring, and no attribute starting with '_'.
 # ============================================================================
 
-DASH = u'–'          # en dash, matches the approved design
+DASH = u'\u2013'       # en dash. Written as an escape, NOT as a literal:
+                       # the ZMI stores pasted source as Latin-1, which turns
+                       # a literal en dash into mojibake ('Oct 27 a Nov 10').
+                       # Keep every non-ASCII character in this file escaped.
 # One icon for every announcement, and a star for the featured one. Keyword-
 # derived icons were dropped: the mapping was invisible to editors, and
 # substring matching meant a "training" keyword picked up the AI icon because
@@ -47,7 +50,7 @@ FEATURED_KEYWORD = 'featured'
 # wording can change without touching this.
 #
 # A missing or unparseable priority is treated as 2, the middle of the range
-# and what the dropdown defaults to — rather than as lowest, which would bury
+# and what the dropdown defaults to -- rather than as lowest, which would bury
 # an announcement whose priority simply was not set.
 PRIORITY_DEFAULT = 2
 DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
@@ -57,7 +60,7 @@ DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
 # labels, exposed through keys():
 #   Hosted By, Time, Location, Contact Name, Contact Phone, Contact Email,
 #   Open To, Priority, School or Program, College Calendar, Physical Address
-# That is why no attribute name ever matched — "Contact Name" cannot be one.
+# That is why no attribute name ever matched -- "Contact Name" cannot be one.
 # Note values()/items() are ObjectManager's and return the document's
 # sub-objects (its image and .ics), not these field values.
 FIELD_TIME     = ('Time',)
@@ -232,7 +235,7 @@ def span_end(brain, obj, start):
     """Last day of a multi-day item, or None when it is a single day.
 
     Prefers event_end_date, which is catalog metadata. event_length is not, so
-    it is only read off the object as a fallback — and it counts days
+    it is only read off the object as a fallback -- and it counts days
     inclusively, so a length of 3 starting Sep 3 ends Sep 5.
     """
     end = meta(brain, 'event_end_date')
@@ -342,7 +345,7 @@ def visible(brain, now):
 
 def resolve(brain):
     """(url, object-or-None). redirect_url is not catalog metadata, so the
-    object is loaded — but only for the few documents actually displayed."""
+    object is loaded -- but only for the few documents actually displayed."""
     url = u''
     try:
         url = as_text(brain.getURL())
@@ -424,7 +427,7 @@ def query(folder_id, sort_on, sort_order):
 # Why the two blocks below are wrapped in try/except
 #
 # The template calls this script from a tal:define on its ROOT element. TALES
-# "| nothing" only catches a failed *lookup* — the script not existing — and
+# "| nothing" only catches a failed *lookup* -- the script not existing -- and
 # does NOT catch an exception raised inside it. So an error here would fail the
 # root define and the whole template would render nothing at all.
 #
@@ -441,7 +444,7 @@ except Exception:
 
 
 # ---------------------------------------------------------------------------
-# Upcoming events — /calendar, soonest first
+# Upcoming events -- /calendar, soonest first
 # ---------------------------------------------------------------------------
 events = []
 try:
@@ -465,7 +468,7 @@ try:
         url, obj = resolve(brain)
         # The admin-authored Time string wins. Only when it is absent do we derive
         # a time from event_date, which is stored at midnight unless someone has
-        # entered one — in which case this reads "All day".
+        # entered one -- in which case this reads "All day".
         when = field_value(obj, FIELD_TIME)
         if not when:
             when = fmt_when(start, meta(brain, 'event_end_date'))
@@ -484,7 +487,7 @@ except Exception:
 
 
 # ---------------------------------------------------------------------------
-# Announcements — /announcements
+# Announcements -- /announcements
 #
 # Order: the featured item first, then by priority (4 highest down to 0), then
 # newest first. event_date is empty on news items, so recency comes from show_date;
