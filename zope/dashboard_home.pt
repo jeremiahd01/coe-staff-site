@@ -124,9 +124,7 @@
                  an <a>, so the link now wraps the title only. Summary text
                  becomes selectable as a side benefit. -->
             <li tal:repeat="item announcements"
-                tal:attributes="class python:item['featured']
-                                       and 'staff-news__item is-featured'
-                                       or 'staff-news__item'">
+                tal:attributes="class python:item['featured'] and 'staff-news__item is-featured' or 'staff-news__item'">
 
               <i class="staff-news__icon" aria-hidden="true"
                  tal:attributes="class string:fa-solid ${item/icon} staff-news__icon"></i>

@@ -387,7 +387,18 @@ Two escaping traps worth knowing, both already handled:
   `&#39;` inside a single-quoted Python string terminates it early and raises a
   SyntaxError. Strings containing apostrophes use `&quot;` delimiters instead.
 - A multi-line `python:` expression that is not bracketed raises
-  "unexpected indent". Keep such expressions on one line or wrap them in parens.
+  **"unexpected indent"**. Keep such expressions on one line or wrap them in
+  parens. This bites even when a local render passes: modern `zope.tales`
+  collapses newlines before compiling, Zope 2.13 does not, and the ZMI stores
+  CRLF line endings which makes it certain.
+
+**Run `tools/check_template.py` before pasting a template into the ZMI.** It
+compiles every `python:` expression the way Zope 2.13 will, so these get caught
+locally instead of at the paste:
+
+```bash
+python3 tools/check_template.py zope/dashboard_home.pt
+```
 
 ## Verification performed
 
