@@ -122,45 +122,125 @@
             </div>
 
             <ul class="staff-news">
-              <li class="staff-news__item">
-                <a class="staff-news__link" href="#">
-                  <i class="fa-solid fa-trophy staff-news__icon" aria-hidden="true"></i>
-                  <span class="staff-news__title">Bravo+ Nominations Open</span>
-                  <p class="staff-news__desc">Recognize a colleague who went above and beyond.</p>
-                  <span class="staff-news__due">Closes Sep 30</span>
-                </a>
-              </li>
-              <li class="staff-news__item">
-                <a class="staff-news__link" href="#">
-                  <i class="fa-solid fa-medal staff-news__icon" aria-hidden="true"></i>
-                  <span class="staff-news__title">PESLA Cohort 9 Applications</span>
-                  <p class="staff-news__desc">Apply to the Engineering Staff Leadership Academy.</p>
-                  <span class="staff-news__due">Closes Oct 10</span>
-                </a>
-              </li>
-              <li class="staff-news__item">
-                <a class="staff-news__link" href="#">
-                  <i class="fa-solid fa-wand-magic-sparkles staff-news__icon" aria-hidden="true"></i>
-                  <span class="staff-news__title">New AI Guidance for Staff</span>
-                  <p class="staff-news__desc">What's approved, what isn't, and where to get trained.</p>
-                </a>
-              </li>
-              <li class="staff-news__item">
-                <a class="staff-news__link" href="#">
-                  <i class="fa-solid fa-shield-halved staff-news__icon" aria-hidden="true"></i>
-                  <span class="staff-news__title">Benefits Open Enrollment</span>
-                  <p class="staff-news__desc">Review your elections for the 2027 plan year.</p>
-                  <span class="staff-news__due">Closes Oct 24</span>
-                </a>
-              </li>
-              <li class="staff-news__item">
-                <a class="staff-news__link" href="#">
-                  <i class="fa-solid fa-user-group staff-news__icon" aria-hidden="true"></i>
-                  <span class="staff-news__title">Welcome, New Staff</span>
-                  <p class="staff-news__desc">Meet the colleagues who joined the College this month.</p>
-                </a>
-              </li>
-            </ul>
+            <!-- The full-text trigger is a <button>, which cannot live inside
+                 an <a>, so the link now wraps the title only. Summary text
+                 becomes selectable as a side benefit. -->
+            <li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Closes Sep 30</span>
+            </li>
+            <li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Closes Oct 10</span>
+            </li>
+            <li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li>
+            <li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Benefits Open Enrollment</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-4">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-4">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+              </div>
+
+              <span class="staff-news__due">Closes Oct 24</span>
+            </li>
+            <li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Welcome, New Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Meet the colleagues who joined the College this month.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-5">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-5">Meet the colleagues who joined the College this month.</div>
+              </div>
+
+              
+            </li>
+          </ul>
           </div>
 
           <!-- Quick Links -->
@@ -382,6 +462,136 @@
   <code>#page-body</code>; all custom CSS is prefixed <code>.staff-</code> and consumes
   Wrap9's own custom properties.
 </div>
+
+<script>
+/* Full-text tooltip for clamped announcement summaries.
+   Hover opens after a delay; keyboard focus opens at once; Escape closes; the
+   tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
+   The trigger is revealed only when the text is actually clipped.
+   Written without ampersand or less-than characters so the template
+   stays valid XML. */
+(function () {
+  var OPEN_DELAY = 1000;
+  var groups = document.querySelectorAll('.staff-news__summary');
+  if (!groups.length) { return; }
+
+  var current = null, openTimer = null, closeTimer = null, entries = [];
+
+  function place(tip) {
+    tip.style.left = '0px';
+    var box = tip.getBoundingClientRect();
+    var over = box.right - (window.innerWidth - 8);
+    if (over > 0) { tip.style.left = (0 - over) + 'px'; }
+    var after = tip.getBoundingClientRect();
+    if (after.left > 8) { return; }
+    tip.style.left = (parseFloat(tip.style.left || 0) + (8 - after.left)) + 'px';
+  }
+
+  function close() {
+    window.clearTimeout(openTimer);
+    window.clearTimeout(closeTimer);
+    if (!current) { return; }
+    current.tip.hidden = true;
+    current.btn.setAttribute('aria-expanded', 'false');
+    if (current.card) { current.card.classList.remove('has-open-tip'); }
+    current = null;
+  }
+
+  function open(entry) {
+    if (current) {
+      if (current === entry) { return; }
+      close();
+    }
+    entry.tip.hidden = false;
+    entry.btn.setAttribute('aria-expanded', 'true');
+    /* Raise the owning card so later cards cannot paint over the tooltip. */
+    if (entry.card) { entry.card.classList.add('has-open-tip'); }
+    place(entry.tip);
+    current = entry;
+  }
+
+  function scheduleClose() {
+    window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(close, 200);
+  }
+
+  function measure(entry) {
+    var clipped = entry.clamp.scrollHeight > entry.clamp.clientHeight + 1;
+    entry.btn.hidden = !clipped;
+    if (!clipped) {
+      if (current === entry) { close(); }
+    }
+  }
+
+  Array.prototype.forEach.call(groups, function (summary) {
+    var clamp = summary.querySelector('.staff-news__clamp');
+    var btn = summary.querySelector('.staff-news__more');
+    var tip = summary.querySelector('.staff-news__tip');
+    if (!clamp) { return; }
+    if (!btn) { return; }
+    if (!tip) { return; }
+    var entry = { clamp: clamp, btn: btn, tip: tip,
+                  card: summary.closest ? summary.closest('.staff-card') : null };
+    entries.push(entry);
+
+    btn.addEventListener('mouseenter', function () {
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(openTimer);
+      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
+    });
+    btn.addEventListener('mouseleave', function () {
+      window.clearTimeout(openTimer);
+      scheduleClose();
+    });
+    /* Keyboard users get it immediately: a one second wait on focus would
+       feel broken. */
+    btn.addEventListener('focus', function () { open(entry); });
+    btn.addEventListener('blur', function (ev) {
+      if (ev.relatedTarget) {
+        if (tip.contains(ev.relatedTarget)) { return; }
+      }
+      scheduleClose();
+    });
+    /* Click covers touch, where hover does not exist. */
+    btn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      window.clearTimeout(openTimer);
+      if (current === entry) { close(); } else { open(entry); }
+    });
+
+    tip.addEventListener('mouseenter', function () { window.clearTimeout(closeTimer); });
+    tip.addEventListener('mouseleave', function () { scheduleClose(); });
+    tip.addEventListener('focusout', function (ev) {
+      if (ev.relatedTarget) {
+        if (tip.contains(ev.relatedTarget)) { return; }
+        if (ev.relatedTarget === btn) { return; }
+      }
+      scheduleClose();
+    });
+
+    measure(entry);
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape') { close(); }
+  });
+  document.addEventListener('click', function (ev) {
+    if (!current) { return; }
+    if (current.tip.contains(ev.target)) { return; }
+    if (current.btn.contains(ev.target)) { return; }
+    close();
+  });
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(function () {
+      close();
+      entries.forEach(function (e) { measure(e); });
+    }, 150);
+  });
+}());
+</script>
 
 </body>
 </html>

@@ -199,6 +199,55 @@ carries no .ics either, so those rows show no button until live data arrives.
 
 Events also carry an image sub-object, if the calendar page ever wants thumbnails.
 
+### New & Important: ordering, featuring and icons
+
+**Order:** the featured item first, then by `priority` (the leading digit, so
+`1 - high` outranks `2 - medium`), then newest by `show_date`. Everything
+visible is collected before sorting, so a high-priority item deep in the catalog
+can still reach position one.
+
+Parsing the leading digit rather than matching the whole string means new
+priority values work without a code change. A missing or unparseable priority
+sorts as if middle.
+
+**Featured:** an announcement whose `keywords` contains `featured` is pinned to
+position one and gets a star. Matched case-insensitively against the **whole**
+keyword, so `featured-story` does not count. If several carry it the newest
+wins; the others return to normal ordering. The featured item counts toward the
+five.
+
+**Icons:** one small dot for every announcement, a star for the featured one.
+The old keyword-to-icon mapping is gone — it was invisible to editors, and
+substring matching meant a `training` keyword picked the AI icon, because
+"tr-**ai**-ning" contains "ai".
+
+### Summary text: four-line clamp with a full-text tooltip
+
+`intro` is rendered with `tal:content="structure"`, so admin-authored HTML comes
+through as markup. Note this is the opposite of sanitising — a `<script>` in an
+intro would run. That is acceptable while only trusted editors can create Event
+Documents.
+
+The preview is clamped to four lines. Block elements inside the clamp are
+flattened to inline, because each one would otherwise start a new line and blow
+the height; the tooltip renders them normally.
+
+A trigger button appears **only when the text is actually clipped**, measured at
+runtime. It opens on hover after one second, immediately on keyboard focus, and
+on click for touch. Escape closes it, and it stays open while the pointer or
+focus is inside, which is what WCAG 1.4.13 requires. The link now wraps the
+title only, because a `<button>` cannot live inside an `<a>`.
+
+Two things worth knowing:
+
+- The tooltip is not clipped by anything, but it **was** being occluded: cards
+  later in the DOM painted over it, because the tooltip's own card establishes
+  no stacking context and `z-index` alone cannot escape one. The script raises
+  the owning card while a tooltip is open.
+- Without JavaScript the clamp still applies and no trigger appears, so long
+  summaries are truncated with no way to expand them in place. The title links
+  to the full announcement, so nothing is unreachable.
+
 ### Two things needing your input
 
 - **Announcement icons.** Native Event Documents have no icon field, so the

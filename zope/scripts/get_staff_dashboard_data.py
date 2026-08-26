@@ -29,39 +29,25 @@
 # ============================================================================
 
 DASH = u'–'          # en dash, matches the approved design
-DEFAULT_ICON = 'fa-circle-info'
+# One icon for every announcement, and a star for the featured one. Keyword-
+# derived icons were dropped: the mapping was invisible to editors, and
+# substring matching meant a "training" keyword picked up the AI icon because
+# "tr-ai-ning" contains "ai".
+ICON_STANDARD = 'fa-circle'
+ICON_FEATURED = 'fa-star'
 
-# Announcement icons. Purdue Event Documents carry no icon field, so map from
-# the `keywords` property. Matching is on substrings, so 'new-staff' hits
-# 'staff' and a compound keyword still resolves.
-ICON_BY_KEYWORD = (
-    ('bravo',       'fa-trophy'),
-    ('award',       'fa-trophy'),
-    ('recognition', 'fa-trophy'),
-    ('pesla',       'fa-medal'),
-    ('leadership',  'fa-medal'),
-    ('ai',          'fa-wand-magic-sparkles'),
-    ('benefit',     'fa-shield-halved'),
-    ('enrollment',  'fa-shield-halved'),
-    ('policy',      'fa-shield-halved'),
-    ('staff',       'fa-user-group'),
-    ('welcome',     'fa-user-group'),
-    ('people',      'fa-user-group'),
-    ('training',    'fa-chart-line'),
-    ('career',      'fa-chart-line'),
-)
+# An announcement keyed with this in `keywords` is pinned to position one.
+# Matched case-insensitively as a whole keyword, so "featured-story" does not
+# count. If several carry it, the newest wins.
+FEATURED_KEYWORD = 'featured'
 
-# eventOrFunction documents carry Time and Location as free-text STRING
-# properties, authored by whoever created the event. They are displayed
-# verbatim rather than parsed — "10:00-11:00 AM" is the admin's wording and
-# reformatting it would only introduce ways to be wrong.
-#
-# These live on the Edit tab, not the Properties tab: the edit form stores them
-# as plain instance attributes rather than registered OFS properties, so
-# getProperty() cannot see them and they must be read with getattr. Zope
-# property ids are case-sensitive, so each candidate is tried in turn. Neither
-# is catalog metadata, so both come off the object already being loaded for
-# redirect_url.
+# priority is a selection like "2 - medium". The leading digit is the rank and
+# sorts ascending, so 1 outranks 2. Parsing the digit rather than matching the
+# whole string means new values work without a code change.
+PRIORITY_UNSET = 5
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
 # EventDocument keeps its template fields in a mapping keyed by human-readable
 # labels, exposed through keys():
 #   Hosted By, Time, Location, Contact Name, Contact Phone, Contact Email,
@@ -173,12 +159,72 @@ def day_number(dt):
         return u''
 
 
-def pick_icon(keywords):
-    text = as_text(keywords).lower()
-    for pair in ICON_BY_KEYWORD:
-        if pair[0] in text:
-            return pair[1]
-    return DEFAULT_ICON
+def keyword_list(keywords):
+    """Normalised whole keywords: trimmed and lowercased, one per entry.
+
+    Deliberately does NOT split on punctuation. Tokenising would make
+    "featured-story" match "featured", which is not what the pinning rule
+    means. `keywords` may also be a bare string, and iterating a string would
+    yield characters, so a string is wrapped first.
+    """
+    items = keywords
+    if items is None:
+        return []
+    if hasattr(items, 'strip'):
+        items = [items]
+    out = []
+    try:
+        for entry in items:
+            text = as_text(entry).strip().lower()
+            if text:
+                out.append(text)
+    except Exception:
+        pass
+    return out
+
+
+def is_featured(keywords):
+    for keyword in keyword_list(keywords):
+        if keyword == FEATURED_KEYWORD:
+            return 1
+    return 0
+
+
+def priority_rank(value):
+    """Leading digit of "2 - medium". Unset or unparseable sorts as middle."""
+    text = as_text(value).strip()
+    if not text:
+        return PRIORITY_UNSET
+    rank = None
+    for ch in text:
+        if ch in DIGITS:
+            if rank is None:
+                rank = 0
+            rank = rank * 10 + DIGITS[ch]
+        else:
+            if rank is not None:
+                break
+    if rank is None:
+        return PRIORITY_UNSET
+    return rank
+
+
+def stamp(dt):
+    """Sortable number from a date, newest highest."""
+    if dt is None:
+        return 0
+    try:
+        return dt.timeTime()
+    except Exception:
+        pass
+    try:
+        return dt.millis()
+    except Exception:
+        return 0
+
+
+def order_key(row):
+    return (row[0], row[1], row[2])
 
 
 def visible(brain, now):
@@ -324,19 +370,52 @@ for brain in cal_brains:
 
 
 # ---------------------------------------------------------------------------
-# Announcements — /announcements, newest first
+# Announcements — /announcements
 #
-# event_date is empty on news items, so these sort on show_date. When an
-# announcement does carry an event_date it is a deadline, and becomes the
-# "Closes <date>" line.
+# Order: the featured item first, then by priority (1 outranks 2), then newest
+# first. event_date is empty on news items, so recency comes from show_date;
+# when an announcement does carry an event_date it is a deadline and becomes
+# the "Closes <date>" line.
+#
+# Everything visible is collected before sorting, rather than stopping at the
+# limit, because a featured or high-priority item further down the catalog
+# result has to be able to reach position one.
 # ---------------------------------------------------------------------------
-announcements = []
 ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
+
+rows = []
 for brain in ann_brains:
-    if len(announcements) >= announcement_limit:
-        break
     if not visible(brain, now):
         continue
+    keywords = meta(brain, 'keywords', ())
+    featured = is_featured(keywords)
+    rows.append((priority_rank(meta(brain, 'priority')),
+                 -stamp(meta(brain, 'show_date')),
+                 as_text(meta(brain, 'id', u'')),   # stable tie-break
+                 featured,
+                 brain))
+
+rows.sort(key=order_key)
+
+# Pin the newest featured item. Sorting by -show_date already put the newest
+# first among equals, so the first featured row encountered is the newest one.
+featured_row = None
+for row in rows:
+    if row[3]:
+        featured_row = row
+        break
+if featured_row is not None:
+    ordered = [featured_row]
+    for row in rows:
+        if row is not featured_row:
+            ordered.append(row)
+else:
+    ordered = rows
+
+announcements = []
+for row in ordered[:announcement_limit]:
+    brain = row[4]
+    is_first_featured = (featured_row is not None and row is featured_row)
     deadline = meta(brain, 'event_date')
     due = u''
     if deadline is not None:
@@ -346,11 +425,12 @@ for brain in ann_brains:
             due = u'Closes %s %s' % (month, day)
     url, obj = resolve(brain)
     announcements.append({
-        'icon':    pick_icon(meta(brain, 'keywords', ())),
-        'title':   as_text(meta(brain, 'title', u'')),
-        'summary': as_text(meta(brain, 'intro', u'')),
-        'due':     due,
-        'url':     url,
+        'icon':     is_first_featured and ICON_FEATURED or ICON_STANDARD,
+        'featured': is_first_featured and 1 or 0,
+        'title':    as_text(meta(brain, 'title', u'')),
+        'summary':  as_text(meta(brain, 'intro', u'')),
+        'due':      due,
+        'url':      url,
     })
 
 

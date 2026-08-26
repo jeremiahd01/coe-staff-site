@@ -200,6 +200,11 @@
   margin-bottom: 0.7rem;
   display: block;
 }
+/* Standard announcements get a small dot; the featured one gets a star that is
+   deliberately larger and darker so it reads as the exception. */
+.staff-news__item .fa-circle { font-size: 0.5rem; color: var(--boiler-gold); }
+.staff-news__item.is-featured .fa-star { font-size: 1.15rem; color: var(--aged-gold); }
+
 .staff-news__title {
   font-family: var(--acumin-pro);
   font-size: 0.9375rem;
@@ -215,12 +220,101 @@
 }
 .staff-news__link:hover .staff-news__title { background-size: 100% 2px; }
 
-.staff-news__desc {
+/* ---- Summary: clamped to four lines, full text in a tooltip ---- */
+.staff-news__summary { position: relative; margin-top: 0.45rem; }
+
+.staff-news__clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--steel-gray);
-  margin: 0.45rem 0 0;
 }
+
+/* intro is admin-authored HTML. Inside a four-line box each block child would
+   start a new line and blow the height, so blocks are flattened to inline for
+   the preview only. The tooltip renders them normally. */
+.staff-news__clamp p,
+.staff-news__clamp div,
+.staff-news__clamp ul,
+.staff-news__clamp ol,
+.staff-news__clamp li,
+.staff-news__clamp h1,
+.staff-news__clamp h2,
+.staff-news__clamp h3,
+.staff-news__clamp h4 {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+.staff-news__clamp li::after { content: " "; }
+.staff-news__clamp br { display: none; }
+.staff-news__clamp img { display: none; }
+
+.staff-news__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--aged-gold);
+  background: transparent;
+  border: 1px solid var(--steam);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+.staff-news__more:hover,
+.staff-news__more[aria-expanded="true"] {
+  border-color: var(--boiler-gold);
+  background: #fff;
+  color: #000;
+}
+.staff-news__more[hidden] { display: none !important; }
+
+.staff-news__tip {
+  position: absolute;
+  z-index: 60;
+  top: 100%;
+  left: 0;
+  width: 17rem;
+  max-width: 78vw;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 2px solid var(--boiler-gold);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  text-align: left;
+}
+.staff-news__tip[hidden] { display: none !important; }
+
+/* The tooltip is not clipped, but without this it is OCCLUDED: cards that come
+   later in the DOM (Quick Links, Explore) paint over it, because the tooltip's
+   own card establishes no stacking context and z-index alone cannot escape it.
+   JS raises the owning card for as long as a tooltip is open. */
+.staff-card.has-open-tip {
+  position: relative;
+  z-index: 70;
+}
+.staff-news__tip p { margin: 0 0 0.6rem; }
+.staff-news__tip p:last-child,
+.staff-news__tip ul:last-child,
+.staff-news__tip ol:last-child { margin-bottom: 0; }
+.staff-news__tip ul,
+.staff-news__tip ol { margin: 0 0 0.6rem; padding-left: 1.1rem; }
+
 .staff-news__due {
   display: inline-block;
   margin-top: 0.6rem;
@@ -563,6 +657,8 @@
 .block.--bg-light-gray .staff-explore__link {
   color: #000;
 }
+.block.--bg-light-gray .staff-news__clamp,
+.block.--bg-light-gray .staff-news__tip,
 .block.--bg-light-gray .staff-news__title,
 .block.--bg-light-gray .staff-explore__title,
 .block.--bg-light-gray .staff-event__title {
