@@ -1,0 +1,1566 @@
+<!DOCTYPE html><html lang="en" class="wrap09"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New &amp; Important: low-count layout options</title>
+<link rel="stylesheet" href="https://use.typekit.net/hrz3oev.css?ver=5.7">
+<link rel="stylesheet" href="https://marcom.purdue.edu/app/mu-plugins/boilerup-wp/unitedsans.css?ver=5.7">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://engineering.purdue.edu/Wraps/wrap09/required/wrap_css.css">
+<script src="https://kit.fontawesome.com/f660349cfc.js" crossorigin="anonymous"></script>
+<style>/* ==========================================================================
+   Purdue Engineering -- Staff Hub dashboard
+   Additive layer for /staff/local.css. Consumes Wrap9's own custom properties
+   (--boiler-gold, --acumin-pro, ...) rather than redeclaring the palette, so a
+   theme-side colour change flows through here automatically.
+
+   Everything is prefixed .staff- and scoped under .staff-dashboard.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Banner search  (lives inside the native .banner-split-motion block)
+   ========================================================================== */
+.staff-search {
+  width: 100%;
+  max-width: 30rem;
+  margin-top: 1.75rem;
+}
+
+.staff-search__label {
+  display: block;
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 0.875rem;
+  letter-spacing: 2.81px;
+  text-transform: uppercase;
+  color: var(--boiler-gold);
+  margin-bottom: 0.6rem;
+}
+
+.staff-search__field {
+  display: flex;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 var(--box-shadow-color);
+}
+
+.staff-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0.8rem 1rem;
+  font-family: var(--acumin-pro);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #000;
+}
+.staff-search__input::placeholder { color: var(--cool-gray); opacity: 1; }
+.staff-search__input:focus { outline: none; }
+
+.staff-search__field:focus-within {
+  box-shadow: 0 0 0 3px var(--rush);
+}
+
+/* Gold, not black. A black submit button sitting in a white field on a black
+   banner reads as a hole punched through the field rather than a control. */
+.staff-search__submit {
+  flex: 0 0 auto;
+  border: 0;
+  background: var(--boiler-gold);
+  color: #000;
+  padding-inline: 1.25rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.staff-search__submit:hover {
+  background: var(--aged-gold);
+  color: #fff;
+}
+
+.staff-search__note {
+  margin: 0.6rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--steam);
+}
+
+/* ==========================================================================
+   2. Dashboard shell
+   ========================================================================== */
+.staff-dashboard { padding-block: 3rem; }
+
+/* ==========================================================================
+   3. Card chrome -- shared by every widget
+   ========================================================================== */
+.staff-card {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px 0 var(--box-shadow-color);
+  padding: 0 1.5rem 1.6rem;
+}
+
+/* The card header reuses Wrap9's motion-line + motion-heading idiom: a 2px
+   gold rule with the skewed heading hanging beneath it. Overrides below pull
+   it flush with the card's own padding and let a "view all" link share the
+   rule on the right. */
+.staff-card .motion-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Wraps rather than overflows. Under the WCAG 1.4.12 text-spacing overrides
+     the nowrap heading outgrows its box; without this the label spills off the
+     gold parallelogram and collides with the view-all link. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  gap: 1rem;
+  width: calc(100% + 3rem);
+  margin: 0 -1.5rem 1.35rem;
+  padding-right: 1.5rem;
+  margin-top: 0;
+}
+
+.staff-card .motion-heading {
+  font-size: 0.9375rem;
+  letter-spacing: 2.2px;
+  padding: 0.5rem 1.25rem;
+  /* The skewed parallelogram is a single-line shape; letting the label wrap
+     inside it doubles its height and breaks the silhouette. */
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* Between lg and xl the rail is at its narrowest, and "Upcoming Events" plus
+   its view-all link only just fit. */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .staff-card .motion-heading {
+    font-size: 0.875rem;
+    letter-spacing: 1.6px;
+    padding-inline: 1rem;
+  }
+  .staff-card__more { font-size: 0.75rem; }
+}
+
+.staff-card__more {
+  flex: 0 1 auto;
+  font-family: var(--acumin-pro);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--aged-gold);
+  text-decoration: none !important;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+.staff-card__more::after {
+  content: "";
+  margin-left: 0.5rem;
+  height: 0.85rem;
+  width: 0.85rem;
+  background-image: var(--gold-arrow-url);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+.staff-card__more:hover::after { transform: translateX(3px); }
+.staff-card__more:hover { color: #000; }
+
+.staff-card__note {
+  font-family: var(--acumin-pro);
+  font-size: 0.8125rem;
+  color: var(--cool-gray);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   4. New & Important
+   ========================================================================== */
+.staff-news {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Explicit column counts, never auto-fit: the 5th item must not orphan
+     onto a row of its own. Cadence is 5 -> 3 -> 2 -> 1. */
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 1.4rem;
+}
+.staff-news__item {
+  padding-inline: 1.15rem;
+  border-left: 1px solid var(--steam);
+}
+.staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+
+.staff-news__link {
+  display: block;
+  text-decoration: none !important;
+  color: inherit;
+  line-height: inherit;
+}
+.staff-news__icon {
+  font-size: 1.25rem;
+  color: var(--aged-gold);
+  margin-bottom: 0.7rem;
+  display: block;
+}
+/* Standard announcements get a small dot; the featured one gets a star that is
+   deliberately larger and darker so it reads as the exception. */
+.staff-news__item .fa-circle { font-size: 0.5rem; color: var(--boiler-gold); }
+.staff-news__item.is-featured .fa-star { font-size: 1.15rem; color: var(--aged-gold); }
+
+.staff-news__title {
+  font-family: var(--acumin-pro);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #000;
+  display: inline;
+  background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.25s ease;
+}
+.staff-news__link:hover .staff-news__title { background-size: 100% 2px; }
+
+/* ---- Summary: clamped to four lines, full text in a tooltip ---- */
+.staff-news__summary { position: relative; margin-top: 0.45rem; }
+
+.staff-news__clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* intro is admin-authored HTML. Inside a four-line box each block child would
+   start a new line and blow the height, so blocks are flattened to inline for
+   the preview only. The tooltip renders them normally. */
+.staff-news__clamp p,
+.staff-news__clamp div,
+.staff-news__clamp ul,
+.staff-news__clamp ol,
+.staff-news__clamp li,
+.staff-news__clamp h1,
+.staff-news__clamp h2,
+.staff-news__clamp h3,
+.staff-news__clamp h4 {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+.staff-news__clamp li::after { content: " "; }
+.staff-news__clamp br { display: none; }
+.staff-news__clamp img { display: none; }
+
+.staff-news__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--aged-gold);
+  background: transparent;
+  border: 1px solid var(--steam);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+.staff-news__more:hover,
+.staff-news__more[aria-expanded="true"] {
+  border-color: var(--boiler-gold);
+  background: #fff;
+  color: #000;
+}
+.staff-news__more[hidden] { display: none !important; }
+
+.staff-news__tip {
+  position: absolute;
+  z-index: 60;
+  top: 100%;
+  left: 0;
+  width: 17rem;
+  max-width: 78vw;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  border: 2px solid var(--boiler-gold);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  text-align: left;
+}
+.staff-news__tip[hidden] { display: none !important; }
+
+/* The tooltip is not clipped, but without this it is OCCLUDED: cards that come
+   later in the DOM (Quick Links, Explore) paint over it, because the tooltip's
+   own card establishes no stacking context and z-index alone cannot escape it.
+   JS raises the owning card for as long as a tooltip is open. */
+.staff-card.has-open-tip {
+  position: relative;
+  z-index: 70;
+}
+.staff-news__tip p { margin: 0 0 0.6rem; }
+.staff-news__tip p:last-child,
+.staff-news__tip ul:last-child,
+.staff-news__tip ol:last-child { margin-bottom: 0; }
+.staff-news__tip ul,
+.staff-news__tip ol { margin: 0 0 0.6rem; padding-left: 1.1rem; }
+
+.staff-news__due {
+  display: inline-block;
+  margin-top: 0.6rem;
+  padding-top: 0.35rem;
+  border-top: 2px solid var(--dust);
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--aged-gold);
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   5. Quick Links
+   ========================================================================== */
+.staff-quick {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.staff-quick__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  height: 100%;
+  padding: 1.35rem 0.6rem 1.2rem;
+  text-align: center;
+  text-decoration: none !important;
+  color: #000;
+  background: #fff;
+  border: 2px solid var(--steam);
+  border-radius: 4px;
+  line-height: 1.3;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.staff-quick__link:hover,
+.staff-quick__link:focus-visible {
+  border-color: var(--boiler-gold);
+  box-shadow: 0 2px 6px 0 var(--box-shadow-color);
+  transform: translateY(-2px);
+}
+.staff-quick__icon {
+  font-size: 1.6rem;
+  color: var(--aged-gold);
+  transition: color 0.2s ease;
+}
+.staff-quick__link:hover .staff-quick__icon { color: #000; }
+.staff-quick__label {
+  font-family: var(--acumin-pro-cond);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+/* ==========================================================================
+   6. Explore
+   ========================================================================== */
+.staff-explore {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.staff-explore__link {
+  display: block;
+  height: 100%;
+  padding: 1.25rem 1.3rem 1.35rem;
+  text-decoration: none !important;
+  color: #000;
+  background: #fff;
+  border: 2px solid var(--steam);
+  border-radius: 4px;
+  line-height: 1.4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.staff-explore__link:hover,
+.staff-explore__link:focus-visible {
+  border-color: var(--boiler-gold);
+  box-shadow: 0 2px 6px 0 var(--box-shadow-color);
+}
+.staff-explore__icon {
+  font-size: 1.35rem;
+  color: var(--aged-gold);
+  margin-bottom: 0.85rem;
+  display: block;
+}
+.staff-explore__title {
+  font-family: var(--acumin-pro);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.staff-explore__title::after {
+  content: "";
+  height: 0.9rem;
+  width: 0.9rem;
+  flex: 0 0 auto;
+  background-image: var(--gold-arrow-url);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  transition: transform 0.3s ease;
+}
+.staff-explore__link:hover .staff-explore__title::after { transform: translateX(3px); }
+.staff-explore__desc {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--steel-gray);
+  margin: 0;
+}
+
+/* ==========================================================================
+   7. Upcoming Events & Deadlines
+   ========================================================================== */
+.staff-events { list-style: none; margin: 0; padding: 0; }
+
+.staff-event {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--steam);
+}
+.staff-event:first-child { padding-top: 0; }
+.staff-event:last-child { padding-bottom: 0; border-bottom: 0; }
+
+.staff-event__date {
+  grid-row: span 2;
+  align-self: start;
+  text-align: center;
+  background: var(--dust);
+  border-radius: 4px;
+  padding: 0.35rem 0.2rem 0.45rem;
+}
+.staff-event__month,
+.staff-event__day {
+  display: block;
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000;
+}
+.staff-event__month { font-size: 0.6875rem; letter-spacing: 1.5px; line-height: 1.2; }
+.staff-event__day   { font-size: 1.5rem; line-height: 1.1; }
+
+.staff-event__title {
+  font-family: var(--acumin-pro);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 0.3rem;
+  color: #000;
+}
+/* The title links to the event document. Matches the announcement title's
+   sliding gold underline so the two widgets behave the same way.
+   line-height is pinned because wrap9 sets `body a { line-height: 24px }`,
+   which would otherwise override the heading's own spacing. */
+.staff-event__link {
+  color: #000;
+  line-height: inherit;
+  text-decoration: none !important;
+  background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.25s ease;
+}
+.staff-event__link:hover,
+.staff-event__link:focus-visible { background-size: 100% 2px; }
+
+.staff-event__meta {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--steel-gray);
+  margin: 0;
+}
+.staff-event__meta .sep { color: var(--steam); padding-inline: 0.4rem; }
+
+.staff-event__outlook {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--aged-gold);
+  text-decoration: none !important;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+.staff-event__outlook:hover,
+.staff-event__outlook:focus-visible {
+  color: #000;
+  border-bottom-color: var(--boiler-gold);
+}
+
+/* ==========================================================================
+   8. Feedback block
+   ========================================================================== */
+.staff-feedback-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-block: 2.25rem;
+}
+.staff-feedback__text { margin: 0; }
+.staff-feedback__lead {
+  display: block;
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 1.375rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1.2;
+}
+.staff-feedback__sub {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--steam);
+  margin-top: 0.35rem;
+}
+.staff-feedback-inner .purdue-btn { margin: 0; }
+
+/* ==========================================================================
+   9. Extension slots -- prototype scaffolding, removed before ship
+   ========================================================================== */
+.staff-slot {
+  border: 2px dashed var(--railway-gray);
+  border-radius: 4px;
+  background: repeating-linear-gradient(135deg, transparent 0 10px, rgba(207, 185, 145, 0.2) 10px 20px);
+  padding: 1.5rem;
+  text-align: center;
+}
+.staff-slot__label {
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 0.8125rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--steel-gray);
+  margin: 0;
+}
+.staff-slot__sub {
+  font-size: 0.8125rem;
+  color: var(--cool-gray);
+  margin: 0.35rem 0 0;
+}
+
+/* ==========================================================================
+   10. Accessibility
+   ========================================================================== */
+.staff-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   11. Motion -- one staggered reveal on load, nothing scattered
+   ========================================================================== */
+@keyframes staff-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.staff-dashboard .staff-card,
+.staff-dashboard .staff-slot {
+  animation: staff-rise 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.staff-col-main > *:nth-child(1) { animation-delay: 0.05s; }
+.staff-col-main > *:nth-child(2) { animation-delay: 0.12s; }
+.staff-col-main > *:nth-child(3) { animation-delay: 0.19s; }
+.staff-col-main > *:nth-child(4) { animation-delay: 0.26s; }
+.staff-col-rail > *:nth-child(1) { animation-delay: 0.09s; }
+.staff-col-rail > *:nth-child(2) { animation-delay: 0.16s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .staff-dashboard *,
+  .staff-dashboard *::before,
+  .staff-dashboard *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .staff-quick__link:hover { transform: none; }
+}
+
+/* ==========================================================================
+   12. Responsive
+   ========================================================================== */
+@media (min-width: 576px) {
+  .staff-quick { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 768px) {
+  .staff-news { grid-template-columns: repeat(3, 1fr); }
+  .staff-news__item { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
+  .staff-explore { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1200px) {
+  .staff-news { grid-template-columns: repeat(5, 1fr); row-gap: 0; }
+  .staff-news__item { padding-inline: 0.95rem; border-left: 1px solid var(--steam); }
+  .staff-news__item:nth-child(5n + 1) { border-left: 0; padding-left: 0; }
+  .staff-quick { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (max-width: 575.98px) {
+  .staff-dashboard { padding-block: 2rem; }
+  .staff-card { padding-inline: 1.15rem; }
+  .staff-card .motion-line { width: calc(100% + 2.3rem); margin-inline: -1.15rem; padding-right: 1.15rem; }
+  .staff-news { grid-template-columns: 1fr; row-gap: 0; }
+  .staff-news__item {
+    border-left: 0 !important;
+    padding: 1rem 0 0 !important;
+    border-top: 1px solid var(--steam);
+  }
+  .staff-news__item:first-child { padding-top: 0 !important; border-top: 0; }
+  .staff-news__icon { display: none; }
+  .staff-feedback-inner .purdue-btn { width: 100%; justify-content: center; }
+}
+
+/* ==========================================================================
+   13. Theme overrides
+   Wrap9 styles links per block background, at specificity (0,3,1):
+     .block.--bg-light-gray a { color: rgb(0, 0, 238); }
+   That browser-blue would win over a plain .staff-* class selector, so these
+   rules match that specificity exactly and rely on load order -- local.css is
+   linked after wrap_css.css, so an equal-specificity rule here wins.
+   ========================================================================== */
+.block.--bg-light-gray .staff-news__link,
+.block.--bg-light-gray .staff-quick__link,
+.block.--bg-light-gray .staff-explore__link {
+  color: #000;
+}
+.block.--bg-light-gray .staff-news__clamp,
+.block.--bg-light-gray .staff-news__tip,
+.block.--bg-light-gray .staff-news__title,
+.block.--bg-light-gray .staff-explore__title,
+.block.--bg-light-gray .staff-event__link,
+.block.--bg-light-gray .staff-event__title {
+  color: #000;
+}
+.block.--bg-light-gray .staff-card__more,
+.block.--bg-light-gray .staff-news__due,
+.block.--bg-light-gray .staff-event__outlook {
+  color: var(--aged-gold);
+}
+.block.--bg-light-gray .staff-card__more:hover,
+.block.--bg-light-gray .staff-event__outlook:hover {
+  color: #000;
+}
+.block.--bg-light-gray .staff-news__icon,
+.block.--bg-light-gray .staff-quick__icon,
+.block.--bg-light-gray .staff-explore__icon {
+  color: var(--aged-gold);
+}
+.block.--bg-light-gray .staff-quick__link:hover .staff-quick__icon {
+  color: #000;
+}
+
+/* ==========================================================================
+   14. Banner sizing
+   The stock split-motion banner is a full hero: 6rem of vertical padding, a
+   3rem headline, and a 50/50 image. The brief asks for a narrow banner, so:
+     - the image is dropped entirely below 992px
+     - on desktop it shrinks from half the banner to a ~26% accent panel
+     - the headline/tagline and the search sit side by side rather than
+       stacked, which is what actually removes the height
+   ========================================================================== */
+
+/* ---- Mobile and tablet: no image, single stacked column ---- */
+.block .banner.staff-banner .split-motion-image {
+  display: none;
+}
+
+.block .banner.staff-banner {
+  min-height: 0;
+}
+
+.block .banner.staff-banner .split-motion-content {
+  padding: 1.75rem 1.25rem 2rem;
+}
+
+.staff-banner__row {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.staff-banner__intro { min-width: 0; }
+
+.block .banner.staff-banner h1 {
+  font-size: 1.875rem;
+  line-height: 1.95rem;
+  margin: 0;
+}
+
+.block .banner.staff-banner .intro-text {
+  margin-bottom: 0;
+  font-size: 0.9375rem;
+}
+
+.block .banner.staff-banner .hgroup {
+  gap: 0.9rem;
+  margin: 0 0 0.85rem;
+}
+
+.block .banner.staff-banner .motion-heading {
+  font-size: 0.8125rem;
+  padding: 0.4rem 1rem;
+}
+
+.staff-banner__row .staff-search {
+  margin-top: 0;
+  max-width: 30rem;
+}
+
+/* ---- Desktop: narrow accent image, two-column content ---- */
+@media screen and (min-width: 992px) {
+  .block .banner.staff-banner .split-motion-image {
+    display: block;
+    flex: 0 0 26%;
+    width: 26%;
+    aspect-ratio: auto;
+  }
+
+  /* Stock rule gives the copy container max-width 50%; the image is now an
+     accent panel, so the content takes the rest. */
+  .block .banner.staff-banner .container {
+    max-width: 74%;
+    width: 74%;
+  }
+
+  /* The diagonal wedge is scaled to the narrower panel so it stays a wedge
+     instead of swallowing the image. */
+  .block .banner.staff-banner .split-motion-image:before {
+    width: 5rem;
+  }
+
+  .block .banner.staff-banner .split-motion-content {
+    padding: 1.75rem 1.5rem 1.75rem 3.5rem;
+  }
+
+  .staff-banner__row {
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+
+  .staff-banner__intro { flex: 1 1 auto; }
+
+  .staff-banner__row .staff-search {
+    flex: 0 0 auto;
+    width: 22rem;
+  }
+
+  .block .banner.staff-banner h1 {
+    font-size: 2.25rem;
+    line-height: 2.35rem;
+  }
+
+  .block .banner.staff-banner .motion-heading {
+    font-size: 0.875rem;
+    padding: 0.45rem 1.1rem;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .block .banner.staff-banner h1 {
+    font-size: 2.625rem;
+    line-height: 2.7rem;
+  }
+  .staff-banner__row .staff-search { width: 24rem; }
+}
+
+
+/* ==========================================================================
+   15. Focus indicators
+   Wrap9 sets `a:focus-visible { outline: auto !important }`, which Chrome
+   paints in the element's own colour. On the black banner and feedback bands
+   that resolves to a black ring on a black background -- an invisible focus
+   indicator (WCAG 2.4.7) that also fails non-text contrast (1.4.11).
+   These pin an explicit ring colour per band.
+   ========================================================================== */
+.staff-dashboard a:focus-visible,
+.staff-dashboard button:focus-visible {
+  outline: 3px solid #000 !important;
+  outline-offset: 2px;
+}
+
+.block.--bg-black a:focus-visible,
+.block.--bg-black button:focus-visible,
+.block.--bg-black input:focus-visible {
+  outline: 3px solid var(--rush) !important;
+  outline-offset: 2px;
+}
+
+/* The search field signals focus with a box-shadow ring, which forced-colors
+   mode discards. Give it a real outline there. */
+@media (forced-colors: active) {
+  .staff-dashboard a:focus-visible,
+  .staff-dashboard button:focus-visible,
+  .block.--bg-black a:focus-visible,
+  .block.--bg-black button:focus-visible,
+  .block.--bg-black input:focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+  .staff-search__field:focus-within { outline: 3px solid Highlight; }
+}
+
+
+/* ==========================================================================
+   16. Page Template Embed breakout
+   The embed block wraps our output like this:
+
+     <section class="block no-pad" id="page_template_embed_...">
+       <div class="page-template-embed">
+         <div class="container">   <-- caps width at 1320px
+           ... our template ...
+
+   That container traps the full-bleed bands (banner, dashboard, feedback)
+   72px inside each viewport edge at 1440px, so the design loses its
+   edge-to-edge character. Neutralise it -- but only when it actually contains
+   our dashboard, so any other Page Template Embed block on the site is left
+   alone. Each of our own sections carries its own .container for inner content.
+
+   :has() has been baseline since 2023. On a browser without it the rule is
+   skipped and the dashboard renders inset rather than full-bleed -- degraded,
+   not broken. See zope/README.md for an id-scoped alternative.
+   ========================================================================== */
+.page-template-embed > .container:has(> .staff-embed-root) {
+  max-width: none;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+</style>
+<style>
+ body{background:#ededed;margin:0}
+ .page{max-width:900px;margin:0 auto;padding:1.5rem 1rem 4rem}
+ .intro{background:#000;color:#fff;padding:1.25rem 1.5rem;margin-bottom:1.5rem;border-top:4px solid #cfb991}
+ .intro h1{font:900 20px/1.2 united-sans-condensed,Impact,sans-serif;letter-spacing:2px;text-transform:uppercase;margin:0 0 .5rem;color:#fff}
+ .intro p{font:400 14px/1.6 acumin-pro,Arial,sans-serif;color:#c4bfc0;margin:0}
+ .count{font:900 14px/1 united-sans-condensed,Impact,sans-serif;letter-spacing:2.5px;text-transform:uppercase;
+        background:#cfb991;color:#000;padding:.7rem 1rem;margin:2.5rem 0 1rem}
+ .opt{margin-bottom:1.5rem}
+ .cap{font:600 13px/1.4 acumin-pro,Arial,sans-serif;color:#000;margin:0 0 .15rem}
+ .note{font:400 12px/1.5 acumin-pro,Arial,sans-serif;color:#555960;margin:0 0 .5rem;max-width:62ch}
+</style></head>
+<body class="block --bg-light-gray"><div class="page">
+<div class="intro"><h1>New &amp; Important: what happens with fewer than 5</h1>
+<p>The same real markup rendered three ways at each count. The widget is 880px wide here,
+matching its width on the dashboard at a 1440px screen. Recommendation: <b>C</b>.</p></div>
+<h2 class="count">1 announcement published</h2><div class="opt"><p class="cap"><b>A.</b> Current &mdash; fixed 5 columns</p><p class="note">Columns stay put, so unused tracks leave dead space on the right.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(5,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>B.</b> Stretch to fill</p><p class="note">Items divide the full width. Good at 3&ndash;4; at 1&ndash;2 the summary stops clipping, so the &ldquo;more&rdquo; button disappears.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(1,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>C.</b> Stretch, capped at 265px, left aligned</p><p class="note">Same as B once there are 3 or more. At 1&ndash;2 the item keeps its normal proportions and the tooltip still works.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(1,minmax(0,265px));justify-content:start;"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li></ul></div></div><h2 class="count">2 announcements published</h2><div class="opt"><p class="cap"><b>A.</b> Current &mdash; fixed 5 columns</p><p class="note">Columns stay put, so unused tracks leave dead space on the right.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(5,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>B.</b> Stretch to fill</p><p class="note">Items divide the full width. Good at 3&ndash;4; at 1&ndash;2 the summary stops clipping, so the &ldquo;more&rdquo; button disappears.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(2,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>C.</b> Stretch, capped at 265px, left aligned</p><p class="note">Same as B once there are 3 or more. At 1&ndash;2 the item keeps its normal proportions and the tooltip still works.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(2,minmax(0,265px));justify-content:start;"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li></ul></div></div><h2 class="count">3 announcements published</h2><div class="opt"><p class="cap"><b>A.</b> Current &mdash; fixed 5 columns</p><p class="note">Columns stay put, so unused tracks leave dead space on the right.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(5,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li></ul></div></div><div class="opt"><p class="cap"><b>B.</b> Stretch to fill</p><p class="note">Items divide the full width. Good at 3&ndash;4; at 1&ndash;2 the summary stops clipping, so the &ldquo;more&rdquo; button disappears.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(3,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li></ul></div></div><div class="opt"><p class="cap"><b>C.</b> Stretch, capped at 265px, left aligned</p><p class="note">Same as B once there are 3 or more. At 1&ndash;2 the item keeps its normal proportions and the tooltip still works.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(3,minmax(0,265px));justify-content:start;"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li></ul></div></div><h2 class="count">4 announcements published</h2><div class="opt"><p class="cap"><b>A.</b> Current &mdash; fixed 5 columns</p><p class="note">Columns stay put, so unused tracks leave dead space on the right.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(5,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Benefits Open Enrollment</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-4">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-4">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 24 – Nov 7</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>B.</b> Stretch to fill</p><p class="note">Items divide the full width. Good at 3&ndash;4; at 1&ndash;2 the summary stops clipping, so the &ldquo;more&rdquo; button disappears.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(4,1fr);"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Benefits Open Enrollment</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-4">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-4">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 24 – Nov 7</span>
+            </li></ul></div></div><div class="opt"><p class="cap"><b>C.</b> Stretch, capped at 265px, left aligned</p><p class="note">Same as B once there are 3 or more. At 1&ndash;2 the item keeps its normal proportions and the tooltip still works.</p><div class="staff-card"><div class="motion-line mh-gold"><h2 class="motion-heading mh-gold">New &amp; Important</h2></div><ul class="staff-news" style="grid-template-columns:repeat(4,minmax(0,265px));justify-content:start;"><li class="staff-news__item is-featured">
+
+              <i class="fa-solid fa-star staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Bravo+ Nominations Open</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
+              </div>
+
+              <span class="staff-news__due">Sep 30</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">PESLA Cohort 9 Applications</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 10–12</span>
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">New AI Guidance for Staff</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
+              </div>
+
+              
+            </li><li class="staff-news__item">
+
+              <i class="fa-solid fa-circle staff-news__icon" aria-hidden="true"></i>
+
+              <a class="staff-news__link" href="#">
+                <span class="staff-news__title">Benefits Open Enrollment</span>
+              </a>
+
+              <div class="staff-news__summary">
+                <!-- structure: intro is admin-authored HTML and is rendered
+                     unescaped. Only trusted editors can create these. -->
+                <div class="staff-news__clamp">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+
+                <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-4">
+                  <span class="staff-visually-hidden">Show the full description</span>
+                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+
+                <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-4">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
+              </div>
+
+              <span class="staff-news__due">Oct 24 – Nov 7</span>
+            </li></ul></div></div></div></body></html>
