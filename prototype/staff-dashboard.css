@@ -483,6 +483,23 @@
   margin: 0 0 0.3rem;
   color: #000;
 }
+/* The title links to the event document. Matches the announcement title's
+   sliding gold underline so the two widgets behave the same way.
+   line-height is pinned because wrap9 sets `body a { line-height: 24px }`,
+   which would otherwise override the heading's own spacing. */
+.staff-event__link {
+  color: #000;
+  line-height: inherit;
+  text-decoration: none !important;
+  background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.25s ease;
+}
+.staff-event__link:hover,
+.staff-event__link:focus-visible { background-size: 100% 2px; }
+
 .staff-event__meta {
   font-size: 0.8125rem;
   line-height: 1.45;
@@ -661,6 +678,7 @@
 .block.--bg-light-gray .staff-news__tip,
 .block.--bg-light-gray .staff-news__title,
 .block.--bg-light-gray .staff-explore__title,
+.block.--bg-light-gray .staff-event__link,
 .block.--bg-light-gray .staff-event__title {
   color: #000;
 }

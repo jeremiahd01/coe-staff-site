@@ -124,7 +124,7 @@
                  an <a>, so the link now wraps the title only. Summary text
                  becomes selectable as a side benefit. -->
             <li tal:repeat="item announcements"
-                tal:attributes="class python:item['featured'] and 'staff-news__item is-featured' or 'staff-news__item'">
+                tal:attributes="class python:item.get('featured') and 'staff-news__item is-featured' or 'staff-news__item'">
 
               <i class="staff-news__icon" aria-hidden="true"
                  tal:attributes="class string:fa-solid ${item/icon} staff-news__icon"></i>
@@ -282,7 +282,15 @@
               </div>
 
               <div>
-                <h3 class="staff-event__title" tal:content="event/title">Event title</h3>
+                <h3 class="staff-event__title"
+                    tal:define="event_url python:event.get('url')">
+                  <a class="staff-event__link"
+                     tal:condition="event_url"
+                     tal:attributes="href event_url"
+                     tal:content="event/title">Event title</a>
+                  <tal:unlinked tal:condition="not:event_url"
+                                tal:content="event/title">Event title</tal:unlinked>
+                </h3>
                 <p class="staff-event__meta">
                   <tal:when tal:content="event/when">All day</tal:when>
                   <tal:where tal:condition="event/where|nothing"

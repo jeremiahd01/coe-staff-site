@@ -178,6 +178,21 @@ Nine other fields are available and currently unused — `Hosted By`,
 `Contact Email`, `Open To`, `School or Program` and the rest — if the calendar
 page ever wants them.
 
+### Upcoming Events: linked titles
+
+Each event title links to its document, using the same `url` the card already
+resolves - so `redirect_url` is honoured here too, and a title pointing
+elsewhere goes where the editor intended rather than to the document.
+
+An event with no resolvable URL renders its title as plain text rather than an
+empty `<a href="">`.
+
+Styling matches the announcement titles: black rather than the browser-blue the
+theme applies inside a light-gray block, no underline, and a gold underline that
+slides in on hover. The link pins its own `line-height`, because wrap9 sets
+`body a { line-height: 24px }`, which would otherwise override the heading's
+spacing and shift every row.
+
 ### Add to Outlook — solved, for free
 
 Each event document **auto-generates its own `.ics` file** as a sub-object:
