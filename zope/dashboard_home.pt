@@ -188,7 +188,7 @@
                 'url': 'https://www.purdue.edu/operations/travel/'},
                {'label': 'Engineering Forms',
                 'icon': 'fa-clipboard-list',
-                'url': 'toolkit#forms'}]">
+                'url': 'resources/forms'}]">
 
           <div class="motion-line mh-gold">
             <h2 class="motion-heading mh-gold">Quick Links</h2>
