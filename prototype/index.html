@@ -139,8 +139,7 @@
                 <div class="staff-news__clamp"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
 
                 <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-1">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-1"><p>Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and <strong>any staff member may nominate</strong> a peer, a team, or a supervisor.</p></div>
@@ -162,8 +161,7 @@
                 <div class="staff-news__clamp">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
 
                 <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-2">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-2">Apply to the Engineering Staff Leadership Academy. The cohort meets monthly across the academic year and covers strategic thinking, team leadership and change management.</div>
@@ -185,8 +183,7 @@
                 <div class="staff-news__clamp">What's approved, what isn't, and where to get trained.</div>
 
                 <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-3">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-3">What's approved, what isn't, and where to get trained.</div>
@@ -208,8 +205,7 @@
                 <div class="staff-news__clamp">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
 
                 <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-4">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-4">Review your elections for the 2027 plan year. Medical, dental and vision selections carry over automatically, but flexible spending accounts must be re-elected each year.</div>
@@ -231,8 +227,7 @@
                 <div class="staff-news__clamp">Meet the colleagues who joined the College this month.</div>
 
                 <button type="button" class="staff-news__more" hidden="hidden" aria-expanded="false" aria-describedby="staff-tip-5">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden" id="staff-tip-5">Meet the colleagues who joined the College this month.</div>
@@ -511,6 +506,8 @@
 
 <script>
 /* Full-text tooltip for clamped announcement summaries.
+   The summary text is the hover and tap target. The small "More" control stays
+   as the keyboard affordance and as a visible hint that there is more to read.
    Hover opens after a delay; keyboard focus opens at once; Escape closes; the
    tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
    The trigger is revealed only when the text is actually clipped.
@@ -563,8 +560,12 @@
 
   function measure(entry) {
     var clipped = entry.clamp.scrollHeight > entry.clamp.clientHeight + 1;
+    entry.clipped = clipped;
     entry.btn.hidden = !clipped;
-    if (!clipped) {
+    if (clipped) {
+      entry.clamp.classList.add('is-clipped');
+    } else {
+      entry.clamp.classList.remove('is-clipped');
       if (current === entry) { close(); }
     }
   }
@@ -605,6 +606,22 @@
       if (current === entry) { close(); } else { open(entry); }
     });
 
+    clamp.addEventListener('mouseenter', function () {
+      if (!entry.clipped) { return; }
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(openTimer);
+      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
+    });
+    clamp.addEventListener('mouseleave', function () {
+      window.clearTimeout(openTimer);
+      scheduleClose();
+    });
+    clamp.addEventListener('click', function () {
+      if (!entry.clipped) { return; }
+      window.clearTimeout(openTimer);
+      if (current === entry) { close(); } else { open(entry); }
+    });
+
     tip.addEventListener('mouseenter', function () { window.clearTimeout(closeTimer); });
     tip.addEventListener('mouseleave', function () { scheduleClose(); });
     tip.addEventListener('focusout', function (ev) {
@@ -625,6 +642,9 @@
     if (!current) { return; }
     if (current.tip.contains(ev.target)) { return; }
     if (current.btn.contains(ev.target)) { return; }
+    /* The summary text opens the tooltip, so a click on it must not also be
+       treated as a click outside - that closed it again immediately. */
+    if (current.clamp.contains(ev.target)) { return; }
     close();
   });
 

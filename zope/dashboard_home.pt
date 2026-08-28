@@ -146,8 +146,7 @@
                 <button type="button" class="staff-news__more" hidden="hidden"
                         aria-expanded="false"
                         tal:attributes="aria-describedby string:staff-tip-${repeat/item/number}">
-                  <span class="staff-visually-hidden">Show the full description</span>
-                  <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                  More<span class="staff-visually-hidden"> of this announcement</span>
                 </button>
 
                 <div class="staff-news__tip" role="tooltip" hidden="hidden"
@@ -349,6 +348,8 @@
 
 <script>
 /* Full-text tooltip for clamped announcement summaries.
+   The summary text is the hover and tap target. The small "More" control stays
+   as the keyboard affordance and as a visible hint that there is more to read.
    Hover opens after a delay; keyboard focus opens at once; Escape closes; the
    tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
    The trigger is revealed only when the text is actually clipped.
@@ -401,8 +402,12 @@
 
   function measure(entry) {
     var clipped = entry.clamp.scrollHeight > entry.clamp.clientHeight + 1;
+    entry.clipped = clipped;
     entry.btn.hidden = !clipped;
-    if (!clipped) {
+    if (clipped) {
+      entry.clamp.classList.add('is-clipped');
+    } else {
+      entry.clamp.classList.remove('is-clipped');
       if (current === entry) { close(); }
     }
   }
@@ -443,6 +448,22 @@
       if (current === entry) { close(); } else { open(entry); }
     });
 
+    clamp.addEventListener('mouseenter', function () {
+      if (!entry.clipped) { return; }
+      window.clearTimeout(closeTimer);
+      window.clearTimeout(openTimer);
+      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
+    });
+    clamp.addEventListener('mouseleave', function () {
+      window.clearTimeout(openTimer);
+      scheduleClose();
+    });
+    clamp.addEventListener('click', function () {
+      if (!entry.clipped) { return; }
+      window.clearTimeout(openTimer);
+      if (current === entry) { close(); } else { open(entry); }
+    });
+
     tip.addEventListener('mouseenter', function () { window.clearTimeout(closeTimer); });
     tip.addEventListener('mouseleave', function () { scheduleClose(); });
     tip.addEventListener('focusout', function (ev) {
@@ -463,6 +484,9 @@
     if (!current) { return; }
     if (current.tip.contains(ev.target)) { return; }
     if (current.btn.contains(ev.target)) { return; }
+    /* The summary text opens the tooltip, so a click on it must not also be
+       treated as a click outside - that closed it again immediately. */
+    if (current.clamp.contains(ev.target)) { return; }
     close();
   });
 

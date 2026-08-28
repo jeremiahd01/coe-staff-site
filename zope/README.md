@@ -297,11 +297,23 @@ The preview is clamped to four lines. Block elements inside the clamp are
 flattened to inline, because each one would otherwise start a new line and blow
 the height; the tooltip renders them normally.
 
-A trigger button appears **only when the text is actually clipped**, measured at
-runtime. It opens on hover after one second, immediately on keyboard focus, and
-on click for touch. Escape closes it, and it stays open while the pointer or
-focus is inside, which is what WCAG 1.4.13 requires. The link now wraps the
-title only, because a `<button>` cannot live inside an `<a>`.
+**The summary text itself is the target.** Hovering it opens the tooltip after a
+second; clicking or tapping it toggles, which is what makes this work on touch
+where hover does not exist. Only clipped summaries are interactive - the state is
+measured at runtime and re-measured on resize.
+
+A small borderless "More" control sits below the text. It is a real `<button>`,
+so it stays in the tab order and opens the tooltip immediately on keyboard focus;
+it also doubles as the visible hint that there is more to read. It carries a
+`min-height` of 24px to satisfy WCAG 2.5.8 without drawing a box - the bordered
+chip it replaced was what the PM disliked.
+
+Escape closes, and the tooltip stays open while the pointer or focus is inside it
+(WCAG 1.4.13). The title link wraps the title only, because a `<button>` cannot
+live inside an `<a>`.
+
+Note the clamp renders its own trailing ellipsis, so truncation is signalled even
+before the "More" control is noticed.
 
 Two things worth knowing:
 

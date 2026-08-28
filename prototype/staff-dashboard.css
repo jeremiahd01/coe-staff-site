@@ -253,29 +253,41 @@
 .staff-news__clamp br { display: none; }
 .staff-news__clamp img { display: none; }
 
+/* The summary text itself is the hover target now. This stays as the keyboard
+   and touch affordance, so it keeps being a real button - but with no border,
+   background or box, since the chip was the thing the PM disliked.
+   min-height keeps the tap target at 24px (WCAG 2.5.8) without drawing a box. */
 .staff-news__more {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  margin-top: 0.3rem;
-  padding: 0.15rem 0.5rem;
   min-height: 24px;
-  min-width: 24px;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--acumin-pro);
   font-size: 0.75rem;
-  line-height: 1;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
   color: var(--aged-gold);
-  background: transparent;
-  border: 1px solid var(--steam);
-  border-radius: 4px;
   cursor: pointer;
-  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+  background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.25s ease;
 }
 .staff-news__more:hover,
+.staff-news__more:focus-visible,
 .staff-news__more[aria-expanded="true"] {
-  border-color: var(--boiler-gold);
-  background: #fff;
   color: #000;
+  background-size: 100% 2px;
 }
+
+/* Only clipped summaries are interactive; the class is set at runtime. */
+.staff-news__clamp.is-clipped { cursor: pointer; }
+
 .staff-news__more[hidden] { display: none !important; }
 
 .staff-news__tip {
