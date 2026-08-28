@@ -57,6 +57,12 @@ DEFAULT_ICON = 'fa-newspaper'
 # count. If several carry it, the newest wins.
 FEATURED_KEYWORD = 'featured'
 
+# The catalog's getStatus index holds 'draft' or 'published'. It is the real
+# publication state; show_date only schedules when a published item appears.
+# A draft can carry no show_date at all, which the date check alone reads as
+# "publish immediately" - so both checks are needed.
+PUBLISHED_STATUS = 'published'
+
 # priority is a dropdown from 0 (lowest) to 4 (highest), rendered as strings
 # like "2 - medium". The leading digit is the rank and sorts DESCENDING, so 4
 # comes first. Parsing the digit rather than matching the whole label means the
@@ -354,7 +360,20 @@ def order_key(row):
 
 
 def visible(brain, now):
-    """Respect the show_date / hide_date publication window."""
+    """Published, and inside its show_date / hide_date window.
+
+    Status is checked only when the catalog actually reports one. An explicit
+    status that is not "published" hides the item, so a future 'archived' or
+    'pending' is excluded too. But a missing or unreadable status is treated as
+    visible rather than hidden: requiring the field outright would empty both
+    widgets if the metadata column were ever absent, and a blank dashboard is a
+    worse failure than showing an item whose state we cannot read.
+    """
+    status = as_text(meta(brain, 'getStatus', u'')).strip().lower()
+    if status:
+        if status != PUBLISHED_STATUS:
+            return 0
+
     show = meta(brain, 'show_date')
     hide = meta(brain, 'hide_date')
     if show is not None:

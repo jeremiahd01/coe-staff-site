@@ -353,6 +353,29 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+### Draft filtering
+
+Two independent checks, and both are needed:
+
+| Field | Meaning |
+|---|---|
+| `getStatus` | The real publication state: `draft` or `published` |
+| `show_date` | *When* a published item starts appearing |
+
+`show_date` alone is not enough. A draft can carry **no show_date at all**, and
+a missing date reads as "publish immediately" - so the draft would appear. That
+was live on the dev site: `staff-ai-training-webinar-posted` is a draft with no
+show_date and was being displayed.
+
+The status check is deliberately asymmetric:
+
+- an explicit status that is not `published` hides the item, so a future
+  `archived` or `pending` is excluded too;
+- a **missing or unreadable** status is treated as visible. Requiring the field
+  outright would empty both widgets if the metadata column were ever absent, and
+  a blank dashboard is a worse failure than showing one item whose state cannot
+  be read.
+
 ## Smaller decisions worth recording
 
 - **No time means no time line.** `event_date` is stored at midnight unless
