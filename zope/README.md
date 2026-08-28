@@ -233,34 +233,33 @@ keyword, so `featured-story` does not count. If several carry it the newest
 wins; the others return to normal ordering. The featured item counts toward the
 five.
 
-**Icons:** one small dot for every announcement, a star for the featured one.
-The old keyword-to-icon mapping is gone — it was invisible to editors, and
-substring matching meant a `training` keyword picked the AI icon, because
-"tr-**ai**-ning" contains "ai".
+**Icons:** driven by the document's `keywords`, matched against the agreed
+vocabulary as **whole keywords** (never substrings), in this order:
 
-### The announcement date line
+| Keyword | Icon | Covers |
+|---|---|---|
+| `new-staff` | `fa-user-group` | New staff joining soon or recently |
+| `benefits` | `fa-shield-check` | Enrollment start/end, new benefits |
+| `awards` | `fa-trophy` | Award nominations and award events |
+| `deadline` | `fa-calendar-exclamation` | Review deadlines, time-sensitive items |
+| `training` | `fa-circle-book-open` | New training resources or opportunities |
+| `recording` | `fa-clapperboard-play` | Event, webinar and town hall recordings |
+| `documentation` | `fa-file-lines` | New forms, new documentation |
+| `high-importance` | `fa-circle-exclamation` | High-stakes announcements |
+| `general` *or none* | `fa-newspaper` | Everything else |
 
-Shows the date alone — no "Closes" prefix — and widens to a range for anything
-lasting more than a day:
+Order is precedence: an item tagged both `awards` and `deadline` gets the
+trophy. Matching is case-insensitive and tolerates surrounding whitespace, and
+`awards-banquet` does **not** match `awards` - only whole keywords count.
 
-| Data | Shown |
-|---|---|
-| no `event_date` | *(nothing)* |
-| `event_date` only | `Sep 30` |
-| `event_length` 1 | `Sep 30` |
-| `event_length` 3 from Sep 3 | `Sep 3-5` |
-| `event_length` 3 from Sep 30 | `Sep 30 - Oct 2` |
+Four of these are Font Awesome **Pro** icons (`shield-check`,
+`calendar-exclamation`, `circle-book-open`, `clapperboard-play`). Verified
+against the site kit: all nine render, so the kit is Pro.
 
-The end of a span comes from **`event_end_date`**, which is catalog metadata.
-`event_length` is *not* in the metadata, so it is only read off the object as a
-fallback — and it counts inclusively, so a length of 3 starting Sep 3 ends Sep 5.
-
-Lengths are parsed digit by digit rather than compared numerically: the property
-is an int, but in Python 2 comparing a str to an int succeeds and gives
-nonsense, so a value that arrives as `"3"` would otherwise sort strangely.
-
-Ranges within one month close up (`Sep 3-5`); ranges crossing a month get spaces
-(`Sep 30 - Oct 2`).
+**Featured no longer changes the icon.** The `featured` keyword still pins an
+announcement to position one, but its icon comes from whichever category keyword
+it also carries. An item tagged only `featured` therefore gets the default
+newspaper - worth telling editors to tag a category as well.
 
 ### Column count follows the announcement count
 

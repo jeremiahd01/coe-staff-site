@@ -197,10 +197,10 @@
   margin-bottom: 0.7rem;
   display: block;
 }
-/* Standard announcements get a small dot; the featured one gets a star that is
-   deliberately larger and darker so it reads as the exception. */
-.staff-news__item .fa-circle { font-size: 0.5rem; color: var(--boiler-gold); }
-.staff-news__item.is-featured .fa-star { font-size: 1.15rem; color: var(--aged-gold); }
+/* Every announcement now carries a category icon from the agreed vocabulary,
+   so they are all the same size. The featured item is no longer marked by its
+   icon - it is simply first. `.is-featured` is still emitted and is available
+   if that ever needs a visual treatment again. */
 
 .staff-news__title {
   font-family: var(--acumin-pro);

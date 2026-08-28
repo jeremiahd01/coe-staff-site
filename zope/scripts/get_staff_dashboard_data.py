@@ -32,12 +32,25 @@ DASH = u'\u2013'       # en dash. Written as an escape, NOT as a literal:
                        # the ZMI stores pasted source as Latin-1, which turns
                        # a literal en dash into mojibake ('Oct 27 a Nov 10').
                        # Keep every non-ASCII character in this file escaped.
-# One icon for every announcement, and a star for the featured one. Keyword-
-# derived icons were dropped: the mapping was invisible to editors, and
-# substring matching meant a "training" keyword picked up the AI icon because
-# "tr-ai-ning" contains "ai".
-ICON_STANDARD = 'fa-circle'
-ICON_FEATURED = 'fa-star'
+# Icon vocabulary, agreed with the PM. Matched against whole keywords, in this
+# order - so an item tagged both "awards" and "deadline" gets the trophy.
+# Verified against the site kit: all nine render, including the four that are
+# Font Awesome Pro only (shield-check, calendar-exclamation, circle-book-open,
+# clapperboard-play).
+ICON_BY_KEYWORD = (
+    ('new-staff',       'fa-user-group'),
+    ('benefits',        'fa-shield-check'),
+    ('awards',          'fa-trophy'),
+    ('deadline',        'fa-calendar-exclamation'),
+    ('training',        'fa-circle-book-open'),
+    ('recording',       'fa-clapperboard-play'),
+    ('documentation',   'fa-file-lines'),
+    ('high-importance', 'fa-circle-exclamation'),
+    ('general',         'fa-newspaper'),
+)
+
+# No keyword, or none from the vocabulary above.
+DEFAULT_ICON = 'fa-newspaper'
 
 # An announcement keyed with this in `keywords` is pinned to position one.
 # Matched case-insensitively as a whole keyword, so "featured-story" does not
@@ -196,6 +209,19 @@ def is_featured(keywords):
         if keyword == FEATURED_KEYWORD:
             return 1
     return 0
+
+
+def pick_icon(keywords):
+    """Whole-keyword match against the vocabulary, in chart order.
+
+    Substring matching is deliberately not used: an earlier version matched
+    "ai" inside "training" and gave a training announcement the AI icon.
+    """
+    words = keyword_list(keywords)
+    for pair in ICON_BY_KEYWORD:
+        if pair[0] in words:
+            return pair[1]
+    return DEFAULT_ICON
 
 
 def count_of(value):
@@ -544,7 +570,7 @@ try:
         start = meta(brain, 'event_date')
         due = date_display(start, span_end(brain, obj, start))
         announcements.append({
-            'icon':     is_first_featured and ICON_FEATURED or ICON_STANDARD,
+            'icon':     pick_icon(meta(brain, 'keywords', ())),
             'featured': is_first_featured and 1 or 0,
             'title':    title,
             'summary':  as_text(meta(brain, 'intro', u'')),
