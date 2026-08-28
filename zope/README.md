@@ -262,6 +262,31 @@ nonsense, so a value that arrives as `"3"` would otherwise sort strangely.
 Ranges within one month close up (`Sep 3-5`); ranges crossing a month get spaces
 (`Sep 30 - Oct 2`).
 
+### Column count follows the announcement count
+
+With fewer than five announcements the items divide the row rather than leaving
+empty tracks (option B, chosen by the PM from `prototype/layout-options.html`).
+Columns are `min(count, max-for-breakpoint)`: 5 at xl, 3 at md, 2 at sm, 1 below,
+so five items never squeeze at tablet width.
+
+The template emits a `staff-news--N` class from the item count, sliced to five so
+an unexpected sixth cannot produce a class with no rule behind it.
+
+Two things to know before editing these rules:
+
+- Each breakpoint **restores every divider before clearing the row-start ones**.
+  A narrower breakpoint clears more of them, and without the restore they stay
+  cleared as the viewport grows.
+- That restore carries a redundant-looking `:nth-child(n)` purely for
+  specificity. The clear rules are (0,3,0) because a pseudo-class counts as a
+  class, so a plain (0,2,0) restore loses to an earlier breakpoint's clear no
+  matter how late it appears in the file.
+
+Consequence worth knowing: at one or two announcements the summary no longer
+exceeds four lines, so the clamp does not engage and the "more" trigger does not
+appear. That is correct - there is nothing hidden to reveal - but it does mean
+the affordance comes and goes with the number of announcements published.
+
 ### Summary text: four-line clamp with a full-text tooltip
 
 `intro` is rendered with `tal:content="structure"`, so admin-authored HTML comes

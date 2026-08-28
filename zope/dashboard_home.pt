@@ -119,7 +119,11 @@
                tal:attributes="href string:${here/absolute_url}/announcements">View all</a>
           </div>
 
-          <ul class="staff-news">
+          <!-- The count drives the column count: fewer than five stretch
+               to fill rather than leaving empty tracks. Sliced so an
+               unexpected sixth item cannot produce a class with no rule. -->
+          <ul class="staff-news"
+              tal:attributes="class python:'staff-news staff-news--' + str(len(announcements[:5]))">
             <!-- The full-text trigger is a <button>, which cannot live inside
                  an <a>, so the link now wraps the title only. Summary text
                  becomes selectable as a side benefit. -->

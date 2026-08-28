@@ -177,16 +177,13 @@
   margin: 0;
   padding: 0;
   display: grid;
-  /* Explicit column counts, never auto-fit: the 5th item must not orphan
-     onto a row of its own. Cadence is 5 -> 3 -> 2 -> 1. */
-  grid-template-columns: repeat(2, 1fr);
   row-gap: 1.4rem;
 }
+
 .staff-news__item {
   padding-inline: 1.15rem;
   border-left: 1px solid var(--steam);
 }
-.staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
 
 .staff-news__link {
   display: block;
@@ -633,16 +630,12 @@
 }
 
 @media (min-width: 768px) {
-  .staff-news { grid-template-columns: repeat(3, 1fr); }
-  .staff-news__item { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
-  .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
   .staff-explore { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (min-width: 1200px) {
-  .staff-news { grid-template-columns: repeat(5, 1fr); row-gap: 0; }
-  .staff-news__item { padding-inline: 0.95rem; border-left: 1px solid var(--steam); }
-  .staff-news__item:nth-child(5n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news { row-gap: 0; }
+  .staff-news__item { padding-inline: 0.95rem; }
   .staff-quick { grid-template-columns: repeat(6, 1fr); }
 }
 
@@ -650,7 +643,7 @@
   .staff-dashboard { padding-block: 2rem; }
   .staff-card { padding-inline: 1.15rem; }
   .staff-card .motion-line { width: calc(100% + 2.3rem); margin-inline: -1.15rem; padding-right: 1.15rem; }
-  .staff-news { grid-template-columns: 1fr; row-gap: 0; }
+  .staff-news { row-gap: 0; }
   .staff-news__item {
     border-left: 0 !important;
     padding: 1rem 0 0 !important;
@@ -817,7 +810,6 @@
   .staff-banner__row .staff-search { width: 24rem; }
 }
 
-
 /* ==========================================================================
    15. Focus indicators
    Wrap9 sets `a:focus-visible { outline: auto !important }`, which Chrome
@@ -852,7 +844,6 @@
   .staff-search__field:focus-within { outline: 3px solid Highlight; }
 }
 
-
 /* ==========================================================================
    16. Page Template Embed breakout
    The embed block wraps our output like this:
@@ -877,4 +868,76 @@
   width: 100%;
   padding-left: 0;
   padding-right: 0;
+}
+
+/* ==========================================================================
+   Announcement columns follow the number of announcements ("stretch to fill")
+
+   With fewer than five, items divide the row rather than leaving empty tracks.
+   Columns are min(count, max-for-breakpoint), so five items never squeeze at
+   tablet width. The count class is emitted by the template.
+
+   Each breakpoint restores every divider before clearing the row-start ones.
+   A narrower breakpoint clears more of them, and without the restore they stay
+   cleared as the viewport grows.
+
+   The restore carries a redundant-looking :nth-child(n) purely for specificity:
+   the clear rules are (0,3,0) because a pseudo-class counts as a class, so a
+   plain (0,2,0) restore loses to an earlier breakpoint's clear no matter how
+   late it appears in the file.
+   ========================================================================== */
+.staff-news__item { border-left: 0; padding-left: 0; }
+
+@media (min-width: 576px) {
+  .staff-news--1 { grid-template-columns: repeat(1, 1fr); }
+  .staff-news--1 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--1 > .staff-news__item:nth-child(1n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--2 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--2 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--2 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--3 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--3 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--3 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--4 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--4 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--4 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--5 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--5 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--5 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+}
+
+@media (min-width: 768px) {
+  .staff-news--1 { grid-template-columns: repeat(1, 1fr); }
+  .staff-news--1 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--1 > .staff-news__item:nth-child(1n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--2 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--2 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--2 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--3 { grid-template-columns: repeat(3, 1fr); }
+  .staff-news--3 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--3 > .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--4 { grid-template-columns: repeat(3, 1fr); }
+  .staff-news--4 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--4 > .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--5 { grid-template-columns: repeat(3, 1fr); }
+  .staff-news--5 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--5 > .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
+}
+
+@media (min-width: 1200px) {
+  .staff-news--1 { grid-template-columns: repeat(1, 1fr); }
+  .staff-news--1 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--1 > .staff-news__item:nth-child(1n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--2 { grid-template-columns: repeat(2, 1fr); }
+  .staff-news--2 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--2 > .staff-news__item:nth-child(2n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--3 { grid-template-columns: repeat(3, 1fr); }
+  .staff-news--3 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--3 > .staff-news__item:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--4 { grid-template-columns: repeat(4, 1fr); }
+  .staff-news--4 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--4 > .staff-news__item:nth-child(4n + 1) { border-left: 0; padding-left: 0; }
+  .staff-news--5 { grid-template-columns: repeat(5, 1fr); }
+  .staff-news--5 > .staff-news__item:nth-child(n) { border-left: 1px solid var(--steam); padding-left: 1.15rem; }
+  .staff-news--5 > .staff-news__item:nth-child(5n + 1) { border-left: 0; padding-left: 0; }
 }
