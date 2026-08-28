@@ -353,6 +353,20 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+## Smaller decisions worth recording
+
+- **No time means no time line.** `event_date` is stored at midnight unless
+  someone enters a time, so defaulting to "All day" asserted something the data
+  does not support - every timeless event claimed to run all day. The card now
+  omits the time and shows only the location, with no leftover separator.
+- **The feedback band is Aged gold**, not black. That is a mid-tone, so the
+  sub-line moved from Steam to white (Steam on Aged is 2.7:1 and fails) and the
+  button switched to `btn-black` (a gold button on a gold band gives only
+  ~2.2:1 boundary contrast). Measured after the change: 4.67:1 for both text
+  lines, 4.49:1 for the button against the band.
+- **The Phase 2 extension slots are hidden** with `tal:condition="nothing"`.
+  The markup stays in the template, so restoring them is deleting one attribute.
+
 ## Troubleshooting
 
 ### The Page Template Embed renders nothing at all

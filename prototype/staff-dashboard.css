@@ -541,6 +541,18 @@
 /* ==========================================================================
    8. Feedback block
    ========================================================================== */
+/* The band was --bg-black; it is now Aged gold. That is a mid-tone, so the
+   sub-line moved from Steam to white: Steam on Aged is only 2.7:1 and fails.
+   The button switched to btn-black, because a gold button on a gold band has
+   too little boundary contrast to satisfy 1.4.11. */
+.staff-feedback {
+  background-color: var(--aged-gold);
+}
+.staff-feedback .staff-feedback__lead,
+.staff-feedback .staff-feedback__sub {
+  color: #fff;
+}
+
 .staff-feedback-inner {
   display: flex;
   flex-wrap: wrap;
@@ -563,7 +575,6 @@
 .staff-feedback__sub {
   display: block;
   font-size: 0.9375rem;
-  color: var(--steam);
   margin-top: 0.35rem;
 }
 .staff-feedback-inner .purdue-btn { margin: 0; }

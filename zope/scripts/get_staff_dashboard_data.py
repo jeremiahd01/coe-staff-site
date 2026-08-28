@@ -139,17 +139,20 @@ def is_midnight(dt):
 
 
 def fmt_when(start, end):
-    """'10:00-11:00 AM', '9:05 AM-4:30 PM', or 'All day'.
+    """'10:00-11:00 AM', '9:05 AM-4:30 PM', or empty.
 
-    Purdue Event Documents store event_date at midnight when no time has been
-    entered, which is currently every event. Those render as 'All day'; the
-    moment real times are entered this starts formatting them.
+    Returns nothing rather than "All day" when no time is known. event_date is
+    stored at midnight unless someone enters a time, so "All day" would have
+    been asserted for every event whether or not it ran all day - a claim the
+    data does not support. The card simply omits the time line instead.
     """
-    if start is None or is_midnight(start):
-        return u'All day'
+    if start is None:
+        return u''
+    if is_midnight(start):
+        return u''
     a = clock_parts(start)
     if not a:
-        return u'All day'
+        return u''
     ah, am, ap = a
     b = None
     if end is not None and not is_midnight(end):
