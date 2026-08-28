@@ -579,6 +579,16 @@
 }
 .staff-feedback-inner .purdue-btn { margin: 0; }
 
+/* Shown when a widget genuinely has nothing to display - distinct from the
+   placeholder content, which only appears when the query could not run. */
+.staff-empty {
+  margin: 0;
+  padding: 0.5rem 0 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--steel-gray);
+}
+
 /* ==========================================================================
    9. Extension slots -- prototype scaffolding, removed before ship
    ========================================================================== */

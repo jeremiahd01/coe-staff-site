@@ -2,6 +2,8 @@
      xmlns:tal="http://xml.zope.org/namespaces/tal"
      xmlns:metal="http://xml.zope.org/namespaces/metal"
      tal:define="dashboard here/get_staff_dashboard_data | nothing;
+                 news_ok python:dashboard is not None and dashboard.get('announcements_ok');
+                 events_ok python:dashboard is not None and dashboard.get('events_ok');
                  live_news python:dashboard and dashboard.get('announcements') or [];
                  live_events python:dashboard and dashboard.get('events') or []">
 <!--
@@ -86,7 +88,7 @@
              this container, filtered to Document Type "News Item".
              Replace the define below with the query; keys stay the same.        -->
         <div class="staff-card"
-             tal:define="announcements python:live_news or [
+             tal:define="announcements python:live_news or (not news_ok and [
                {'icon': 'fa-trophy', 'featured': 1,
                 'title': 'Bravo+ Nominations Open',
                 'summary': '&lt;p&gt;Recognize a colleague who went above and beyond. Nominations are open to all College of Engineering staff, and &lt;strong&gt;any staff member may nominate&lt;/strong&gt; a peer, a team, or a supervisor.&lt;/p&gt;',
@@ -111,7 +113,7 @@
                 'title': 'Welcome, New Staff',
                 'summary': 'Meet the colleagues who joined the College this month.',
                 'due': '',
-                'url': '#'}]">
+                'url': '#'}] or [])">
 
           <div class="motion-line mh-gold">
             <h2 class="motion-heading mh-gold">New &amp; Important</h2>
@@ -122,7 +124,11 @@
           <!-- The count drives the column count: fewer than five stretch
                to fill rather than leaving empty tracks. Sliced so an
                unexpected sixth item cannot produce a class with no rule. -->
-          <ul class="staff-news"
+          <p class="staff-empty" tal:condition="not:announcements">
+            No announcements right now. Check back soon.
+          </p>
+
+          <ul class="staff-news" tal:condition="announcements"
               tal:attributes="class python:'staff-news staff-news--' + str(len(announcements[:5]))">
             <!-- The full-text trigger is a <button>, which cannot live inside
                  an <a>, so the link now wraps the title only. Summary text
@@ -253,7 +259,7 @@
              'month' and 'day' become formatted from the event date; 'when' and
              'where' come from the event's date/time and location fields.        -->
         <div class="staff-card"
-             tal:define="events python:live_events or [
+             tal:define="events python:live_events or (not events_ok and [
                {'month': 'Sep', 'day': '3',
                 'title': 'Staff Council Meeting',
                 'when': '10:00&#8211;11:00 AM', 'where': 'ARMS 1010', 'url': '#'},
@@ -268,7 +274,7 @@
                 'when': '9:00&#8211;11:30 AM', 'where': 'POTR 234', 'url': '#'},
                {'month': 'Sep', 'day': '30',
                 'title': 'College of Engineering Town Hall',
-                'when': '9:00&#8211;10:00 AM', 'where': 'Fowler Hall', 'url': '#'}]">
+                'when': '9:00&#8211;10:00 AM', 'where': 'Fowler Hall', 'url': '#'}] or [])">
 
           <div class="motion-line mh-gold">
             <h2 class="motion-heading mh-gold">Upcoming Events</h2>
@@ -276,7 +282,11 @@
                tal:attributes="href string:${here/absolute_url}/calendar">View calendar</a>
           </div>
 
-          <ul class="staff-events">
+          <p class="staff-empty" tal:condition="not:events">
+            Nothing scheduled right now. Check back soon.
+          </p>
+
+          <ul class="staff-events" tal:condition="events">
             <li class="staff-event" tal:repeat="event events">
 
               <div class="staff-event__date">

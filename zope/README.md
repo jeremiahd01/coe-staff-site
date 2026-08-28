@@ -353,6 +353,24 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+### Three states per widget
+
+The script returns `announcements_ok` / `events_ok` alongside the lists, so the
+template can tell "nothing to show" apart from "the query failed":
+
+| Situation | What renders |
+|---|---|
+| Items found | The items |
+| Query ran, no items (`ok=1`, empty) | An empty-state line: *"No announcements right now."* |
+| Query failed (`ok=0`) or script missing | The placeholder content |
+
+This matters because the placeholder was written to cover a missing or broken
+script, and it looks like real content. Once draft filtering landed, a widget
+could legitimately have nothing to show - and placeholder copy presented as real
+announcements is worse than an honest empty state.
+
+The two widgets are independent: one can be empty while the other has items.
+
 ### Draft filtering
 
 Two independent checks, and both are needed:

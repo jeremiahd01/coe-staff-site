@@ -495,6 +495,7 @@ except Exception:
 # Upcoming events -- /calendar, soonest first
 # ---------------------------------------------------------------------------
 events = []
+events_ok = 1
 try:
     cal_folder, cal_brains = query('calendar', 'event_date', 'ascending')
     for brain in cal_brains:
@@ -532,6 +533,7 @@ try:
 except Exception:
     # one widget failing must not take the page down; see note above
     events = []
+    events_ok = 0
 
 
 # ---------------------------------------------------------------------------
@@ -546,6 +548,7 @@ except Exception:
 # limit, because a featured or high-priority item further down the catalog
 # result has to be able to reach position one.
 # ---------------------------------------------------------------------------
+announcements_ok = 1
 try:
     ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
 
@@ -602,6 +605,11 @@ try:
 except Exception:
     # one widget failing must not take the page down; see note above
     announcements = []
+    announcements_ok = 0
 
 
-return {'announcements': announcements, 'events': events}
+# The *_ok flags let the template tell "nothing to show" apart from "the query
+# failed". An empty list with ok=1 is a real empty state and says so; ok=0 means
+# we could not look, and the template keeps its placeholder content instead.
+return {'announcements': announcements, 'announcements_ok': announcements_ok,
+        'events': events, 'events_ok': events_ok}
