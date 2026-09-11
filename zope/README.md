@@ -535,6 +535,42 @@ logic into a Python Script instead. It costs portability (URLs are hard-coded to
 Written for **Zope 2.13.10 / Python 2.7.18**. Restricted Python only — no
 f-strings, `%` formatting throughout, and expressions kept traversal-safe.
 
+### What the sandbox actually exposes
+
+Measured on this instance with `scripts/introspect_sandbox.py`, not assumed.
+
+**Builtins NOT available - never use these:**
+
+```
+dir  reversed  set  sorted  type  frozenset  slice
+vars  globals  locals  open  compile  eval  execfile  input  raw_input
+```
+
+`sorted` and `reversed` are the ones that bite; `list.sort()` and
+`list.reverse()` are methods, not builtins, and both work. `set` being absent
+matters if you reach for de-duplication - use a dict instead.
+
+**Builtins that ARE available**, including several worth knowing because they
+are easy to assume missing: `int`, `range`, `callable`, `isinstance`, `unicode`,
+`basestring`, `long`, `enumerate`, `filter`, `map`, `zip`, `getattr`, `hasattr`,
+`setattr`, `len`, `str`, `abs`, `min`, `max`, `sum`, `round`, `ord`, `chr`,
+`cmp`, `apply`, `xrange`, `hash`, `id`, `repr`, `pow`, `divmod`, `all`, `any`,
+`bool`, `dict`, `list`, `tuple`, `float`, `hex`, `oct`, `issubclass`, `unichr`.
+
+**Modules importable:** `json`, `re`, `string`, `math`, `random`, `datetime`,
+`time`, `base64`, `urllib`, `urlparse`, `cgi`, `hashlib`, `itertools`,
+`collections`, `operator`, `functools`, `copy`, `decimal`, `csv`, `textwrap`,
+plus `from DateTime import DateTime`, `from Products.PythonScripts.standard
+import html_quote`, `from ZTUtils import make_query`, and
+`from AccessControl import getSecurityManager`.
+
+**Not importable:** `uuid`, and `Products.CMFCore.utils` (no CMF here).
+
+Note the existing scripts avoid `int`, `range`, `callable`, `isinstance` and
+`unicode` even though all five are available. That caution was written before
+this was measured; the workarounds are correct and tested, just more defensive
+than they need to be.
+
 **Restricted Python** applies to Script (Python) objects, and it is stricter than
 the TAL sandbox. Traps hit so far, all now avoided in these scripts:
 
