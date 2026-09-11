@@ -39,8 +39,10 @@ DASH = u'\u2013'       # en dash. Written as an escape, NOT as a literal:
 # clapperboard-play).
 ICON_BY_KEYWORD = (
     ('new-staff',       'fa-user-group'),
+    ('staff-event',     'fa-calendar-star'),
     ('benefits',        'fa-shield-check'),
     ('awards',          'fa-trophy'),
+    ('event',           'fa-calendar-days'),
     ('deadline',        'fa-calendar-exclamation'),
     ('training',        'fa-circle-book-open'),
     ('recording',       'fa-clapperboard-play'),
