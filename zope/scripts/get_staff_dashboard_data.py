@@ -498,6 +498,7 @@ except Exception:
 # ---------------------------------------------------------------------------
 events = []
 events_ok = 1
+cal_brains = []
 try:
     cal_folder, cal_brains = query('calendar', 'event_date', 'ascending')
     for brain in cal_brains:
@@ -610,8 +611,105 @@ except Exception:
     announcements_ok = 0
 
 
+# ---------------------------------------------------------------------------
+# Calendar snapshot - a rolling seven days starting today
+#
+# Rolling rather than "this week" on purpose: with events spread across months,
+# a fixed Mon-Fri strip is empty most weeks, which reads as broken. A rolling
+# window only empties when nothing is genuinely coming up.
+#
+# Every day's events are emitted, not just the selected one, so switching days
+# is instant and needs no second request. Reuses the catalog read above.
+# ---------------------------------------------------------------------------
+SNAPSHOT_DAYS = 7
+
+snapshot = []
+snapshot_ok = 1
+snapshot_selected = 0
+try:
+    # A while loop rather than range(): this instance's restricted Python
+    # withholds sorted(), so no builtin is assumed unless it has been proven.
+    offset = 0
+    while offset < SNAPSHOT_DAYS:
+        try:
+            day = today + offset
+        except Exception:
+            break
+        key = day_key(day)
+        entries = []
+        for brain in cal_brains:
+            if not visible(brain, now):
+                continue
+            start = meta(brain, 'event_date')
+            if start is None:
+                continue
+            finish = meta(brain, 'event_end_date')
+            if finish is None:
+                finish = start
+            start_key = day_key(start)
+            finish_key = day_key(finish)
+            if finish_key < start_key:
+                finish_key = start_key
+            # a multi-day event shows on every day it covers
+            if key < start_key:
+                continue
+            if key > finish_key:
+                continue
+            url, obj = resolve(brain)
+            when = field_value(obj, FIELD_TIME)
+            if not when:
+                when = fmt_when(start, meta(brain, 'event_end_date'))
+            title = as_text(meta(brain, 'title', u''))
+            if not title:
+                continue
+            entries.append({'title': title, 'when': when, 'url': url})
+
+        if offset == 0:
+            label = u'Today'
+        elif offset == 1:
+            label = u'Tomorrow'
+        else:
+            label = as_text(day.strftime('%A'))
+
+        snapshot.append({
+            'weekday': as_text(day.strftime('%a')),
+            'day':     day_number(day),
+            'label':   label,
+            'long':    as_text(day.strftime('%A, %B ')) + day_number(day),
+            'today':   offset == 0 and 1 or 0,
+            'count':   len(entries),
+            'events':  entries,
+        })
+        offset = offset + 1
+
+    # Open on today, unless today is empty and something else in the window is
+    # not - landing on an empty list when there is content to see is unhelpful.
+    if snapshot:
+        if not snapshot[0]['count']:
+            position = 0
+            for day_entry in snapshot:
+                if day_entry['count']:
+                    snapshot_selected = position
+                    break
+                position = position + 1
+
+    # Mark the selected day in the data rather than comparing indices in the
+    # template. In a python: expression repeat['day'].index is a bound method,
+    # not a value, and Zope 2.13 exposes it differently again - so the template
+    # should not have to introspect the repeat variable at all.
+    position = 0
+    for day_entry in snapshot:
+        day_entry['selected'] = position == snapshot_selected and 1 or 0
+        position = position + 1
+except Exception:
+    snapshot = []
+    snapshot_ok = 0
+
+
 # The *_ok flags let the template tell "nothing to show" apart from "the query
 # failed". An empty list with ok=1 is a real empty state and says so; ok=0 means
 # we could not look, and the template keeps its placeholder content instead.
 return {'announcements': announcements, 'announcements_ok': announcements_ok,
-        'events': events, 'events_ok': events_ok}
+        'events': events, 'events_ok': events_ok,
+        'snapshot': snapshot, 'snapshot_ok': snapshot_ok,
+        'snapshot_selected': snapshot_selected}

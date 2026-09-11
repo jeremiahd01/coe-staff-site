@@ -353,6 +353,42 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+### Calendar snapshot
+
+A **rolling seven days from today**, not a fixed Mon-Fri week. With events
+spread across months, a fixed week is empty most of the time and reads as
+broken; a rolling window only empties when nothing is genuinely coming up.
+
+It sits below Upcoming Events and answers a different question - *what is
+happening soon* rather than *what is next* - so some overlap is expected.
+
+- Built from the **same catalog read** as Upcoming Events, so the snapshot
+  costs no extra query.
+- A **multi-day event appears on every day it covers**, derived from
+  `event_end_date`.
+- It opens on today, unless today is empty and a later day in the window is
+  not - landing on an empty list when there is content to see is unhelpful.
+- Days with events carry a dot; today carries a gold ring. Those are
+  independent: you can be looking at Thursday while today is Monday.
+
+**Interaction** is the ARIA tabs pattern: the strip is a `tablist`, each day a
+`tab`, each day's list a `tabpanel`. Every panel is rendered and all but one
+carries `hidden`, so switching days needs no request. Arrow keys, Home and End
+move between days with a roving tabindex.
+
+**Batch "Add selected events to Outlook" was deferred.** Each event already
+links to its own `.ics`; a combined file needs a script stitching multiple
+VEVENTs plus selection state, which is a lot for a secondary action.
+
+Two Zope specifics worth knowing:
+
+- The selected day is flagged **in the data** (`day['selected']`), not computed
+  in the template. In a `python:` expression `repeat['day'].index` is a *bound
+  method* rather than a value, and Zope 2.13 exposes it differently again.
+- `tal:define` runs **before** `tal:repeat` on the same element, so
+  `repeat/day/index` is unavailable there. Attributes are evaluated after the
+  repeat, so `repeat/day/number` works in `tal:attributes`.
+
 ### Three states per widget
 
 The script returns `announcements_ok` / `events_ok` alongside the lists, so the

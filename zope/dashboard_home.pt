@@ -5,7 +5,10 @@
                  news_ok python:dashboard is not None and dashboard.get('announcements_ok');
                  events_ok python:dashboard is not None and dashboard.get('events_ok');
                  live_news python:dashboard and dashboard.get('announcements') or [];
-                 live_events python:dashboard and dashboard.get('events') or []">
+                 live_events python:dashboard and dashboard.get('events') or [];
+                 snapshot_ok python:dashboard is not None and dashboard.get('snapshot_ok');
+                 live_snapshot python:dashboard and dashboard.get('snapshot') or [];
+                 live_selected python:dashboard and dashboard.get('snapshot_selected') or 0">
 <!--
   ============================================================================
   Staff Hub  -  dashboard home
@@ -329,10 +332,69 @@
           </ul>
         </div>
 
-        <!-- ==== Extension slot: calendar snapshot (Phase 2) ==== -->
-        <div class="staff-slot">
-          <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
-          <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
+        <!-- ==== Calendar snapshot ====
+             A rolling seven days from today, not a fixed Mon-Fri week: with
+             events spread across months a fixed week is empty most of the time.
+             Every day's list is rendered and all but one hidden, so switching
+             days needs no second request. Tabs pattern, so it works from the
+             keyboard. The literal days below are used only as placeholder
+             content when the script is unavailable. -->
+        <div class="staff-card staff-snapshot"
+             tal:define="snapshot python:live_snapshot or (not snapshot_ok and [
+               {'weekday': 'Mon', 'day': '8', 'label': 'Today', 'long': 'Monday, September 8', 'today': 1, 'count': 1, 'selected': 1,
+                'events': [{'when': '10:00 AM', 'title': 'Staff Council Meeting', 'url': '#'}]},
+               {'weekday': 'Tue', 'day': '9', 'label': 'Tomorrow', 'long': 'Tuesday, September 9', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
+               {'weekday': 'Wed', 'day': '10', 'label': 'Wednesday', 'long': 'Wednesday, September 10', 'today': 0, 'count': 2, 'selected': 0,
+                'events': [{'when': '1:00 PM', 'title': 'LinkedIn Learning Workshop', 'url': '#'},
+                           {'when': '', 'title': 'Performance Review Deadline', 'url': '#'}]},
+               {'weekday': 'Thu', 'day': '11', 'label': 'Thursday', 'long': 'Thursday, September 11', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
+               {'weekday': 'Fri', 'day': '12', 'label': 'Friday', 'long': 'Friday, September 12', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
+               {'weekday': 'Sat', 'day': '13', 'label': 'Saturday', 'long': 'Saturday, September 13', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
+               {'weekday': 'Sun', 'day': '14', 'label': 'Sunday', 'long': 'Sunday, September 14', 'today': 0, 'count': 1, 'selected': 0,
+                'events': [{'when': '', 'title': 'Staff Awards Banquet', 'url': '#'}]}] or [])"
+             tal:condition="snapshot">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Next 7 Days</h2>
+            <a class="staff-card__more"
+               tal:attributes="href string:${here/absolute_url}/calendar">View calendar</a>
+          </div>
+
+          <div class="staff-snapshot__strip" role="tablist" aria-label="Next seven days">
+            <button type="button" role="tab"
+                    tal:repeat="day snapshot"
+                    tal:attributes="id string:staff-day-${repeat/day/number};
+                                    aria-controls string:staff-panel-${repeat/day/number};
+                                    aria-selected python:day['selected'] and 'true' or 'false';
+                                    tabindex python:day['selected'] and '0' or '-1';
+                                    class python:day['today'] and 'staff-snapshot__day is-today' or 'staff-snapshot__day'">
+              <span class="staff-snapshot__weekday" tal:content="day/weekday">Mon</span>
+              <span class="staff-snapshot__date" tal:content="day/day">8</span>
+              <span class="staff-snapshot__dot" aria-hidden="true" tal:condition="day/count"></span>
+              <span class="staff-visually-hidden"
+                    tal:content="python:day['count'] and (str(day['count']) + ' events') or 'no events'">events</span>
+            </button>
+          </div>
+
+          <div class="staff-snapshot__panel" role="tabpanel"
+               tal:repeat="day snapshot"
+               tal:attributes="id string:staff-panel-${repeat/day/number};
+                               aria-labelledby string:staff-day-${repeat/day/number};
+                               hidden python:not day['selected'] and 'hidden' or None">
+
+            <h3 class="staff-snapshot__label" tal:content="day/long">Monday, September 8</h3>
+
+            <ul class="staff-snapshot__events" tal:condition="day/count">
+              <li tal:repeat="event day/events">
+                <span class="staff-snapshot__when"
+                      tal:condition="event/when" tal:content="event/when">10:00 AM</span>
+                <a class="staff-snapshot__link"
+                   tal:attributes="href event/url" tal:content="event/title">Event title</a>
+              </li>
+            </ul>
+
+            <p class="staff-empty" tal:condition="not:day/count">Nothing scheduled.</p>
+          </div>
         </div>
 
       </div><!-- /right rail -->
@@ -509,6 +571,48 @@
       close();
       entries.forEach(function (e) { measure(e); });
     }, 150);
+  });
+}());
+
+/* Calendar snapshot: the day strip is an ARIA tablist. Every day's panel is
+   already in the DOM, so switching is just toggling `hidden` - no request.
+   Arrow keys, Home and End move between days with a roving tabindex.
+   Written without ampersand or less-than characters so the template stays
+   valid XML - hence forEach rather than an indexed for loop. */
+(function () {
+  var strip = document.querySelector('.staff-snapshot__strip');
+  if (!strip) { return; }
+  var tabs = Array.prototype.slice.call(strip.querySelectorAll('[role="tab"]'));
+  if (!tabs.length) { return; }
+
+  function panelFor(tab) {
+    return document.getElementById(tab.getAttribute('aria-controls'));
+  }
+
+  function select(index, moveFocus) {
+    tabs.forEach(function (tab, i) {
+      var on = (i === index);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.setAttribute('tabindex', on ? '0' : '-1');
+      var panel = panelFor(tab);
+      if (panel) { panel.hidden = !on; }
+    });
+    if (moveFocus) { tabs[index].focus(); }
+  }
+
+  tabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () { select(index, false); });
+    tab.addEventListener('keydown', function (ev) {
+      var next = -1;
+      if (ev.key === 'ArrowRight') { next = (index + 1) % tabs.length; }
+      if (ev.key === 'ArrowLeft') { next = (index + tabs.length - 1) % tabs.length; }
+      if (ev.key === 'Home') { next = 0; }
+      if (ev.key === 'End') { next = tabs.length - 1; }
+      if (next > -1) {
+        ev.preventDefault();
+        select(next, true);
+      }
+    });
   });
 }());
 </script>

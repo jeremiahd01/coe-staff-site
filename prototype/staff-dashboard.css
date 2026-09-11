@@ -579,6 +579,121 @@
 }
 .staff-feedback-inner .purdue-btn { margin: 0; }
 
+/* ==========================================================================
+   Calendar snapshot - rolling seven days
+   Tabs pattern: the strip is a tablist, each day a tab, each day's list a
+   tabpanel. All panels are rendered and all but one carries `hidden`.
+   ========================================================================== */
+.staff-snapshot__strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 1.1rem;
+}
+
+.staff-snapshot__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 44px;
+  padding: 0.4rem 0.1rem 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+  color: var(--steel-gray);
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.staff-snapshot__day:hover { background: #faf7f1; border-color: var(--steam); }
+
+.staff-snapshot__weekday {
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 0.625rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.staff-snapshot__date {
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 1.0625rem;
+  line-height: 1.05;
+  color: #000;
+}
+
+/* Today is marked by a ring; the selected day is filled. They are independent:
+   you can be looking at Thursday while today is Monday. */
+.staff-snapshot__day.is-today { border-color: var(--boiler-gold); }
+
+.staff-snapshot__day[aria-selected="true"] {
+  background: var(--aged-gold);
+  border-color: var(--aged-gold);
+  color: #fff;
+}
+.staff-snapshot__day[aria-selected="true"] .staff-snapshot__date { color: #fff; }
+
+/* A dot means that day has something on it. */
+.staff-snapshot__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--aged-gold);
+}
+.staff-snapshot__day[aria-selected="true"] .staff-snapshot__dot { background: #fff; }
+
+.staff-snapshot__panel[hidden] { display: none !important; }
+
+.staff-snapshot__label {
+  font-family: var(--acumin-pro);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--steel-gray);
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--steam);
+}
+
+.staff-snapshot__events { list-style: none; margin: 0; padding: 0; }
+.staff-snapshot__events li {
+  padding: 0.4rem 0 0.4rem 0.85rem;
+  position: relative;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.staff-snapshot__events li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--boiler-gold);
+}
+.staff-snapshot__when {
+  display: block;
+  font-family: var(--united-sans-cond);
+  font-weight: 900;
+  font-size: 0.6875rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--aged-gold);
+}
+.staff-snapshot__link {
+  color: #000;
+  line-height: inherit;
+  text-decoration: none !important;
+  background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 2px;
+  transition: background-size 0.25s ease;
+}
+.staff-snapshot__link:hover,
+.staff-snapshot__link:focus-visible { background-size: 100% 2px; }
+
 /* Shown when a widget genuinely has nothing to display - distinct from the
    placeholder content, which only appears when the query could not run. */
 .staff-empty {
@@ -704,6 +819,7 @@
 .block.--bg-light-gray .staff-news__tip,
 .block.--bg-light-gray .staff-news__title,
 .block.--bg-light-gray .staff-explore__title,
+.block.--bg-light-gray .staff-snapshot__link,
 .block.--bg-light-gray .staff-event__link,
 .block.--bg-light-gray .staff-event__title {
   color: #000;

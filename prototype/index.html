@@ -474,10 +474,140 @@
           </ul>
         </div>
 
-        <!-- ==== Extension slot: calendar snapshot (Phase 2) ==== -->
-        <div class="staff-slot">
-          <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
-          <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
+        <!-- ==== Calendar snapshot ====
+             A rolling seven days from today, not a fixed Mon-Fri week: with
+             events spread across months a fixed week is empty most of the time.
+             Every day's list is rendered and all but one hidden, so switching
+             days needs no second request. Tabs pattern, so it works from the
+             keyboard. The literal days below are used only as placeholder
+             content when the script is unavailable. -->
+        <div class="staff-card staff-snapshot">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Next 7 Days</h2>
+            <a class="staff-card__more" href="https://engineering.purdue.edu/staff/calendar">View calendar</a>
+          </div>
+
+          <div class="staff-snapshot__strip" role="tablist" aria-label="Next seven days">
+            <button type="button" role="tab" aria-controls="staff-panel-1" aria-selected="true" class="staff-snapshot__day is-today" id="staff-day-1" tabindex="0">
+              <span class="staff-snapshot__weekday">Mon</span>
+              <span class="staff-snapshot__date">8</span>
+              <span class="staff-snapshot__dot" aria-hidden="true"></span>
+              <span class="staff-visually-hidden">1 events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-2" aria-selected="false" class="staff-snapshot__day" id="staff-day-2" tabindex="-1">
+              <span class="staff-snapshot__weekday">Tue</span>
+              <span class="staff-snapshot__date">9</span>
+              
+              <span class="staff-visually-hidden">no events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-3" aria-selected="false" class="staff-snapshot__day" id="staff-day-3" tabindex="-1">
+              <span class="staff-snapshot__weekday">Wed</span>
+              <span class="staff-snapshot__date">10</span>
+              <span class="staff-snapshot__dot" aria-hidden="true"></span>
+              <span class="staff-visually-hidden">2 events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-4" aria-selected="false" class="staff-snapshot__day" id="staff-day-4" tabindex="-1">
+              <span class="staff-snapshot__weekday">Thu</span>
+              <span class="staff-snapshot__date">11</span>
+              
+              <span class="staff-visually-hidden">no events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-5" aria-selected="false" class="staff-snapshot__day" id="staff-day-5" tabindex="-1">
+              <span class="staff-snapshot__weekday">Fri</span>
+              <span class="staff-snapshot__date">12</span>
+              
+              <span class="staff-visually-hidden">no events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-6" aria-selected="false" class="staff-snapshot__day" id="staff-day-6" tabindex="-1">
+              <span class="staff-snapshot__weekday">Sat</span>
+              <span class="staff-snapshot__date">13</span>
+              
+              <span class="staff-visually-hidden">no events</span>
+            </button>
+            <button type="button" role="tab" aria-controls="staff-panel-7" aria-selected="false" class="staff-snapshot__day" id="staff-day-7" tabindex="-1">
+              <span class="staff-snapshot__weekday">Sun</span>
+              <span class="staff-snapshot__date">14</span>
+              <span class="staff-snapshot__dot" aria-hidden="true"></span>
+              <span class="staff-visually-hidden">1 events</span>
+            </button>
+          </div>
+
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-1" id="staff-panel-1">
+
+            <h3 class="staff-snapshot__label">Monday, September 8</h3>
+
+            <ul class="staff-snapshot__events">
+              <li>
+                <span class="staff-snapshot__when">10:00 AM</span>
+                <a class="staff-snapshot__link" href="#">Staff Council Meeting</a>
+              </li>
+            </ul>
+
+            
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-2" hidden="hidden" id="staff-panel-2">
+
+            <h3 class="staff-snapshot__label">Tuesday, September 9</h3>
+
+            
+
+            <p class="staff-empty">Nothing scheduled.</p>
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-3" hidden="hidden" id="staff-panel-3">
+
+            <h3 class="staff-snapshot__label">Wednesday, September 10</h3>
+
+            <ul class="staff-snapshot__events">
+              <li>
+                <span class="staff-snapshot__when">1:00 PM</span>
+                <a class="staff-snapshot__link" href="#">LinkedIn Learning Workshop</a>
+              </li>
+              <li>
+                
+                <a class="staff-snapshot__link" href="#">Performance Review Deadline</a>
+              </li>
+            </ul>
+
+            
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-4" hidden="hidden" id="staff-panel-4">
+
+            <h3 class="staff-snapshot__label">Thursday, September 11</h3>
+
+            
+
+            <p class="staff-empty">Nothing scheduled.</p>
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-5" hidden="hidden" id="staff-panel-5">
+
+            <h3 class="staff-snapshot__label">Friday, September 12</h3>
+
+            
+
+            <p class="staff-empty">Nothing scheduled.</p>
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-6" hidden="hidden" id="staff-panel-6">
+
+            <h3 class="staff-snapshot__label">Saturday, September 13</h3>
+
+            
+
+            <p class="staff-empty">Nothing scheduled.</p>
+          </div>
+          <div class="staff-snapshot__panel" role="tabpanel" aria-labelledby="staff-day-7" hidden="hidden" id="staff-panel-7">
+
+            <h3 class="staff-snapshot__label">Sunday, September 14</h3>
+
+            <ul class="staff-snapshot__events">
+              <li>
+                
+                <a class="staff-snapshot__link" href="#">Staff Awards Banquet</a>
+              </li>
+            </ul>
+
+            
+          </div>
         </div>
 
       </div><!-- /right rail -->
@@ -668,6 +798,48 @@
       close();
       entries.forEach(function (e) { measure(e); });
     }, 150);
+  });
+}());
+
+/* Calendar snapshot: the day strip is an ARIA tablist. Every day's panel is
+   already in the DOM, so switching is just toggling `hidden` - no request.
+   Arrow keys, Home and End move between days with a roving tabindex.
+   Written without ampersand or less-than characters so the template stays
+   valid XML - hence forEach rather than an indexed for loop. */
+(function () {
+  var strip = document.querySelector('.staff-snapshot__strip');
+  if (!strip) { return; }
+  var tabs = Array.prototype.slice.call(strip.querySelectorAll('[role="tab"]'));
+  if (!tabs.length) { return; }
+
+  function panelFor(tab) {
+    return document.getElementById(tab.getAttribute('aria-controls'));
+  }
+
+  function select(index, moveFocus) {
+    tabs.forEach(function (tab, i) {
+      var on = (i === index);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.setAttribute('tabindex', on ? '0' : '-1');
+      var panel = panelFor(tab);
+      if (panel) { panel.hidden = !on; }
+    });
+    if (moveFocus) { tabs[index].focus(); }
+  }
+
+  tabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () { select(index, false); });
+    tab.addEventListener('keydown', function (ev) {
+      var next = -1;
+      if (ev.key === 'ArrowRight') { next = (index + 1) % tabs.length; }
+      if (ev.key === 'ArrowLeft') { next = (index + tabs.length - 1) % tabs.length; }
+      if (ev.key === 'Home') { next = 0; }
+      if (ev.key === 'End') { next = tabs.length - 1; }
+      if (next > -1) {
+        ev.preventDefault();
+        select(next, true);
+      }
+    });
   });
 }());
 </script>
