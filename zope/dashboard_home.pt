@@ -210,11 +210,41 @@
           </ul>
         </div>
 
-        <!-- ==== Extension slot: "How Do I...?" (Phase 2) ====
-             Delete this div when the widget is built.                          -->
-        <div class="staff-slot">
-          <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
-          <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
+        <!-- ==== How Do I...? ====
+             Static, like Quick Links and Explore: these are wayfinding links,
+             not content, so they live in one list here rather than in the CMS.
+             LABELS come from the original mockup; every URL is a placeholder
+             until the guide pages exist. Correct both in the list below. -->
+        <div class="staff-card"
+             tal:define="how_do_i python:[
+               {'label': 'Hire someone',          'url': '#'},
+               {'label': 'Post a position',       'url': '#'},
+               {'label': 'Hire a student',        'url': '#'},
+               {'label': 'Reserve a room',        'url': '#'},
+               {'label': 'Host an event',         'url': '#'},
+               {'label': 'Reserve a vehicle',     'url': '#'},
+               {'label': 'Travel internationally','url': '#'},
+               {'label': 'Purchase software',     'url': '#'},
+               {'label': 'Buy supplies',          'url': '#'},
+               {'label': 'Request furniture',     'url': '#'},
+               {'label': 'Order business cards',  'url': '#'},
+               {'label': 'Add someone to Teams',  'url': '#'},
+               {'label': 'Order catering',        'url': '#'},
+               {'label': 'Request marketing',     'url': '#'}]">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">How Do I&#8230;?</h2>
+            <a class="staff-card__more"
+               tal:attributes="href string:${here/absolute_url}/how-do-i">All guides</a>
+          </div>
+
+          <ul class="staff-howto">
+            <li tal:repeat="item how_do_i">
+              <a class="staff-howto__link"
+                 tal:attributes="href item/url"
+                 tal:content="item/label">Do a thing</a>
+            </li>
+          </ul>
         </div>
 
         <!-- ==== Explore ==== -->

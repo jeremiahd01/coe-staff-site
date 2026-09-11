@@ -353,6 +353,21 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+### How Do I...?
+
+Static, like Quick Links and Explore: these are wayfinding links rather than
+content, so they live in one list in the template instead of the CMS. Adding a
+link is adding one dict.
+
+**Every URL is a placeholder.** The labels come from the original mockup and the
+destinations do not exist yet - both need confirming. Note the mockup has drifted
+in every other widget (nav 8 to 6, Quick Links 7 to 6, Explore 8 tiles to 3), so
+this list has most likely moved too.
+
+Laid out with CSS multi-column rather than a grid, so links read top-to-bottom
+within each column the way the mockup's two columns do, instead of snaking left
+to right across rows. Three columns at xl, two at sm, one on mobile.
+
 ### Calendar snapshot
 
 A **rolling seven days from today**, not a fixed Mon-Fri week. With events
