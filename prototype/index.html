@@ -114,14 +114,23 @@
         <!-- ───────── MAIN COLUMN ───────── -->
         <div class="col-lg-8 staff-col-main d-flex flex-column gap-4">
 
-          <!-- New & Important -->
-          <div class="staff-card">
-            <div class="motion-line mh-gold">
-              <h2 class="motion-heading mh-gold">New &amp; Important</h2>
-              <a class="staff-card__more" href="/staff/announcements">View all</a>
-            </div>
+        <!-- ==== New & Important ====
+             LIVE SOURCE (next pass): the "announcements" Purdue Event Manager in
+             this container, filtered to Document Type "News Item".
+             Replace the define below with the query; keys stay the same.        -->
+        <div class="staff-card">
 
-            <ul class="staff-news staff-news--5">
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">New &amp; Important</h2>
+            <a class="staff-card__more" href="https://engineering.purdue.edu/staff/announcements">View all</a>
+          </div>
+
+          <!-- The count drives the column count: fewer than five stretch
+               to fill rather than leaving empty tracks. Sliced so an
+               unexpected sixth item cannot produce a class with no rule. -->
+          
+
+          <ul class="staff-news staff-news--5">
             <!-- The full-text trigger is a <button>, which cannot live inside
                  an <a>, so the link now wraps the title only. Summary text
                  becomes selectable as a side benefit. -->
@@ -236,16 +245,18 @@
               
             </li>
           </ul>
+        </div>
+
+        <!-- ==== Quick Links ====
+             Static by design. To add a link, add one dict below.               -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Quick Links</h2>
+            <span class="staff-card__note">Opens in a new tab</span>
           </div>
 
-          <!-- Quick Links -->
-          <div class="staff-card">
-            <div class="motion-line mh-gold">
-              <h2 class="motion-heading mh-gold">Quick Links</h2>
-              <span class="staff-card__note">Opens in a new tab</span>
-            </div>
-
-            <ul class="staff-quick">
+          <ul class="staff-quick">
             <li>
               <a class="staff-quick__link" target="_blank" rel="noopener" href="https://engineering.purdue.edu/Engr/People/ptDirectory">
                 <i class="fa-solid fa-address-book staff-quick__icon" aria-hidden="true"></i>
@@ -283,14 +294,23 @@
               </a>
             </li>
           </ul>
-          </div>
-<!-- Explore -->
-          <div class="staff-card">
-            <div class="motion-line mh-gold">
-              <h2 class="motion-heading mh-gold">Explore</h2>
-            </div>
+        </div>
 
-            <ul class="staff-explore">
+        <!-- ==== Extension slot: "How Do I...?" (Phase 2) ====
+             Delete this div when the widget is built.                          -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
+          <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
+        </div>
+
+        <!-- ==== Explore ==== -->
+        <div class="staff-card">
+
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Explore</h2>
+          </div>
+
+          <ul class="staff-explore">
             <li>
               <a class="staff-explore__link" href="https://engineering.purdue.edu/staff/resources/ai">
                 <i class="fa-solid fa-microchip staff-explore__icon" aria-hidden="true"></i>
@@ -313,20 +333,29 @@
               </a>
             </li>
           </ul>
-          </div>
+        </div>
 
-        </div><!-- /main column -->
+      </div><!-- /main column -->
 
         <!-- ───────── RIGHT RAIL ───────── -->
         <div class="col-lg-4 staff-col-rail d-flex flex-column gap-4">
 
-          <div class="staff-card">
-            <div class="motion-line mh-gold">
-              <h2 class="motion-heading mh-gold">Upcoming Events</h2>
-              <a class="staff-card__more" href="/staff/calendar">View calendar</a>
-            </div>
+        <!-- ==== Upcoming Events ====
+             LIVE SOURCE (next pass): the "calendar" Purdue Event Manager in this
+             container, filtered to Document Type "Event/Function", ascending by
+             start date, limited to 5. Sort/tag rules still to be defined.
+             'month' and 'day' become formatted from the event date; 'when' and
+             'where' come from the event's date/time and location fields.        -->
+        <div class="staff-card">
 
-            <ul class="staff-events">
+          <div class="motion-line mh-gold">
+            <h2 class="motion-heading mh-gold">Upcoming Events</h2>
+            <a class="staff-card__more" href="https://engineering.purdue.edu/staff/calendar">View calendar</a>
+          </div>
+
+          
+
+          <ul class="staff-events">
             <li class="staff-event">
 
               <div class="staff-event__date">
@@ -443,8 +472,15 @@
 
             </li>
           </ul>
-          </div>
-</div><!-- /right rail -->
+        </div>
+
+        <!-- ==== Extension slot: calendar snapshot (Phase 2) ==== -->
+        <div class="staff-slot">
+          <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
+          <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
+        </div>
+
+      </div><!-- /right rail -->
 
       </div><!-- /row -->
     </div><!-- /container -->

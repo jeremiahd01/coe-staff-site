@@ -209,7 +209,7 @@
 
         <!-- ==== Extension slot: "How Do I...?" (Phase 2) ====
              Delete this div when the widget is built.                          -->
-        <div class="staff-slot" tal:condition="nothing">
+        <div class="staff-slot">
           <p class="staff-slot__label">Extension slot &#8212; &#8220;How Do I&#8230;?&#8221;</p>
           <p class="staff-slot__sub">Deferred to Phase 2. Drops in here with no relayout.</p>
         </div>
@@ -330,7 +330,7 @@
         </div>
 
         <!-- ==== Extension slot: calendar snapshot (Phase 2) ==== -->
-        <div class="staff-slot" tal:condition="nothing">
+        <div class="staff-slot">
           <p class="staff-slot__label">Extension slot &#8212; Calendar snapshot</p>
           <p class="staff-slot__sub">Week-at-a-glance view from the mockup, Phase&#160;2.</p>
         </div>
