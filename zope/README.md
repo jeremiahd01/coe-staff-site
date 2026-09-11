@@ -353,6 +353,47 @@ once when both ends share it, and `Closes Sep 30` is derived from the end date.
 Both template paths were rendered through `zope.pagetemplate`: script absent
 yields the 5 dummy items, script present yields live data only.
 
+### Admin-managed link lists
+
+Quick Links, Explore and How Do I...? can be driven from
+`/staff/dashboard_settings`, which holds one **text property per list** containing
+a JSON array:
+
+```json
+[
+  {"label": "Purdue Directory",
+   "url": "https://engineering.purdue.edu/Engr/People/ptDirectory",
+   "icon": "fa-address-book"},
+  {"label": "IT Help", "url": "https://service.purdue.edu/TDClient/32/Purdue/Home/",
+   "icon": "fa-headset"}
+]
+```
+
+`label` and `url` are required; `icon` and `summary` are optional and only used
+by the widgets that show them. Relative URLs resolve against the site root, so
+`resources/ai` becomes `/staff/resources/ai`.
+
+`scripts/setup_dashboard_settings.py` creates the folder and seeds all three
+from the lists currently in the template. It is the only script here that
+writes, it is idempotent - an existing non-empty property is never overwritten -
+and it should be deleted after use.
+
+**Degradation is per list and per row:**
+
+| Situation | Result |
+|---|---|
+| No folder, no property, or empty | That widget falls back to the list in the template |
+| Malformed JSON, or not an array | Same fallback |
+| One entry missing `label` or `url` | That entry is skipped, the rest render |
+| One entry is not an object | Same - skipped, rest render |
+
+JSON fails wholesale where a line-based format fails per-row, which is why
+parsing is per-entry rather than one `json.loads` and hope.
+
+**One key name to keep straight:** all three lists use `label`. Explore
+originally used `title`, which would have raised the moment Explore settings
+were saved - and a template exception blanks the entire page, not just the card.
+
 ### How Do I...?
 
 Static, like Quick Links and Explore: these are wayfinding links rather than

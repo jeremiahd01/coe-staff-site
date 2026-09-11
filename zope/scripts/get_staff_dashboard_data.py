@@ -24,9 +24,12 @@
 #              title, type
 #   metadata : the above plus intro, tags, meta_type
 #
-# Zope 2.13 / Python 2.7 restricted Python: no sorted(), int(), callable(),
-# isinstance(), unicode(), basestring, and no attribute starting with '_'.
+# Zope 2.13 / Python 2.7 restricted Python. Measured sandbox: sorted, reversed,
+# set and type are NOT available; int, range, callable and isinstance are. See
+# scripts/introspect_sandbox.py and the README.
 # ============================================================================
+
+import json
 
 DASH = u'\u2013'       # en dash. Written as an escape, NOT as a literal:
                        # the ZMI stores pasted source as Latin-1, which turns
@@ -706,10 +709,71 @@ except Exception:
     snapshot_ok = 0
 
 
+# ---------------------------------------------------------------------------
+# Admin-managed link lists
+#
+# Each list is a JSON array of {"label", "url", "icon", "summary"} held in a
+# text property on the dashboard_settings folder, so an admin page can rewrite
+# one property atomically.
+#
+# Absent, empty or unparseable settings return an empty list and the template
+# falls back to the lists written into the template itself. That means the
+# dashboard works before any settings exist, and a bad save degrades to the
+# previous design rather than an empty card.
+#
+# Parsing is per-entry: one malformed row is skipped rather than discarding the
+# whole list. JSON fails wholesale where a line-based format fails per-row, so
+# the entry-level guard matters more here.
+# ---------------------------------------------------------------------------
+SETTINGS_FOLDER = 'dashboard_settings'
+
+
+def link_list(name):
+    folder = getattr(context, SETTINGS_FOLDER, None)
+    if folder is None:
+        return []
+    try:
+        raw = folder.getProperty(name, '')
+    except Exception:
+        return []
+    text = as_text(raw).strip()
+    if not text:
+        return []
+    try:
+        data = json.loads(text)
+    except Exception:
+        return []
+
+    out = []
+    try:
+        for entry in data:
+            try:
+                label = as_text(entry.get('label', u'')).strip()
+                url = as_text(entry.get('url', u'')).strip()
+                if not label:
+                    continue        # nothing to render
+                if not url:
+                    continue        # a link with no destination is not a link
+                out.append({
+                    'label':   label,
+                    'url':     url,
+                    'icon':    as_text(entry.get('icon', u'')).strip(),
+                    'summary': as_text(entry.get('summary', u'')).strip(),
+                })
+            except Exception:
+                continue            # skip this row, keep the rest
+    except Exception:
+        return []
+    return out
+
+
 # The *_ok flags let the template tell "nothing to show" apart from "the query
 # failed". An empty list with ok=1 is a real empty state and says so; ok=0 means
 # we could not look, and the template keeps its placeholder content instead.
 return {'announcements': announcements, 'announcements_ok': announcements_ok,
         'events': events, 'events_ok': events_ok,
         'snapshot': snapshot, 'snapshot_ok': snapshot_ok,
-        'snapshot_selected': snapshot_selected}
+        'snapshot_selected': snapshot_selected,
+        'quick_links': link_list('quick_links'),
+        'how_do_i': link_list('how_do_i'),
+        'explore': link_list('explore')}

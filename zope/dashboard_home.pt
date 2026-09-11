@@ -8,7 +8,10 @@
                  live_events python:dashboard and dashboard.get('events') or [];
                  snapshot_ok python:dashboard is not None and dashboard.get('snapshot_ok');
                  live_snapshot python:dashboard and dashboard.get('snapshot') or [];
-                 live_selected python:dashboard and dashboard.get('snapshot_selected') or 0">
+                 live_selected python:dashboard and dashboard.get('snapshot_selected') or 0;
+                 live_quick python:dashboard and dashboard.get('quick_links') or [];
+                 live_howto python:dashboard and dashboard.get('how_do_i') or [];
+                 live_explore python:dashboard and dashboard.get('explore') or []">
 <!--
   ============================================================================
   Staff Hub  -  dashboard home
@@ -173,7 +176,7 @@
         <!-- ==== Quick Links ====
              Static by design. To add a link, add one dict below.               -->
         <div class="staff-card"
-             tal:define="quick_links python:[
+             tal:define="quick_links python:live_quick or [
                {'label': 'Purdue Directory',
                 'icon': 'fa-address-book',
                 'url': 'https://engineering.purdue.edu/Engr/People/ptDirectory'},
@@ -216,7 +219,7 @@
              LABELS come from the original mockup; every URL is a placeholder
              until the guide pages exist. Correct both in the list below. -->
         <div class="staff-card"
-             tal:define="how_do_i python:[
+             tal:define="how_do_i python:live_howto or [
                {'label': 'Hire someone',          'url': '#'},
                {'label': 'Post a position',       'url': '#'},
                {'label': 'Hire a student',        'url': '#'},
@@ -249,16 +252,16 @@
 
         <!-- ==== Explore ==== -->
         <div class="staff-card"
-             tal:define="explore python:[
-               {'title': 'AI Resources',
+             tal:define="explore python:live_explore or [
+               {'label': 'AI Resources',
                 'icon': 'fa-microchip',
                 'summary': 'Find trainings, policies and tools related to AI.',
                 'url': 'resources/ai'},
-               {'title': 'Recognize Great Work',
+               {'label': 'Recognize Great Work',
                 'icon': 'fa-trophy',
                 'summary': 'Celebrate achievements and recognize great work of our staff.',
                 'url': 'recognition'},
-               {'title': 'Grow Your Career',
+               {'label': 'Grow Your Career',
                 'icon': 'fa-chart-line',
                 'summary': 'Explore professional development programs and training opportunities.',
                 'url': 'training'}]">
@@ -273,7 +276,7 @@
                  tal:attributes="href string:${here/absolute_url}/${item/url}">
                 <i class="staff-explore__icon" aria-hidden="true"
                    tal:attributes="class string:fa-solid ${item/icon} staff-explore__icon"></i>
-                <span class="staff-explore__title" tal:content="item/title">Section</span>
+                <span class="staff-explore__title" tal:content="item/label">Section</span>
                 <p class="staff-explore__desc" tal:content="item/summary">Tagline.</p>
               </a>
             </li>
