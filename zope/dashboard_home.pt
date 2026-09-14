@@ -467,7 +467,7 @@
 <!-- ======================= HAVE A SUGGESTION? =======================
      TODO: feedback form URL still outstanding.                                 -->
 <section class="block staff-feedback"
-         tal:define="feedback_url string:#">
+         tal:define="feedback_url string:mailto:chelseac@purdue.edu?subject=Staff%20Website%20Feedback">
   <div class="container">
     <div class="staff-feedback-inner">
       <p class="staff-feedback__text">
