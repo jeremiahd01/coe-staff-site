@@ -6,9 +6,7 @@
                  events_ok python:dashboard is not None and dashboard.get('events_ok');
                  live_news python:dashboard and dashboard.get('announcements') or [];
                  live_events python:dashboard and dashboard.get('events') or [];
-                 snapshot_ok python:dashboard is not None and dashboard.get('snapshot_ok');
-                 live_snapshot python:dashboard and dashboard.get('snapshot') or [];
-                 live_selected python:dashboard and dashboard.get('snapshot_selected') or 0;
+                 cal_months python:dashboard and dashboard.get('calendar_months') or [];
                  live_quick python:dashboard and dashboard.get('quick_links') or [];
                  live_howto python:dashboard and dashboard.get('how_do_i') or [];
                  live_explore python:dashboard and dashboard.get('explore') or []">
@@ -368,68 +366,94 @@
           </ul>
         </div>
 
-        <!-- ==== Calendar snapshot ====
-             A rolling seven days from today, not a fixed Mon-Fri week: with
-             events spread across months a fixed week is empty most of the time.
-             Every day's list is rendered and all but one hidden, so switching
-             days needs no second request. Tabs pattern, so it works from the
-             keyboard. The literal days below are used only as placeholder
-             content when the script is unavailable. -->
-        <div class="staff-card staff-snapshot"
-             tal:define="snapshot python:live_snapshot or (not snapshot_ok and [
-               {'weekday': 'Mon', 'day': '8', 'label': 'Today', 'long': 'Monday, September 8', 'today': 1, 'count': 1, 'selected': 1,
-                'events': [{'when': '10:00 AM', 'title': 'Staff Council Meeting', 'url': '#'}]},
-               {'weekday': 'Tue', 'day': '9', 'label': 'Tomorrow', 'long': 'Tuesday, September 9', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
-               {'weekday': 'Wed', 'day': '10', 'label': 'Wednesday', 'long': 'Wednesday, September 10', 'today': 0, 'count': 2, 'selected': 0,
-                'events': [{'when': '1:00 PM', 'title': 'LinkedIn Learning Workshop', 'url': '#'},
-                           {'when': '', 'title': 'Performance Review Deadline', 'url': '#'}]},
-               {'weekday': 'Thu', 'day': '11', 'label': 'Thursday', 'long': 'Thursday, September 11', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
-               {'weekday': 'Fri', 'day': '12', 'label': 'Friday', 'long': 'Friday, September 12', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
-               {'weekday': 'Sat', 'day': '13', 'label': 'Saturday', 'long': 'Saturday, September 13', 'today': 0, 'count': 0, 'selected': 0, 'events': []},
-               {'weekday': 'Sun', 'day': '14', 'label': 'Sunday', 'long': 'Sunday, September 14', 'today': 0, 'count': 1, 'selected': 0,
-                'events': [{'when': '', 'title': 'Staff Awards Banquet', 'url': '#'}]}] or [])"
-             tal:condition="snapshot">
+        <!-- ==== Events Calendar ====
+             The current month and the next eleven, pre-rendered with all but one
+             hidden; dashboard.js pages between them without a request. Only days
+             with events are buttons, each controlling a panel of that day's
+             events below the grid. Renders nothing if the script is unavailable:
+             unlike the lists, a calendar has no sensible placeholder. -->
+        <div class="staff-card staff-cal" tal:condition="cal_months">
 
           <div class="motion-line mh-gold">
-            <h2 class="motion-heading mh-gold">Next 7 Days</h2>
+            <h2 class="motion-heading mh-gold">Events Calendar</h2>
             <a class="staff-card__more"
-               tal:attributes="href string:${here/absolute_url}/calendar">View calendar</a>
+               tal:attributes="href string:${here/absolute_url}/calendar">View full calendar</a>
           </div>
 
-          <div class="staff-snapshot__strip" role="tablist" aria-label="Next seven days">
-            <button type="button" role="tab"
-                    tal:repeat="day snapshot"
-                    tal:attributes="id string:staff-day-${repeat/day/number};
-                                    aria-controls string:staff-panel-${repeat/day/number};
-                                    aria-selected python:day['selected'] and 'true' or 'false';
-                                    tabindex python:day['selected'] and '0' or '-1';
-                                    class python:day['today'] and 'staff-snapshot__day is-today' or 'staff-snapshot__day'">
-              <span class="staff-snapshot__weekday" tal:content="day/weekday">Mon</span>
-              <span class="staff-snapshot__date" tal:content="day/day">8</span>
-              <span class="staff-snapshot__dot" aria-hidden="true" tal:condition="day/count"></span>
-              <span class="staff-visually-hidden"
-                    tal:content="python:day['count'] and (str(day['count']) + ' events') or 'no events'">events</span>
+          <div class="staff-cal__nav">
+            <button type="button" class="staff-cal__step" data-step="-1"
+                    aria-label="Previous month" disabled="disabled">
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <h3 class="staff-cal__heading" aria-live="polite"
+                tal:content="python:cal_months[0]['heading']">September 2026</h3>
+            <button type="button" class="staff-cal__step" data-step="1"
+                    aria-label="Next month">
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
 
-          <div class="staff-snapshot__panel" role="tabpanel"
-               tal:repeat="day snapshot"
-               tal:attributes="id string:staff-panel-${repeat/day/number};
-                               aria-labelledby string:staff-day-${repeat/day/number};
-                               hidden python:not day['selected'] and 'hidden' or None">
+          <div class="staff-cal__month"
+               tal:repeat="month cal_months"
+               tal:attributes="data-heading month/heading;
+                               hidden python:not month['visible'] and 'hidden' or None">
 
-            <h3 class="staff-snapshot__label" tal:content="day/long">Monday, September 8</h3>
+            <table class="staff-cal__grid">
+              <caption class="staff-visually-hidden" tal:content="month/heading">September 2026</caption>
+              <thead>
+                <tr>
+                  <th scope="col" abbr="Sunday">S</th>
+                  <th scope="col" abbr="Monday">M</th>
+                  <th scope="col" abbr="Tuesday">T</th>
+                  <th scope="col" abbr="Wednesday">W</th>
+                  <th scope="col" abbr="Thursday">T</th>
+                  <th scope="col" abbr="Friday">F</th>
+                  <th scope="col" abbr="Saturday">S</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr tal:repeat="week month/weeks">
+                  <td tal:repeat="cell week">
+                    <tal:day tal:condition="not:cell/blank">
+                      <button type="button"
+                              tal:condition="cell/count"
+                              tal:attributes="class python:cell['today'] and 'staff-cal__day is-today' or 'staff-cal__day';
+                                              aria-pressed python:cell['selected'] and 'true' or 'false';
+                                              aria-current python:cell['today'] and 'date' or None;
+                                              aria-controls string:staff-cal-${cell/iso};
+                                              aria-label cell/aria"
+                              tal:content="cell/num">8</button>
+                      <span tal:condition="not:cell/count"
+                            tal:attributes="class python:cell['today'] and 'staff-cal__day is-today' or 'staff-cal__day';
+                                            aria-current python:cell['today'] and 'date' or None"
+                            tal:content="cell/num">9</span>
+                    </tal:day>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-            <ul class="staff-snapshot__events" tal:condition="day/count">
-              <li tal:repeat="event day/events">
-                <span class="staff-snapshot__when"
-                      tal:condition="event/when" tal:content="event/when">10:00 AM</span>
-                <a class="staff-snapshot__link"
-                   tal:attributes="href event/url" tal:content="event/title">Event title</a>
-              </li>
-            </ul>
-
-            <p class="staff-empty" tal:condition="not:day/count">Nothing scheduled.</p>
+            <div class="staff-cal__list">
+              <div class="staff-cal__panel"
+                   tal:repeat="day month/days"
+                   tal:attributes="id string:staff-cal-${day/iso};
+                                   hidden python:not day['selected'] and 'hidden' or None">
+                <h4 class="staff-cal__day-heading" tal:content="day/heading">Thursday, October 1</h4>
+                <ul class="staff-cal__events">
+                  <li tal:repeat="event day/events">
+                    <a class="staff-cal__link"
+                       tal:attributes="href event/url"
+                       tal:content="event/title">Event title</a>
+                    <span class="staff-cal__meta"
+                          tal:condition="event/meta"
+                          tal:content="event/meta">10:00 AM | ARMS 1010</span>
+                  </li>
+                </ul>
+              </div>
+              <p class="staff-empty"
+                 tal:condition="not:month/days"
+                 tal:content="month/empty">No events in September.</p>
+            </div>
           </div>
         </div>
 
@@ -456,201 +480,10 @@
   </div>
 </section>
 
-<script>
-/* Full-text tooltip for clamped announcement summaries.
-   The summary text is the hover and tap target. The small "More" control stays
-   as the keyboard affordance and as a visible hint that there is more to read.
-   Hover opens after a delay; keyboard focus opens at once; Escape closes; the
-   tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
-   The trigger is revealed only when the text is actually clipped.
-   Written without ampersand or less-than characters so the template
-   stays valid XML. */
-(function () {
-  var OPEN_DELAY = 1000;
-  var groups = document.querySelectorAll('.staff-news__summary');
-  if (!groups.length) { return; }
-
-  var current = null, openTimer = null, closeTimer = null, entries = [];
-
-  function place(tip) {
-    tip.style.left = '0px';
-    var box = tip.getBoundingClientRect();
-    var over = box.right - (window.innerWidth - 8);
-    if (over > 0) { tip.style.left = (0 - over) + 'px'; }
-    var after = tip.getBoundingClientRect();
-    if (after.left > 8) { return; }
-    tip.style.left = (parseFloat(tip.style.left || 0) + (8 - after.left)) + 'px';
-  }
-
-  function close() {
-    window.clearTimeout(openTimer);
-    window.clearTimeout(closeTimer);
-    if (!current) { return; }
-    current.tip.hidden = true;
-    current.btn.setAttribute('aria-expanded', 'false');
-    if (current.card) { current.card.classList.remove('has-open-tip'); }
-    current = null;
-  }
-
-  function open(entry) {
-    if (current) {
-      if (current === entry) { return; }
-      close();
-    }
-    entry.tip.hidden = false;
-    entry.btn.setAttribute('aria-expanded', 'true');
-    /* Raise the owning card so later cards cannot paint over the tooltip. */
-    if (entry.card) { entry.card.classList.add('has-open-tip'); }
-    place(entry.tip);
-    current = entry;
-  }
-
-  function scheduleClose() {
-    window.clearTimeout(closeTimer);
-    closeTimer = window.setTimeout(close, 200);
-  }
-
-  function measure(entry) {
-    var clipped = entry.clamp.scrollHeight > entry.clamp.clientHeight + 1;
-    entry.clipped = clipped;
-    entry.btn.hidden = !clipped;
-    if (clipped) {
-      entry.clamp.classList.add('is-clipped');
-    } else {
-      entry.clamp.classList.remove('is-clipped');
-      if (current === entry) { close(); }
-    }
-  }
-
-  Array.prototype.forEach.call(groups, function (summary) {
-    var clamp = summary.querySelector('.staff-news__clamp');
-    var btn = summary.querySelector('.staff-news__more');
-    var tip = summary.querySelector('.staff-news__tip');
-    if (!clamp) { return; }
-    if (!btn) { return; }
-    if (!tip) { return; }
-    var entry = { clamp: clamp, btn: btn, tip: tip,
-                  card: summary.closest ? summary.closest('.staff-card') : null };
-    entries.push(entry);
-
-    btn.addEventListener('mouseenter', function () {
-      window.clearTimeout(closeTimer);
-      window.clearTimeout(openTimer);
-      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
-    });
-    btn.addEventListener('mouseleave', function () {
-      window.clearTimeout(openTimer);
-      scheduleClose();
-    });
-    /* Keyboard users get it immediately: a one second wait on focus would
-       feel broken. */
-    btn.addEventListener('focus', function () { open(entry); });
-    btn.addEventListener('blur', function (ev) {
-      if (ev.relatedTarget) {
-        if (tip.contains(ev.relatedTarget)) { return; }
-      }
-      scheduleClose();
-    });
-    /* Click covers touch, where hover does not exist. */
-    btn.addEventListener('click', function (ev) {
-      ev.preventDefault();
-      window.clearTimeout(openTimer);
-      if (current === entry) { close(); } else { open(entry); }
-    });
-
-    clamp.addEventListener('mouseenter', function () {
-      if (!entry.clipped) { return; }
-      window.clearTimeout(closeTimer);
-      window.clearTimeout(openTimer);
-      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
-    });
-    clamp.addEventListener('mouseleave', function () {
-      window.clearTimeout(openTimer);
-      scheduleClose();
-    });
-    clamp.addEventListener('click', function () {
-      if (!entry.clipped) { return; }
-      window.clearTimeout(openTimer);
-      if (current === entry) { close(); } else { open(entry); }
-    });
-
-    tip.addEventListener('mouseenter', function () { window.clearTimeout(closeTimer); });
-    tip.addEventListener('mouseleave', function () { scheduleClose(); });
-    tip.addEventListener('focusout', function (ev) {
-      if (ev.relatedTarget) {
-        if (tip.contains(ev.relatedTarget)) { return; }
-        if (ev.relatedTarget === btn) { return; }
-      }
-      scheduleClose();
-    });
-
-    measure(entry);
-  });
-
-  document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape') { close(); }
-  });
-  document.addEventListener('click', function (ev) {
-    if (!current) { return; }
-    if (current.tip.contains(ev.target)) { return; }
-    if (current.btn.contains(ev.target)) { return; }
-    /* The summary text opens the tooltip, so a click on it must not also be
-       treated as a click outside - that closed it again immediately. */
-    if (current.clamp.contains(ev.target)) { return; }
-    close();
-  });
-
-  var resizeTimer = null;
-  window.addEventListener('resize', function () {
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(function () {
-      close();
-      entries.forEach(function (e) { measure(e); });
-    }, 150);
-  });
-}());
-
-/* Calendar snapshot: the day strip is an ARIA tablist. Every day's panel is
-   already in the DOM, so switching is just toggling `hidden` - no request.
-   Arrow keys, Home and End move between days with a roving tabindex.
-   Written without ampersand or less-than characters so the template stays
-   valid XML - hence forEach rather than an indexed for loop. */
-(function () {
-  var strip = document.querySelector('.staff-snapshot__strip');
-  if (!strip) { return; }
-  var tabs = Array.prototype.slice.call(strip.querySelectorAll('[role="tab"]'));
-  if (!tabs.length) { return; }
-
-  function panelFor(tab) {
-    return document.getElementById(tab.getAttribute('aria-controls'));
-  }
-
-  function select(index, moveFocus) {
-    tabs.forEach(function (tab, i) {
-      var on = (i === index);
-      tab.setAttribute('aria-selected', on ? 'true' : 'false');
-      tab.setAttribute('tabindex', on ? '0' : '-1');
-      var panel = panelFor(tab);
-      if (panel) { panel.hidden = !on; }
-    });
-    if (moveFocus) { tabs[index].focus(); }
-  }
-
-  tabs.forEach(function (tab, index) {
-    tab.addEventListener('click', function () { select(index, false); });
-    tab.addEventListener('keydown', function (ev) {
-      var next = -1;
-      if (ev.key === 'ArrowRight') { next = (index + 1) % tabs.length; }
-      if (ev.key === 'ArrowLeft') { next = (index + tabs.length - 1) % tabs.length; }
-      if (ev.key === 'Home') { next = 0; }
-      if (ev.key === 'End') { next = tabs.length - 1; }
-      if (next > -1) {
-        ev.preventDefault();
-        select(next, true);
-      }
-    });
-  });
-}());
-</script>
+<!-- Tooltip and calendar behaviour live in /staff/dashboard.js (source:
+     prototype/dashboard.js). Loaded by absolute URL so it resolves whether the
+     page is reached as /staff, /staff/ or /staff/index_html. -->
+<script defer="defer"
+        tal:attributes="src string:${here/absolute_url}/dashboard.js"></script>
 
 </div><!-- /.staff-embed-root -->

@@ -13,10 +13,20 @@
    not take pasted template source.
 3. **Add the styles.** Append `../prototype/staff-dashboard.css` to
    `/staff/local.css` (see below).
-4. **Remove the existing banner block.** `index_html` already carries a
+4. **Add the script.** In `/staff`, add a **File** object with the id
+   `dashboard.js` and upload `../prototype/dashboard.js`. Set its Content-Type to
+   `text/javascript` - served as `application/octet-stream` the browser refuses
+   to run it, and the tooltip and calendar paging silently stop working. The
+   template links it with `defer` from `${here/absolute_url}/dashboard.js`.
+5. **Remove the existing banner block.** `index_html` already carries a
    `banner_2025-01-01-00-00-00-000` block. This template renders its own banner
    (the approved design puts the search field inside it), so leaving both in
    place shows two banners.
+
+A deploy is therefore **four pieces**: the data script, the template,
+`staff-dashboard.css` into `local.css`, and `dashboard.js`. Run
+`python3 tools/check_template.py` first; it checks all four for non-ASCII
+characters and the template for XML and `python:` expression errors.
 
 ### The stylesheet
 
@@ -396,6 +406,9 @@ were saved - and a template exception blanks the entire page, not just the card.
 
 ### How Do I...?
 
+**Parked** (`tal:condition="nothing"`) until the destinations exist. The markup
+and styles stay in place; delete that condition to bring it back.
+
 Static, like Quick Links and Explore: these are wayfinding links rather than
 content, so they live in one list in the template instead of the CMS. Adding a
 link is adding one dict.
@@ -409,41 +422,48 @@ Laid out with CSS multi-column rather than a grid, so links read top-to-bottom
 within each column the way the mockup's two columns do, instead of snaking left
 to right across rows. Three columns at xl, two at sm, one on mobile.
 
-### Calendar snapshot
+### Events Calendar
 
-A **rolling seven days from today**, not a fixed Mon-Fri week. With events
-spread across months, a fixed week is empty most of the time and reads as
-broken; a rolling window only empties when nothing is genuinely coming up.
+Replaced the rolling "Next 7 Days" strip at the client's request. A month grid,
+Sunday first, with **the current month and the next eleven**; days that have
+events are solid black circles, today carries a gold ring.
 
-It sits below Upcoming Events and answers a different question - *what is
-happening soon* rather than *what is next* - so some overlap is expected.
+- Built from the **same catalog read** as Upcoming Events - no extra query.
+- All twelve months are rendered and eleven carry `hidden`; `dashboard.js`
+  pages between them, so the chevrons need no request. At either end the arrow
+  disables, and focus moves to the other arrow rather than being lost.
+- Only event days are `<button>`s, each with `aria-pressed` and
+  `aria-controls` pointing at a list of that day's events below the grid.
+  Plain days are text, so keyboard users tab through events rather than 30 days.
+- Each month opens on a day: this month on the **first event day from today
+  onwards** (or its first event day if they are all past), other months on
+  their first event day. A month with no events says so.
+- A **multi-day event appears on every day it covers**, clipped to the window.
+  Past days of the current month are kept - the grid would look wrong without them.
+- Grid arithmetic is **pure integer maths** (Sakamoto's weekday formula), not
+  `DateTime + n`. Adding days to a `DateTime` adds 24-hour periods, which lands on
+  the wrong date at midnight across a daylight-saving change - a latent bug the
+  old strip had.
+- Renders **nothing** when the script is unavailable: unlike a list, a
+  calendar has no sensible placeholder.
 
-- Built from the **same catalog read** as Upcoming Events, so the snapshot
-  costs no extra query.
-- A **multi-day event appears on every day it covers**, derived from
-  `event_end_date`.
-- It opens on today, unless today is empty and a later day in the window is
-  not - landing on an empty list when there is content to see is unhelpful.
-- Days with events carry a dot; today carries a gold ring. Those are
-  independent: you can be looking at Thursday while today is Monday.
+Verified by running the script against Python's `calendar` module for every
+month from 2024 to 2031 (1,152 grids, leap Februaries included), plus fixture
+tests for spans across month ends, window edges, drafts and DST dates.
 
-**Interaction** is the ARIA tabs pattern: the strip is a `tablist`, each day a
-`tab`, each day's list a `tabpanel`. Every panel is rendered and all but one
-carries `hidden`, so switching days needs no request. Arrow keys, Home and End
-move between days with a roving tabindex.
+**Open with the client:** the mockup draws some numerals gold and some white
+inside the circles with no stated meaning. One style is used for now.
 
-**Batch "Add selected events to Outlook" was deferred.** Each event already
-links to its own `.ics`; a combined file needs a script stitching multiple
-VEVENTs plus selection state, which is a lot for a secondary action.
+**Batch "Add selected events to Outlook" is still deferred.** Each event links
+to its own `.ics` from Upcoming Events.
 
 Two Zope specifics worth knowing:
 
-- The selected day is flagged **in the data** (`day['selected']`), not computed
+- The selected day is flagged **in the data** (`selected`), not computed
   in the template. In a `python:` expression `repeat['day'].index` is a *bound
-  method* rather than a value, and Zope 2.13 exposes it differently again.
+  method* rather than a value.
 - `tal:define` runs **before** `tal:repeat` on the same element, so
-  `repeat/day/index` is unavailable there. Attributes are evaluated after the
-  repeat, so `repeat/day/number` works in `tal:attributes`.
+  `repeat/day/index` is unavailable there.
 
 ### Three states per widget
 

@@ -632,109 +632,138 @@
 .staff-howto__link:focus-visible::after { transform: translateX(3px); }
 
 /* ==========================================================================
-   Calendar snapshot - rolling seven days
-   Tabs pattern: the strip is a tablist, each day a tab, each day's list a
-   tabpanel. All panels are rendered and all but one carries `hidden`.
+   Events Calendar
+   Month grid after the approved mockup: Sunday-first, blank cells for the
+   neighbouring months, solid black circles on days with events.
+   Today and the selected day are layered as rings so they combine with the
+   event circle rather than replacing it.
    ========================================================================== */
-.staff-snapshot__strip {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
-  margin-bottom: 1.1rem;
-}
-
-.staff-snapshot__day {
+.staff-cal__nav {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  min-height: 44px;
-  padding: 0.4rem 0.1rem 0.45rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: none;
-  cursor: pointer;
-  color: var(--steel-gray);
-  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
-.staff-snapshot__day:hover { background: #faf7f1; border-color: var(--steam); }
-
-.staff-snapshot__weekday {
-  font-family: var(--united-sans-cond);
-  font-weight: 900;
-  font-size: 0.625rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  line-height: 1;
-}
-.staff-snapshot__date {
-  font-family: var(--united-sans-cond);
-  font-weight: 900;
+.staff-cal__heading {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--acumin-pro);
   font-size: 1.0625rem;
-  line-height: 1.05;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
   color: #000;
 }
-
-/* Today is marked by a ring; the selected day is filled. They are independent:
-   you can be looking at Thursday while today is Monday. */
-.staff-snapshot__day.is-today { border-color: var(--boiler-gold); }
-
-.staff-snapshot__day[aria-selected="true"] {
-  background: var(--aged-gold);
-  border-color: var(--aged-gold);
-  color: #fff;
-}
-.staff-snapshot__day[aria-selected="true"] .staff-snapshot__date { color: #fff; }
-
-/* A dot means that day has something on it. */
-.staff-snapshot__dot {
-  width: 5px;
-  height: 5px;
+.staff-cal__step {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
   border-radius: 50%;
-  background: var(--aged-gold);
+  background: none;
+  color: #000;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.16s ease;
 }
-.staff-snapshot__day[aria-selected="true"] .staff-snapshot__dot { background: #fff; }
+.staff-cal__step:hover { background: var(--light-gray); }
+/* Inactive controls are exempt from contrast minimums (WCAG 1.4.3). */
+.staff-cal__step[disabled] {
+  color: var(--steam);
+  background: none;
+  cursor: default;
+}
 
-.staff-snapshot__panel[hidden] { display: none !important; }
+.staff-cal__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.staff-cal__grid th {
+  padding: 0.25rem 0 0.45rem;
+  font-family: var(--acumin-pro);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--steel-gray);
+}
+.staff-cal__grid td {
+  padding: 0.15rem 0;
+  text-align: center;
+}
 
-.staff-snapshot__label {
+.staff-cal__day {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-family: var(--acumin-pro);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--steel-gray);
+}
+
+/* A day with events: the black circle from the mockup. */
+button.staff-cal__day {
+  padding: 0;
+  border: 0;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+button.staff-cal__day:hover { background: var(--steel-gray); }
+
+/* Today: an inner gold ring. On a plain day it sits on white; on an event day
+   it sits inside the black circle, so both states read at once. */
+.staff-cal__day.is-today {
+  color: #000;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px var(--aged-gold);
+}
+button.staff-cal__day.is-today {
+  color: #fff;
+  box-shadow: inset 0 0 0 2px var(--boiler-gold);
+}
+
+/* Selected: an outer ring with a white gap. Aged gold, not Boilermaker gold,
+   because the ring sits on white and must clear 3:1 as a state indicator. */
+button.staff-cal__day[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--aged-gold);
+}
+button.staff-cal__day.is-today[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--boiler-gold), 0 0 0 2px #fff, 0 0 0 4px var(--aged-gold);
+}
+
+.staff-cal__month[hidden],
+.staff-cal__panel[hidden] { display: none !important; }
+
+.staff-cal__list {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--steam);
+}
+.staff-cal__day-heading {
+  margin: 0 0 0.35rem;
   font-family: var(--acumin-pro);
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--steel-gray);
-  margin: 0 0 0.5rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px solid var(--steam);
 }
-
-.staff-snapshot__events { list-style: none; margin: 0; padding: 0; }
-.staff-snapshot__events li {
-  padding: 0.4rem 0 0.4rem 0.85rem;
-  position: relative;
+.staff-cal__events { list-style: none; margin: 0; padding: 0; }
+.staff-cal__events li {
+  padding: 0.35rem 0;
   font-size: 0.875rem;
   line-height: 1.4;
 }
-.staff-snapshot__events li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.85rem;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--boiler-gold);
-}
-.staff-snapshot__when {
-  display: block;
-  font-family: var(--united-sans-cond);
-  font-weight: 900;
-  font-size: 0.6875rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--aged-gold);
-}
-.staff-snapshot__link {
+.staff-cal__link {
   color: #000;
+  font-weight: 600;
   line-height: inherit;
   text-decoration: none !important;
   background-image: linear-gradient(var(--boiler-gold), var(--boiler-gold));
@@ -743,8 +772,13 @@
   background-size: 0% 2px;
   transition: background-size 0.25s ease;
 }
-.staff-snapshot__link:hover,
-.staff-snapshot__link:focus-visible { background-size: 100% 2px; }
+.staff-cal__link:hover,
+.staff-cal__link:focus-visible { background-size: 100% 2px; }
+.staff-cal__meta {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--steel-gray);
+}
 
 /* Shown when a widget genuinely has nothing to display - distinct from the
    placeholder content, which only appears when the query could not run. */
@@ -872,7 +906,7 @@
 .block.--bg-light-gray .staff-news__title,
 .block.--bg-light-gray .staff-explore__title,
 .block.--bg-light-gray .staff-howto__link,
-.block.--bg-light-gray .staff-snapshot__link,
+.block.--bg-light-gray .staff-cal__link,
 .block.--bg-light-gray .staff-event__link,
 .block.--bg-light-gray .staff-event__title {
   color: #000;

@@ -102,7 +102,8 @@ def check(path):
 
 DEFAULTS = ['zope/dashboard_home.pt',
             'zope/scripts/get_staff_dashboard_data.py',
-            'prototype/staff-dashboard.css']
+            'prototype/staff-dashboard.css',
+            'prototype/dashboard.js']
 
 if __name__ == '__main__':
     sys.exit(max(check(p) for p in (sys.argv[1:] or DEFAULTS)))

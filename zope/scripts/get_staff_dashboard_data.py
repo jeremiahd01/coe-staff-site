@@ -615,98 +615,216 @@ except Exception:
 
 
 # ---------------------------------------------------------------------------
-# Calendar snapshot - a rolling seven days starting today
+# Events Calendar - month grids for the current month and the next eleven
 #
-# Rolling rather than "this week" on purpose: with events spread across months,
-# a fixed Mon-Fri strip is empty most weeks, which reads as broken. A rolling
-# window only empties when nothing is genuinely coming up.
+# Dates are built with plain year/month/day arithmetic, never DateTime
+# addition. Adding days to a DateTime adds exact 24-hour periods, so across a
+# daylight-saving change a midnight date lands at 23:00 the day before and
+# .day() reports the wrong date. Arithmetic on the numbers cannot drift.
 #
-# Every day's events are emitted, not just the selected one, so switching days
-# is instant and needs no second request. Reuses the catalog read above.
+# Every month in the window is emitted with all but the first hidden, so paging
+# needs no request. Only days that have events become buttons; each day's
+# events are emitted alongside as a panel for dashboard.js to reveal.
 # ---------------------------------------------------------------------------
-SNAPSHOT_DAYS = 7
+CALENDAR_MONTHS = 12
+SPAN_LIMIT = 92            # longest multi-day event we will expand, in days
 
-snapshot = []
-snapshot_ok = 1
-snapshot_selected = 0
+MONTH_NAMES = ('January', 'February', 'March', 'April', 'May', 'June', 'July',
+               'August', 'September', 'October', 'November', 'December')
+WEEKDAY_NAMES = ('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+                 'Friday', 'Saturday')
+MONTH_LENGTHS = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+DOW_OFFSETS = (0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
+
+
+def is_leap(year):
+    if year % 400 == 0:
+        return 1
+    if year % 100 == 0:
+        return 0
+    return year % 4 == 0 and 1 or 0
+
+
+def month_length(year, month):
+    if month == 2 and is_leap(year):
+        return 29
+    return MONTH_LENGTHS[month - 1]
+
+
+def weekday_of(year, month, day):
+    """0 = Sunday. Sakamoto's method - no DateTime, no timezone."""
+    y = year
+    if month < 3:
+        y = y - 1
+    return (y + y // 4 - y // 100 + y // 400 + DOW_OFFSETS[month - 1] + day) % 7
+
+
+def iso_of(year, month, day):
+    return '%04d-%02d-%02d' % (year, month, day)
+
+
+def next_day(year, month, day):
+    if day < month_length(year, month):
+        return (year, month, day + 1)
+    if month < 12:
+        return (year, month + 1, 1)
+    return (year + 1, 1, 1)
+
+
+def ymd(dt):
+    """(year, month, day) as ints from a Zope DateTime or a datetime."""
+    if dt is None:
+        return None
+    try:
+        return (int(dt.year()), int(dt.month()), int(dt.day()))
+    except Exception:
+        pass
+    try:
+        return (int(dt.strftime('%Y')), int(dt.strftime('%m')), int(dt.strftime('%d')))
+    except Exception:
+        return None
+
+
+calendar_months = []
+calendar_ok = 1
 try:
-    # A while loop rather than range(): this instance's restricted Python
-    # withholds sorted(), so no builtin is assumed unless it has been proven.
-    offset = 0
-    while offset < SNAPSHOT_DAYS:
-        try:
-            day = today + offset
-        except Exception:
-            break
-        key = day_key(day)
-        entries = []
-        for brain in cal_brains:
-            if not visible(brain, now):
-                continue
-            start = meta(brain, 'event_date')
-            if start is None:
-                continue
-            finish = meta(brain, 'event_end_date')
-            if finish is None:
-                finish = start
-            start_key = day_key(start)
-            finish_key = day_key(finish)
-            if finish_key < start_key:
-                finish_key = start_key
-            # a multi-day event shows on every day it covers
-            if key < start_key:
-                continue
-            if key > finish_key:
-                continue
-            url, obj = resolve(brain)
-            when = field_value(obj, FIELD_TIME)
-            if not when:
-                when = fmt_when(start, meta(brain, 'event_end_date'))
-            title = as_text(meta(brain, 'title', u''))
-            if not title:
-                continue
-            entries.append({'title': title, 'when': when, 'url': url})
+    today_ymd = ymd(now)
+    today_iso = iso_of(today_ymd[0], today_ymd[1], today_ymd[2])
 
-        if offset == 0:
-            label = u'Today'
-        elif offset == 1:
-            label = u'Tomorrow'
-        else:
-            label = as_text(day.strftime('%A'))
+    window = []
+    year = today_ymd[0]
+    month = today_ymd[1]
+    while len(window) < CALENDAR_MONTHS:
+        window.append((year, month))
+        month = month + 1
+        if month > 12:
+            month = 1
+            year = year + 1
+    first_iso = iso_of(window[0][0], window[0][1], 1)
+    last_iso = iso_of(window[-1][0], window[-1][1],
+                      month_length(window[-1][0], window[-1][1]))
 
-        snapshot.append({
-            'weekday': as_text(day.strftime('%a')),
-            'day':     day_number(day),
-            'label':   label,
-            'long':    as_text(day.strftime('%A, %B ')) + day_number(day),
-            'today':   offset == 0 and 1 or 0,
-            'count':   len(entries),
-            'events':  entries,
-        })
-        offset = offset + 1
+    # Every event day inside the window, mapped to its entries.
+    by_day = {}
+    for brain in cal_brains:
+        if not visible(brain, now):
+            continue
+        start = meta(brain, 'event_date')
+        start_ymd = ymd(start)
+        if start_ymd is None:
+            continue
+        finish = meta(brain, 'event_end_date')
+        finish_ymd = ymd(finish) or start_ymd
+        start_iso = iso_of(start_ymd[0], start_ymd[1], start_ymd[2])
+        finish_iso = iso_of(finish_ymd[0], finish_ymd[1], finish_ymd[2])
+        if finish_iso < start_iso:
+            finish_iso = start_iso
+        if finish_iso < first_iso:
+            continue
+        if start_iso > last_iso:
+            continue
+        title = as_text(meta(brain, 'title', u''))
+        if not title:
+            continue
 
-    # Open on today, unless today is empty and something else in the window is
-    # not - landing on an empty list when there is content to see is unhelpful.
-    if snapshot:
-        if not snapshot[0]['count']:
-            position = 0
-            for day_entry in snapshot:
-                if day_entry['count']:
-                    snapshot_selected = position
-                    break
-                position = position + 1
+        url, obj = resolve(brain)
+        when = field_value(obj, FIELD_TIME)
+        if not when:
+            when = fmt_when(start, finish)
+        where = field_value(obj, FIELD_LOCATION)
+        parts = []
+        if when:
+            parts.append(when)
+        if where:
+            parts.append(where)
+        entry = {'title': title, 'url': url, 'meta': u' | '.join(parts)}
 
-    # Mark the selected day in the data rather than comparing indices in the
-    # template. In a python: expression repeat['day'].index is a bound method,
-    # not a value, and Zope 2.13 exposes it differently again - so the template
-    # should not have to introspect the repeat variable at all.
+        # a multi-day event is listed on every day it covers
+        cursor = start_ymd
+        steps = 0
+        while steps < SPAN_LIMIT:
+            key = iso_of(cursor[0], cursor[1], cursor[2])
+            if key > finish_iso:
+                break
+            if key >= first_iso and key <= last_iso:
+                if key not in by_day:
+                    by_day[key] = []
+                by_day[key].append(entry)
+            cursor = next_day(cursor[0], cursor[1], cursor[2])
+            steps = steps + 1
+
     position = 0
-    for day_entry in snapshot:
-        day_entry['selected'] = position == snapshot_selected and 1 or 0
+    for pair in window:
+        year = pair[0]
+        month = pair[1]
+        length = month_length(year, month)
+        lead = weekday_of(year, month, 1)
+        month_name = MONTH_NAMES[month - 1]
+
+        # Which event day opens selected: in the current month the first one
+        # from today onward, otherwise the month's first.
+        event_days = []
+        day_num = 1
+        while day_num <= length:
+            key = iso_of(year, month, day_num)
+            if key in by_day:
+                event_days.append(key)
+            day_num = day_num + 1
+        selected_iso = ''
+        for key in event_days:
+            if position > 0 or key >= today_iso:
+                selected_iso = key
+                break
+        if not selected_iso and event_days:
+            selected_iso = event_days[0]
+
+        cells = []
+        while len(cells) < lead:
+            cells.append({'blank': 1})
+        panels = []
+        day_num = 1
+        while day_num <= length:
+            key = iso_of(year, month, day_num)
+            entries = by_day.get(key, [])
+            count_here = len(entries)
+            label = u'%s, %s %d' % (WEEKDAY_NAMES[(lead + day_num - 1) % 7],
+                                    month_name, day_num)
+            if count_here == 1:
+                aria = label + u', 1 event'
+            elif count_here:
+                aria = u'%s, %d events' % (label, count_here)
+            else:
+                aria = label
+            is_selected = key == selected_iso and 1 or 0
+            cells.append({'blank': 0, 'num': u'%d' % day_num, 'iso': key,
+                          'today': key == today_iso and 1 or 0,
+                          'count': count_here, 'selected': is_selected,
+                          'aria': aria})
+            if count_here:
+                panels.append({'iso': key, 'heading': label,
+                               'selected': is_selected, 'events': entries})
+            day_num = day_num + 1
+        while len(cells) % 7:
+            cells.append({'blank': 1})
+
+        weeks = []
+        index = 0
+        while index < len(cells):
+            weeks.append(cells[index:index + 7])
+            index = index + 7
+
+        calendar_months.append({
+            'key': u'%04d-%02d' % (year, month),
+            'heading': u'%s %d' % (month_name, year),
+            'visible': position == 0 and 1 or 0,
+            'weeks': weeks,
+            'days': panels,
+            'empty': u'No events in %s.' % month_name,
+        })
         position = position + 1
 except Exception:
-    snapshot = []
-    snapshot_ok = 0
+    calendar_months = []
+    calendar_ok = 0
 
 
 # ---------------------------------------------------------------------------
@@ -772,8 +890,7 @@ def link_list(name):
 # we could not look, and the template keeps its placeholder content instead.
 return {'announcements': announcements, 'announcements_ok': announcements_ok,
         'events': events, 'events_ok': events_ok,
-        'snapshot': snapshot, 'snapshot_ok': snapshot_ok,
-        'snapshot_selected': snapshot_selected,
+        'calendar_months': calendar_months, 'calendar_ok': calendar_ok,
         'quick_links': link_list('quick_links'),
         'how_do_i': link_list('how_do_i'),
         'explore': link_list('explore')}
