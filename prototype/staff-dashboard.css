@@ -690,11 +690,16 @@
   color: var(--steel-gray);
 }
 .staff-cal__grid td {
-  padding: 0.15rem 0;
+  /* Extra room below each circle for the today bar. */
+  padding: 0.2rem 0 0.45rem;
   text-align: center;
 }
 
+/* Each state has exactly one kind of mark, so they never compete:
+   black circle = has events, gold fill = the day listed below,
+   gold bar underneath = today. */
 .staff-cal__day {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 36px;
@@ -719,25 +724,69 @@ button.staff-cal__day {
 }
 button.staff-cal__day:hover { background: var(--steel-gray); }
 
-/* Today: an inner gold ring. On a plain day it sits on white; on an event day
-   it sits inside the black circle, so both states read at once. */
-.staff-cal__day.is-today {
+/* Selected: the circle turns Boilermaker gold with a black numeral (about
+   11:1). Boilermaker gold is only 1.9:1 against the white card, so a thin
+   Aged gold edge (4.7:1) carries the shape past the 3:1 non-text minimum. */
+button.staff-cal__day[aria-pressed="true"],
+button.staff-cal__day[aria-pressed="true"]:hover {
+  background: var(--boiler-gold);
   color: #000;
-  font-weight: 700;
-  box-shadow: inset 0 0 0 2px var(--aged-gold);
-}
-button.staff-cal__day.is-today {
-  color: #fff;
-  box-shadow: inset 0 0 0 2px var(--boiler-gold);
+  box-shadow: inset 0 0 0 1px var(--aged-gold);
 }
 
-/* Selected: an outer ring with a white gap. Aged gold, not Boilermaker gold,
-   because the ring sits on white and must clear 3:1 as a state indicator. */
-button.staff-cal__day[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--aged-gold);
+/* Today: bold numeral and a short Aged gold bar under the circle. It sits
+   outside the circle, so it combines with either circle without clashing. */
+.staff-cal__day.is-today {
+  font-weight: 700;
 }
-button.staff-cal__day.is-today[aria-pressed="true"] {
-  box-shadow: inset 0 0 0 2px var(--boiler-gold), 0 0 0 2px #fff, 0 0 0 4px var(--aged-gold);
+span.staff-cal__day.is-today { color: #000; }
+.staff-cal__day.is-today::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 16px;
+  height: 3px;
+  margin-left: -8px;
+  border-radius: 2px;
+  background: var(--aged-gold);
+}
+
+/* Key to the three marks. Decorative for screen readers: each day button
+   already announces its events, pressed state and aria-current. */
+.staff-cal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--acumin-pro);
+  font-size: 0.75rem;
+  color: var(--steel-gray);
+}
+.staff-cal__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.staff-cal__key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #000;
+}
+.staff-cal__key--selected {
+  background: var(--boiler-gold);
+  box-shadow: inset 0 0 0 1px var(--aged-gold);
+}
+.staff-cal__key--today {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--aged-gold);
 }
 
 .staff-cal__month[hidden],

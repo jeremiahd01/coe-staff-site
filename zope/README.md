@@ -426,7 +426,22 @@ to right across rows. Three columns at xl, two at sm, one on mobile.
 
 Replaced the rolling "Next 7 Days" strip at the client's request. A month grid,
 Sunday first, with **the current month and the next eleven**; days that have
-events are solid black circles, today carries a gold ring.
+events are solid black circles.
+
+Each state has **one kind of mark**, so they never compete (an earlier
+version used gold rings for both today and the selected day, which read as
+the same thing):
+
+| State | Mark |
+|---|---|
+| Has events | Black circle, white numeral |
+| Selected (listed below) | Boilermaker gold circle, black numeral, thin Aged gold edge |
+| Today | Bold numeral, short Aged gold bar under the circle |
+
+The Aged gold edge is there for contrast: Boilermaker gold alone is 1.9:1
+against the white card, under the 3:1 minimum for a state indicator. A small
+legend under the grid explains the marks; it is `aria-hidden` because each
+day button already announces its events, pressed state and `aria-current`.
 
 - Built from the **same catalog read** as Upcoming Events - no extra query.
 - All twelve months are rendered and eleven carry `hidden`; `dashboard.js`

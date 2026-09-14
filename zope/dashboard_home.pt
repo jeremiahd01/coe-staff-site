@@ -433,6 +433,12 @@
               </tbody>
             </table>
 
+            <ul class="staff-cal__legend" aria-hidden="true">
+              <li><span class="staff-cal__key"></span>Has events</li>
+              <li><span class="staff-cal__key staff-cal__key--selected"></span>Showing below</li>
+              <li><span class="staff-cal__key staff-cal__key--today"></span>Today</li>
+            </ul>
+
             <div class="staff-cal__list">
               <div class="staff-cal__panel"
                    tal:repeat="day month/days"
