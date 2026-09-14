@@ -218,7 +218,10 @@
              not content, so they live in one list here rather than in the CMS.
              LABELS come from the original mockup; every URL is a placeholder
              until the guide pages exist. Correct both in the list below. -->
-        <div class="staff-card"
+        <!-- Parked until the guide URLs exist: tal:condition="nothing" keeps the
+             markup and the settings wiring, but renders nothing. Delete that one
+             attribute to bring the widget back. -->
+        <div class="staff-card" tal:condition="nothing"
              tal:define="how_do_i python:live_howto or [
                {'label': 'Hire someone',          'url': '#'},
                {'label': 'Post a position',       'url': '#'},
