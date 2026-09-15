@@ -1,0 +1,212 @@
+<div class="staff-embed-root"
+     xmlns:tal="http://xml.zope.org/namespaces/tal"
+     xmlns:metal="http://xml.zope.org/namespaces/metal"
+     tal:define="cal here/get_staff_calendar_month | nothing;
+                 cal_ok python:cal is not None and cal.get('ok')">
+<!--
+  ============================================================================
+  Staff Hub  -  full staff calendar
+  Purdue University, College of Engineering
+
+  Embedded into /staff/calendar/index_html via a "Page Template Embed" block.
+  Styles: /staff/local.css (prototype/staff-dashboard.css, then
+  prototype/staff-calendar.css). Behaviour: /staff/staff-calendar.js.
+
+  DATA: get_staff_calendar_month (Script (Python) in /staff, reached by
+  acquisition) builds one month per request from ?month=YYYY-MM. The arrows
+  are plain links, so there is no month limit and every month is bookmarkable.
+
+  Without JavaScript the page still works: titles are links to each event,
+  busy days show every title, and phones get the agenda list.
+
+  Target: Zope 2.13.10 / Python 2.7.18. Keep the file pure ASCII and every
+  python: expression on one line.
+  ============================================================================
+-->
+
+<section class="block --bg-light-gray staff-fullcal-page">
+  <div class="container">
+    <div class="staff-card staff-fullcal">
+
+      <div class="motion-line mh-gold">
+        <h2 class="motion-heading mh-gold">Staff Calendar</h2>
+      </div>
+
+      <p class="staff-empty" tal:condition="not:cal_ok">
+        The calendar could not be loaded right now. Please try again shortly.
+      </p>
+
+      <tal:calendar tal:condition="cal_ok">
+
+        <div class="staff-fullcal__bar">
+          <nav class="staff-fullcal__nav" aria-label="Choose month">
+            <a class="staff-fullcal__step"
+               tal:attributes="href string:?month=${cal/prev_key};
+                               aria-label string:Previous month, ${cal/prev_heading}">
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </a>
+            <h3 class="staff-fullcal__heading" id="staff-fullcal-heading"
+                tal:content="cal/heading">September 2026</h3>
+            <a class="staff-fullcal__step"
+               tal:attributes="href string:?month=${cal/next_key};
+                               aria-label string:Next month, ${cal/next_heading}">
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+          </nav>
+
+          <div class="staff-fullcal__tools">
+            <a class="staff-fullcal__today"
+               tal:condition="not:cal/is_current"
+               tal:attributes="href string:?month=${cal/current_key}">Back to this month</a>
+            <!-- Decorative: every title also carries a hidden "Event:" or
+                 "Announcement:" prefix for screen readers. -->
+            <ul class="staff-fullcal__legend" aria-hidden="true">
+              <li><span class="staff-fullcal__swatch --event"></span>Event</li>
+              <li><span class="staff-fullcal__swatch --announcement"></span>Announcement</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="staff-empty" tal:condition="not:cal/items_ok">
+          Some calendar entries could not be loaded, so this month may be incomplete.
+        </p>
+
+        <!-- ==== Month grid (tablet and up) ==== -->
+        <table class="staff-fullcal__grid" aria-labelledby="staff-fullcal-heading">
+          <thead>
+            <tr>
+              <th scope="col">Sunday</th>
+              <th scope="col">Monday</th>
+              <th scope="col">Tuesday</th>
+              <th scope="col">Wednesday</th>
+              <th scope="col">Thursday</th>
+              <th scope="col">Friday</th>
+              <th scope="col">Saturday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr tal:repeat="week cal/weeks">
+              <td tal:repeat="cell week"
+                  tal:attributes="class python:cell['blank'] and 'staff-fullcal__cell is-blank' or 'staff-fullcal__cell' + (cell['today'] and ' is-today' or '') + (cell['past'] and ' is-past' or '')">
+                <tal:day tal:condition="not:cell/blank">
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true"
+                          tal:content="cell/num">17</span>
+                    <span class="staff-visually-hidden"
+                          tal:content="python:cell['today'] and cell['label'] + u', today' or cell['label']">Thursday, September 17</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items" tal:condition="cell/entries">
+                    <li tal:repeat="item cell/entries"
+                        tal:attributes="class python:'staff-fullcal__item' + (item['overflow'] and ' is-overflow' or '') + (item['continued'] and ' is-continued' or '')">
+                      <a tal:attributes="href item/url;
+                                         class python:'staff-fullcal__link --' + item['kind'];
+                                         data-pop item/pop_id"><span class="staff-visually-hidden" tal:content="python:item['kind_label'] + u': '">Event: </span><span tal:replace="item/title">Staff Council Meeting</span></a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden"
+                           tal:attributes="id item/pop_id;
+                                           class python:'staff-fullcal__pop --' + item['kind']">
+                        <p class="staff-fullcal__kind" tal:content="item/kind_label">Event</p>
+                        <p class="staff-fullcal__pop-title" tal:content="item/title">Staff Council Meeting</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span tal:content="item/date_label">Thursday, September 17, 2026</span>
+                          </li>
+                          <li tal:condition="item/when">
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span tal:content="item/when">10:00 AM</span>
+                          </li>
+                          <li tal:condition="item/where">
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span tal:content="item/where">ARMS 1010</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"
+                             tal:condition="item/intro"
+                             tal:content="structure item/intro">Intro text.</div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action"
+                             tal:attributes="href item/url">View details<span class="staff-visually-hidden" tal:content="python:u': ' + item['title']">: Staff Council Meeting</span></a>
+                          <a class="staff-fullcal__action"
+                             tal:condition="item/ics"
+                             tal:attributes="href item/ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook</a>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  <button type="button" class="staff-fullcal__more"
+                          hidden="hidden" aria-expanded="false"
+                          tal:condition="cell/more"><span class="staff-fullcal__more-text" tal:content="cell/more_label">+2 more</span><span class="staff-visually-hidden" tal:content="python:u' on ' + cell['label']"> on Tuesday, September 22</span></button>
+
+                </tal:day>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ==== Agenda list (phones) ====
+             Hover does not exist on touch, so details are shown inline. -->
+        <ol class="staff-fullcal__agenda" aria-labelledby="staff-fullcal-heading"
+            tal:condition="cal/agenda">
+          <li tal:repeat="day cal/agenda"
+              tal:attributes="class python:'staff-fullcal__agenda-day' + (day['today'] and ' is-today' or '') + (day['past'] and ' is-past' or '')">
+            <h4 class="staff-fullcal__agenda-heading">
+              <span tal:replace="day/heading">Thursday, September 17</span>
+              <span class="staff-fullcal__today-tag" tal:condition="day/today">Today</span>
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li tal:repeat="item day/entries"
+                  tal:attributes="class python:'staff-fullcal__entry --' + item['kind']">
+                <p class="staff-fullcal__kind" tal:content="item/kind_label">Event</p>
+                <a class="staff-fullcal__entry-title"
+                   tal:attributes="href item/url"
+                   tal:content="item/title">Staff Council Meeting</a>
+                <ul class="staff-fullcal__facts">
+                  <li tal:condition="item/multi">
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span tal:content="item/date_label">September 28 - October 9, 2026</span>
+                  </li>
+                  <li tal:condition="item/when">
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span tal:content="item/when">10:00 AM</span>
+                  </li>
+                  <li tal:condition="item/where">
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span tal:content="item/where">ARMS 1010</span>
+                  </li>
+                </ul>
+                <div class="staff-fullcal__intro"
+                     tal:condition="item/intro"
+                     tal:content="structure item/intro">Intro text.</div>
+                <p class="staff-fullcal__actions" tal:condition="item/ics">
+                  <a class="staff-fullcal__action"
+                     tal:attributes="href item/ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden" tal:content="python:u': ' + item['title']">: Staff Council Meeting</span></a>
+                </p>
+              </li>
+            </ul>
+          </li>
+        </ol>
+
+        <p class="staff-empty staff-fullcal__empty"
+           tal:condition="not:cal/agenda"
+           tal:content="cal/empty">No events or announcements in September.</p>
+
+      </tal:calendar>
+
+    </div>
+  </div>
+</section>
+
+<script defer="defer"
+        tal:attributes="src string:${here/absolute_url}/staff-calendar.js"></script>
+
+</div>

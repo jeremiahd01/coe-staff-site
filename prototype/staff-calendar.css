@@ -1,0 +1,399 @@
+/* ==========================================================================
+   Staff calendar page (/staff/calendar)
+
+   Append to /staff/local.css AFTER staff-dashboard.css. It relies on that
+   file's .staff-card, .motion-line, .staff-empty and .staff-visually-hidden.
+
+   Link rules are prefixed with `.block` on purpose: Wrap9's
+   `.block.--bg-light-gray a` would otherwise repaint them browser blue.
+
+   Contrast (all AA or better):
+     white on black event bar              21:1
+     black on Boilermaker gold bar         11:1
+     white on Cool gray (past event)       4.81:1
+     Steel gray on white (past announcement) 7.04:1
+     Cool gray past date numerals          4.81:1
+   ========================================================================== */
+
+.staff-fullcal {
+  position: relative;                 /* popups are positioned against this */
+  padding-bottom: 1.75rem;
+}
+
+/* ---- Header: month navigation, back link, legend ---- */
+.staff-fullcal__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin: 1.25rem 0 1rem;
+}
+.staff-fullcal__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.staff-fullcal__heading {
+  margin: 0;
+  min-width: 11.5rem;
+  text-align: center;
+  font-family: var(--acumin-pro);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #000;
+}
+.block .staff-fullcal a.staff-fullcal__step {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--steam);
+  border-radius: 50%;
+  color: #000;
+  text-decoration: none;
+  transition: background 0.16s ease;
+}
+.block .staff-fullcal a.staff-fullcal__step:hover { background: var(--light-gray); }
+
+.staff-fullcal__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+.block .staff-fullcal a.staff-fullcal__today {
+  font-family: var(--acumin-pro);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+  text-decoration-color: var(--aged-gold);
+  text-underline-offset: 3px;
+}
+
+.staff-fullcal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--acumin-pro);
+  font-size: 0.8125rem;
+  color: var(--steel-gray);
+}
+.staff-fullcal__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.staff-fullcal__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #000;
+}
+.staff-fullcal__swatch.--announcement {
+  background: var(--boiler-gold);
+  box-shadow: inset 3px 0 0 var(--aged-gold);
+}
+
+/* ---- Month grid ---- */
+.staff-fullcal__grid {
+  width: 100%;
+  margin: 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.staff-fullcal__grid th {
+  padding: 0.5rem;
+  border-bottom: 2px solid #000;
+  font-family: var(--acumin-pro);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--steel-gray);
+}
+.staff-fullcal__cell {
+  height: 7.75rem;                    /* a minimum: busy days grow */
+  padding: 0.35rem 0.35rem 0.5rem;
+  border: 1px solid var(--steam);
+  vertical-align: top;
+}
+.staff-fullcal__cell.is-blank { background: var(--light-gray); }
+
+.staff-fullcal__date {
+  display: flex;
+  margin: 0 0 0.25rem;
+}
+/* Same day marks as the dashboard widget: upcoming black semibold, past Cool
+   gray regular, today bold with an Aged gold bar. */
+.staff-fullcal__num {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  font-family: var(--acumin-pro);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #000;
+}
+.is-past .staff-fullcal__num {
+  font-weight: 400;
+  color: var(--cool-gray, #6f727b);
+}
+.is-today .staff-fullcal__num { font-weight: 700; }
+.is-today .staff-fullcal__num::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 16px;
+  height: 3px;
+  margin-left: -8px;
+  border-radius: 2px;
+  background: var(--aged-gold);
+}
+
+.staff-fullcal__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.staff-fullcal__item { margin: 0 0 3px; }
+
+.block .staff-fullcal a.staff-fullcal__link {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-family: var(--acumin-pro);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+.block .staff-fullcal a.staff-fullcal__link.--event {
+  background: #000;
+  color: #fff;
+}
+.block .staff-fullcal a.staff-fullcal__link.--announcement {
+  padding-left: 9px;
+  background: var(--boiler-gold);
+  color: #000;
+  box-shadow: inset 3px 0 0 var(--aged-gold);
+}
+.block .staff-fullcal a.staff-fullcal__link:hover { text-decoration: underline; }
+.block .staff-fullcal a.staff-fullcal__link:focus-visible {
+  outline: 2px solid var(--aged-gold);
+  outline-offset: 2px;
+}
+/* A multi-day item carried over from an earlier day reads as one bar. */
+.block .staff-fullcal .is-continued a.staff-fullcal__link {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.block .staff-fullcal .is-past a.staff-fullcal__link.--event {
+  background: var(--cool-gray, #6f727b);
+}
+.block .staff-fullcal .is-past a.staff-fullcal__link.--announcement {
+  background: #fff;
+  color: var(--steel-gray);
+  box-shadow: inset 0 0 0 1px var(--steam), inset 3px 0 0 var(--aged-gold);
+}
+
+/* ---- "+N more" ---- */
+.staff-fullcal.is-enhanced .staff-fullcal__item.is-overflow { display: none; }
+.staff-fullcal.is-enhanced .is-expanded .staff-fullcal__item.is-overflow { display: block; }
+.staff-fullcal__more {
+  display: block;
+  margin-top: 2px;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  font-family: var(--acumin-pro);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+  text-decoration-color: var(--aged-gold);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.staff-fullcal__more[hidden] { display: none; }
+
+/* ---- Details popup ---- */
+.staff-fullcal__pop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  width: 21rem;
+  max-width: calc(100% - 1rem);
+  padding: 0.9rem 1.1rem 1rem;
+  background: #fff;
+  border: 1px solid var(--steam);
+  border-top: 4px solid #000;
+  border-radius: 4px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  font-family: var(--acumin-pro);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  color: #000;
+}
+.staff-fullcal__pop.--announcement { border-top-color: var(--boiler-gold); }
+.staff-fullcal__pop[hidden] { display: none !important; }
+
+.staff-fullcal__kind {
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel-gray);
+}
+.staff-fullcal__pop-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.staff-fullcal__facts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.staff-fullcal__facts li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 0.15rem;
+}
+.staff-fullcal__facts i {
+  flex: 0 0 1rem;
+  text-align: center;
+  color: var(--aged-gold);
+}
+/* Clamped rather than scrolled: a scrolling region inside a popup would need
+   its own tab stop. "View details" leads to the full text. */
+.staff-fullcal__intro {
+  display: -webkit-box;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--steam);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+}
+.staff-fullcal__intro p { margin: 0 0 0.5rem; }
+.staff-fullcal__intro p:last-child { margin-bottom: 0; }
+.staff-fullcal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 0.75rem 0 0;
+}
+.block .staff-fullcal a.staff-fullcal__action {
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+  text-decoration-color: var(--aged-gold);
+  text-underline-offset: 3px;
+}
+.block .staff-fullcal a.staff-fullcal__action:hover { text-decoration-thickness: 2px; }
+
+/* ---- Agenda list (phones) ---- */
+.staff-fullcal__agenda {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.staff-fullcal__agenda-day {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--steam);
+}
+.staff-fullcal__agenda-day:first-child { border-top: 2px solid #000; }
+.staff-fullcal__agenda-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-family: var(--acumin-pro);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #000;
+}
+.staff-fullcal__agenda-day.is-past .staff-fullcal__agenda-heading {
+  font-weight: 600;
+  color: var(--cool-gray, #6f727b);
+}
+.staff-fullcal__today-tag {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #000;
+  color: #fff;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.staff-fullcal__agenda-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.staff-fullcal__entry {
+  margin: 0 0 0.85rem;
+  padding-left: 0.75rem;
+  border-left: 4px solid #000;
+  font-family: var(--acumin-pro);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.staff-fullcal__entry:last-child { margin-bottom: 0; }
+.staff-fullcal__entry.--announcement { border-left-color: var(--aged-gold); }
+.block .staff-fullcal a.staff-fullcal__entry-title {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  text-decoration: underline;
+  text-decoration-color: var(--aged-gold);
+  text-underline-offset: 3px;
+}
+.staff-fullcal__entry .staff-fullcal__intro {
+  display: block;
+  -webkit-line-clamp: none;
+}
+.staff-fullcal__empty { margin-top: 1rem; }
+
+@media (max-width: 767.98px) {
+  .staff-fullcal__grid { display: none; }
+  .staff-fullcal__agenda { display: block; }
+  .staff-fullcal__bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .staff-fullcal__nav { justify-content: space-between; }
+  .staff-fullcal__heading { min-width: 0; }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .staff-fullcal__cell { height: 6.5rem; }
+  .staff-fullcal__grid th {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+  }
+}

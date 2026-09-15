@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en" class="wrap09">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff Calendar - MVP Prototype - Purdue Engineering</title>
+
+<!-- ── Fonts: exactly the three sources the Wrap9 dev site loads ────────── -->
+<link rel="stylesheet" href="https://use.typekit.net/hrz3oev.css?ver=5.7">
+<link rel="stylesheet" href="https://marcom.purdue.edu/app/mu-plugins/boilerup-wp/unitedsans.css?ver=5.7">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&display=swap">
+
+<!-- ── Bootstrap 5.3.2, same version and CDN as the dev site ───────────── -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous">
+
+<!-- ── The real Wrap9 theme. Public, so this prototype renders with the
+       actual production styles rather than an approximation. ──────────── -->
+<link rel="stylesheet" href="https://engineering.purdue.edu/Wraps/wrap09/required/wrap_css.css">
+
+<!-- ── Our additions. Ships as an addition to /staff/local.css ─────────── -->
+<link rel="stylesheet" href="staff-dashboard.css">
+<link rel="stylesheet" href="staff-calendar.css">
+
+<!-- ── FontAwesome: the same paid kit Wrap9 loads ──────────────────────── -->
+<script src="https://kit.fontawesome.com/f660349cfc.js" crossorigin="anonymous"></script>
+
+<style>
+  /* ---- PROTOTYPE CHROME ONLY — not part of the deliverable ---- */
+  .proto-bar {
+    background: #1b1b1b; color: var(--steam);
+    font: 900 11px/1.4 var(--united-sans-cond), Impact, sans-serif;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 11px 16px; text-align: center;
+    border-bottom: 2px dashed var(--steel-gray);
+  }
+  .proto-bar b { color: var(--rush); }
+  .proto-foot {
+    background: #fff;
+    max-width: 1140px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
+    font-size: 0.8125rem; line-height: 1.7; color: var(--steel-gray);
+  }
+  .proto-foot code { background: var(--light-gray); padding: 1px 5px; border-radius: 3px; }
+  body { background: #fff; }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  &#9650; <b>Wrap9 theme</b> renders masthead, main nav &amp; breadcrumb above this line
+</div>
+
+<!-- BEGIN deliverable: pt_calendar rendered with fixture data for September 2026 -->
+<main class="main-content">
+<div id="page-body" class="page-body">
+<div class="staff-embed-root">
+<!--
+  ============================================================================
+  Staff Hub  -  full staff calendar
+  Purdue University, College of Engineering
+
+  Embedded into /staff/calendar/index_html via a "Page Template Embed" block.
+  Styles: /staff/local.css (prototype/staff-dashboard.css, then
+  prototype/staff-calendar.css). Behaviour: /staff/staff-calendar.js.
+
+  DATA: get_staff_calendar_month (Script (Python) in /staff, reached by
+  acquisition) builds one month per request from ?month=YYYY-MM. The arrows
+  are plain links, so there is no month limit and every month is bookmarkable.
+
+  Without JavaScript the page still works: titles are links to each event,
+  busy days show every title, and phones get the agenda list.
+
+  Target: Zope 2.13.10 / Python 2.7.18. Keep the file pure ASCII and every
+  python: expression on one line.
+  ============================================================================
+-->
+
+<section class="block --bg-light-gray staff-fullcal-page">
+  <div class="container">
+    <div class="staff-card staff-fullcal">
+
+      <div class="motion-line mh-gold">
+        <h2 class="motion-heading mh-gold">Staff Calendar</h2>
+      </div>
+
+      
+
+      
+
+        <div class="staff-fullcal__bar">
+          <nav class="staff-fullcal__nav" aria-label="Choose month">
+            <a class="staff-fullcal__step" aria-label="Previous month, August 2026" href="?month=2026-08">
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </a>
+            <h3 class="staff-fullcal__heading" id="staff-fullcal-heading">September 2026</h3>
+            <a class="staff-fullcal__step" aria-label="Next month, October 2026" href="?month=2026-10">
+              <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            </a>
+          </nav>
+
+          <div class="staff-fullcal__tools">
+            
+            <!-- Decorative: every title also carries a hidden "Event:" or
+                 "Announcement:" prefix for screen readers. -->
+            <ul class="staff-fullcal__legend" aria-hidden="true">
+              <li><span class="staff-fullcal__swatch --event"></span>Event</li>
+              <li><span class="staff-fullcal__swatch --announcement"></span>Announcement</li>
+            </ul>
+          </div>
+        </div>
+
+        
+
+        <!-- ==== Month grid (tablet and up) ==== -->
+        <table class="staff-fullcal__grid" aria-labelledby="staff-fullcal-heading">
+          <thead>
+            <tr>
+              <th scope="col">Sunday</th>
+              <th scope="col">Monday</th>
+              <th scope="col">Tuesday</th>
+              <th scope="col">Wednesday</th>
+              <th scope="col">Thursday</th>
+              <th scope="col">Friday</th>
+              <th scope="col">Saturday</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="staff-fullcal__cell is-blank">
+                
+              </td>
+              <td class="staff-fullcal__cell is-blank">
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">1</span>
+                    <span class="staff-visually-hidden">Tuesday, September 1</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item is-continued">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-01-0" href="https://engineering.purdue.edu/staff/calendar/2026/conf"><span class="staff-visually-hidden">Event: </span>Engineering Staff Conference</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-01-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Engineering Staff Conference</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>August 30 – September 2, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/conf">View details<span class="staff-visually-hidden">: Engineering Staff Conference</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">2</span>
+                    <span class="staff-visually-hidden">Wednesday, September 2</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item is-continued">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-02-0" href="https://engineering.purdue.edu/staff/calendar/2026/conf"><span class="staff-visually-hidden">Event: </span>Engineering Staff Conference</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-02-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Engineering Staff Conference</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>August 30 – September 2, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/conf">View details<span class="staff-visually-hidden">: Engineering Staff Conference</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">3</span>
+                    <span class="staff-visually-hidden">Thursday, September 3</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-03-0" href="https://engineering.purdue.edu/staff/calendar/2026/council-3"><span class="staff-visually-hidden">Event: </span>Staff Council Meeting</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-03-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Staff Council Meeting</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Thursday, September 3, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>10:00 AM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>ARMS 1010</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/council-3">View details<span class="staff-visually-hidden">: Staff Council Meeting</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">4</span>
+                    <span class="staff-visually-hidden">Friday, September 4</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">5</span>
+                    <span class="staff-visually-hidden">Saturday, September 5</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+            </tr>
+            <tr>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">6</span>
+                    <span class="staff-visually-hidden">Sunday, September 6</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">7</span>
+                    <span class="staff-visually-hidden">Monday, September 7</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">8</span>
+                    <span class="staff-visually-hidden">Tuesday, September 8</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">9</span>
+                    <span class="staff-visually-hidden">Wednesday, September 9</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-09-0" href="https://engineering.purdue.edu/staff/calendar/2026/linkedin"><span class="staff-visually-hidden">Event: </span>LinkedIn Learning: Managing Up</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-09-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">LinkedIn Learning: Managing Up</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Wednesday, September 9, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>1:00–2:00 PM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Online (Teams)</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/linkedin">View details<span class="staff-visually-hidden">: LinkedIn Learning: Managing Up</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">10</span>
+                    <span class="staff-visually-hidden">Thursday, September 10</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-10-0" href="https://engineering.purdue.edu/staff/calendar/2026/retreat"><span class="staff-visually-hidden">Event: </span>Leadership Retreat</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-10-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Leadership Retreat</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>September 10–11, 2026</span>
+                          </li>
+                          
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Purdue Memorial Union</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/retreat">View details<span class="staff-visually-hidden">: Leadership Retreat</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">11</span>
+                    <span class="staff-visually-hidden">Friday, September 11</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item is-continued">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-11-0" href="https://engineering.purdue.edu/staff/calendar/2026/retreat"><span class="staff-visually-hidden">Event: </span>Leadership Retreat</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-11-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Leadership Retreat</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>September 10–11, 2026</span>
+                          </li>
+                          
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Purdue Memorial Union</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/retreat">View details<span class="staff-visually-hidden">: Leadership Retreat</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">12</span>
+                    <span class="staff-visually-hidden">Saturday, September 12</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+            </tr>
+            <tr>
+              <td class="staff-fullcal__cell is-past">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">13</span>
+                    <span class="staff-visually-hidden">Sunday, September 13</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-today">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">14</span>
+                    <span class="staff-visually-hidden">Monday, September 14, today</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">15</span>
+                    <span class="staff-visually-hidden">Tuesday, September 15</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --announcement" data-pop="staff-fc-2026-09-15-0" href="https://engineering.purdue.edu/staff/announcements/2026/review"><span class="staff-visually-hidden">Announcement: </span>Performance Review Self-Assessment Due</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --announcement" id="staff-fc-2026-09-15-0">
+                        <p class="staff-fullcal__kind">Announcement</p>
+                        <p class="staff-fullcal__pop-title">Performance Review Self-Assessment Due</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 15, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>5:00 PM</span>
+                          </li>
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Submit your self-assessment in SuccessFactors before 5:00 PM.</p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/announcements/2026/review">View details<span class="staff-visually-hidden">: Performance Review Self-Assessment Due</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">16</span>
+                    <span class="staff-visually-hidden">Wednesday, September 16</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">17</span>
+                    <span class="staff-visually-hidden">Thursday, September 17</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-17-0" href="https://engineering.purdue.edu/staff/calendar/2026/council"><span class="staff-visually-hidden">Event: </span>Staff Council Meeting</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-17-0">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Staff Council Meeting</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Thursday, September 17, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>10:00 AM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>ARMS 1010</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Monthly Staff Council meeting. Agenda includes the new hybrid work guidelines and fall recognition events. <strong>All staff are welcome.</strong></p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/council">View details<span class="staff-visually-hidden">: Staff Council Meeting</span></a>
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook</a>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">18</span>
+                    <span class="staff-visually-hidden">Friday, September 18</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">19</span>
+                    <span class="staff-visually-hidden">Saturday, September 19</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+            </tr>
+            <tr>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">20</span>
+                    <span class="staff-visually-hidden">Sunday, September 20</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">21</span>
+                    <span class="staff-visually-hidden">Monday, September 21</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">22</span>
+                    <span class="staff-visually-hidden">Tuesday, September 22</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --announcement" data-pop="staff-fc-2026-09-22-0" href="https://engineering.purdue.edu/staff/announcements/2026/bravo"><span class="staff-visually-hidden">Announcement: </span>Bravo+ Nominations Close</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --announcement" id="staff-fc-2026-09-22-0">
+                        <p class="staff-fullcal__kind">Announcement</p>
+                        <p class="staff-fullcal__pop-title">Bravo+ Nominations Close</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 22, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/announcements/2026/bravo">View details<span class="staff-visually-hidden">: Bravo+ Nominations Close</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-22-1" href="https://engineering.purdue.edu/staff/calendar/2026/orientation"><span class="staff-visually-hidden">Event: </span>New Employee Orientation</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-22-1">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">New Employee Orientation</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 22, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>9:00–11:30 AM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>POTR 234</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/orientation">View details<span class="staff-visually-hidden">: New Employee Orientation</span></a>
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook</a>
+                        </p>
+                      </div>
+                    </li>
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-22-2" href="https://engineering.purdue.edu/staff/calendar/2026/lunch"><span class="staff-visually-hidden">Event: </span>Lunch and Learn: Retirement Planning</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-22-2">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Lunch and Learn: Retirement Planning</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 22, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>Noon</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Online (Teams)</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/lunch">View details<span class="staff-visually-hidden">: Lunch and Learn: Retirement Planning</span></a>
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook</a>
+                        </p>
+                      </div>
+                    </li>
+                    <li class="staff-fullcal__item is-overflow">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-22-3" href="https://engineering.purdue.edu/staff/calendar/2026/walk"><span class="staff-visually-hidden">Event: </span>Wellness Walk</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-22-3">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">Wellness Walk</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 22, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>3:00 PM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Engineering Mall</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/walk">View details<span class="staff-visually-hidden">: Wellness Walk</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                    <li class="staff-fullcal__item is-overflow">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-22-4" href="https://engineering.purdue.edu/staff/calendar/2026/it"><span class="staff-visually-hidden">Event: </span>IT Maintenance Window</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-22-4">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">IT Maintenance Window</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Tuesday, September 22, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>6:00 PM</span>
+                          </li>
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/it">View details<span class="staff-visually-hidden">: IT Maintenance Window</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  <button type="button" class="staff-fullcal__more" hidden="hidden" aria-expanded="false"><span class="staff-fullcal__more-text">+2 more</span><span class="staff-visually-hidden"> on Tuesday, September 22</span></button>
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">23</span>
+                    <span class="staff-visually-hidden">Wednesday, September 23</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">24</span>
+                    <span class="staff-visually-hidden">Thursday, September 24</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">25</span>
+                    <span class="staff-visually-hidden">Friday, September 25</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">26</span>
+                    <span class="staff-visually-hidden">Saturday, September 26</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+            </tr>
+            <tr>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">27</span>
+                    <span class="staff-visually-hidden">Sunday, September 27</span>
+                  </p>
+
+                  
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">28</span>
+                    <span class="staff-visually-hidden">Monday, September 28</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --announcement" data-pop="staff-fc-2026-09-28-0" href="https://engineering.purdue.edu/staff/announcements/2026/benefits"><span class="staff-visually-hidden">Announcement: </span>Benefits Open Enrollment</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --announcement" id="staff-fc-2026-09-28-0">
+                        <p class="staff-fullcal__kind">Announcement</p>
+                        <p class="staff-fullcal__pop-title">Benefits Open Enrollment</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>September 28 – October 9, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">View details<span class="staff-visually-hidden">: Benefits Open Enrollment</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">29</span>
+                    <span class="staff-visually-hidden">Tuesday, September 29</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item is-continued">
+                      <a class="staff-fullcal__link --announcement" data-pop="staff-fc-2026-09-29-0" href="https://engineering.purdue.edu/staff/announcements/2026/benefits"><span class="staff-visually-hidden">Announcement: </span>Benefits Open Enrollment</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --announcement" id="staff-fc-2026-09-29-0">
+                        <p class="staff-fullcal__kind">Announcement</p>
+                        <p class="staff-fullcal__pop-title">Benefits Open Enrollment</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>September 28 – October 9, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">View details<span class="staff-visually-hidden">: Benefits Open Enrollment</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell">
+                
+
+                  <p class="staff-fullcal__date">
+                    <span class="staff-fullcal__num" aria-hidden="true">30</span>
+                    <span class="staff-visually-hidden">Wednesday, September 30</span>
+                  </p>
+
+                  <ul class="staff-fullcal__items">
+                    <li class="staff-fullcal__item is-continued">
+                      <a class="staff-fullcal__link --announcement" data-pop="staff-fc-2026-09-30-0" href="https://engineering.purdue.edu/staff/announcements/2026/benefits"><span class="staff-visually-hidden">Announcement: </span>Benefits Open Enrollment</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --announcement" id="staff-fc-2026-09-30-0">
+                        <p class="staff-fullcal__kind">Announcement</p>
+                        <p class="staff-fullcal__pop-title">Benefits Open Enrollment</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>September 28 – October 9, 2026</span>
+                          </li>
+                          
+                          
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">View details<span class="staff-visually-hidden">: Benefits Open Enrollment</span></a>
+                          
+                        </p>
+                      </div>
+                    </li>
+                    <li class="staff-fullcal__item">
+                      <a class="staff-fullcal__link --event" data-pop="staff-fc-2026-09-30-1" href="https://engineering.purdue.edu/staff/calendar/2026/townhall"><span class="staff-visually-hidden">Event: </span>College of Engineering Town Hall</a>
+
+                      <!-- Details popup. Hidden until hover, focus or tap;
+                           it follows its link in the DOM so Tab reaches its
+                           links next. -->
+                      <div hidden="hidden" class="staff-fullcal__pop --event" id="staff-fc-2026-09-30-1">
+                        <p class="staff-fullcal__kind">Event</p>
+                        <p class="staff-fullcal__pop-title">College of Engineering Town Hall</p>
+                        <ul class="staff-fullcal__facts">
+                          <li>
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            <span>Wednesday, September 30, 2026</span>
+                          </li>
+                          <li>
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            <span>9:00–10:00 AM</span>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                            <span>Fowler Hall</span>
+                          </li>
+                        </ul>
+                        <!-- structure: intro is admin-authored HTML, as on the dashboard -->
+                        <div class="staff-fullcal__intro"><p>Dean Mung Chiang shares updates on the college.</p></div>
+                        <p class="staff-fullcal__actions">
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/townhall">View details<span class="staff-visually-hidden">: College of Engineering Town Hall</span></a>
+                          <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook</a>
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- Revealed by staff-calendar.js, which also collapses the
+                       overflow titles. Without JavaScript all titles show. -->
+                  
+
+                
+              </td>
+              <td class="staff-fullcal__cell is-blank">
+                
+              </td>
+              <td class="staff-fullcal__cell is-blank">
+                
+              </td>
+              <td class="staff-fullcal__cell is-blank">
+                
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ==== Agenda list (phones) ====
+             Hover does not exist on touch, so details are shown inline. -->
+        <ol class="staff-fullcal__agenda" aria-labelledby="staff-fullcal-heading">
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Tuesday, September 1
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/conf">Engineering Staff Conference</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>August 30 – September 2, 2026</span>
+                  </li>
+                  
+                  
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Wednesday, September 2
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/conf">Engineering Staff Conference</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>August 30 – September 2, 2026</span>
+                  </li>
+                  
+                  
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Thursday, September 3
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/council-3">Staff Council Meeting</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>10:00 AM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>ARMS 1010</span>
+                  </li>
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Wednesday, September 9
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/linkedin">LinkedIn Learning: Managing Up</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>1:00–2:00 PM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Online (Teams)</span>
+                  </li>
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Thursday, September 10
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/retreat">Leadership Retreat</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>September 10–11, 2026</span>
+                  </li>
+                  
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Purdue Memorial Union</span>
+                  </li>
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day is-past">
+            <h4 class="staff-fullcal__agenda-heading">
+              Friday, September 11
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/retreat">Leadership Retreat</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>September 10–11, 2026</span>
+                  </li>
+                  
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Purdue Memorial Union</span>
+                  </li>
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Tuesday, September 15
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --announcement">
+                <p class="staff-fullcal__kind">Announcement</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/announcements/2026/review">Performance Review Self-Assessment Due</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>5:00 PM</span>
+                  </li>
+                  
+                </ul>
+                <div class="staff-fullcal__intro"><p>Submit your self-assessment in SuccessFactors before 5:00 PM.</p></div>
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Thursday, September 17
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/council">Staff Council Meeting</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>10:00 AM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>ARMS 1010</span>
+                  </li>
+                </ul>
+                <div class="staff-fullcal__intro"><p>Monthly Staff Council meeting. Agenda includes the new hybrid work guidelines and fall recognition events. <strong>All staff are welcome.</strong></p></div>
+                <p class="staff-fullcal__actions">
+                  <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: Staff Council Meeting</span></a>
+                </p>
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Tuesday, September 22
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --announcement">
+                <p class="staff-fullcal__kind">Announcement</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/announcements/2026/bravo">Bravo+ Nominations Close</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  
+                  
+                </ul>
+                
+                
+              </li>
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/orientation">New Employee Orientation</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>9:00–11:30 AM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>POTR 234</span>
+                  </li>
+                </ul>
+                
+                <p class="staff-fullcal__actions">
+                  <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: New Employee Orientation</span></a>
+                </p>
+              </li>
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/lunch">Lunch and Learn: Retirement Planning</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>Noon</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Online (Teams)</span>
+                  </li>
+                </ul>
+                
+                <p class="staff-fullcal__actions">
+                  <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: Lunch and Learn: Retirement Planning</span></a>
+                </p>
+              </li>
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/walk">Wellness Walk</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>3:00 PM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Engineering Mall</span>
+                  </li>
+                </ul>
+                
+                
+              </li>
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/it">IT Maintenance Window</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>6:00 PM</span>
+                  </li>
+                  
+                </ul>
+                
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Monday, September 28
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --announcement">
+                <p class="staff-fullcal__kind">Announcement</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">Benefits Open Enrollment</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>September 28 – October 9, 2026</span>
+                  </li>
+                  
+                  
+                </ul>
+                <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Tuesday, September 29
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --announcement">
+                <p class="staff-fullcal__kind">Announcement</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">Benefits Open Enrollment</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>September 28 – October 9, 2026</span>
+                  </li>
+                  
+                  
+                </ul>
+                <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                
+              </li>
+            </ul>
+          </li>
+          <li class="staff-fullcal__agenda-day">
+            <h4 class="staff-fullcal__agenda-heading">
+              Wednesday, September 30
+              
+            </h4>
+            <ul class="staff-fullcal__agenda-items">
+              <li class="staff-fullcal__entry --announcement">
+                <p class="staff-fullcal__kind">Announcement</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/announcements/2026/benefits">Benefits Open Enrollment</a>
+                <ul class="staff-fullcal__facts">
+                  <li>
+                    <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                    <span>September 28 – October 9, 2026</span>
+                  </li>
+                  
+                  
+                </ul>
+                <div class="staff-fullcal__intro"><p>Review your elections for the 2027 plan year.</p></div>
+                
+              </li>
+              <li class="staff-fullcal__entry --event">
+                <p class="staff-fullcal__kind">Event</p>
+                <a class="staff-fullcal__entry-title" href="https://engineering.purdue.edu/staff/calendar/2026/townhall">College of Engineering Town Hall</a>
+                <ul class="staff-fullcal__facts">
+                  
+                  <li>
+                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                    <span>9:00–10:00 AM</span>
+                  </li>
+                  <li>
+                    <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                    <span>Fowler Hall</span>
+                  </li>
+                </ul>
+                <div class="staff-fullcal__intro"><p>Dean Mung Chiang shares updates on the college.</p></div>
+                <p class="staff-fullcal__actions">
+                  <a class="staff-fullcal__action" href="https://engineering.purdue.edu/staff/calendar/2026/doc/event.ics"><i class="fa-solid fa-calendar-plus" aria-hidden="true"></i> Add to Outlook<span class="staff-visually-hidden">: College of Engineering Town Hall</span></a>
+                </p>
+              </li>
+            </ul>
+          </li>
+        </ol>
+
+        
+
+      
+
+    </div>
+  </div>
+</section>
+
+<script defer="defer" src="staff-calendar.js"></script>
+
+</div>
+
+</div>
+</main>
+<!-- END deliverable -->
+
+<div class="proto-foot">
+  <strong>Staff calendar prototype.</strong> Rendered from <code>zope/calendar_page.pt</code> with fixture data for September 2026, with today as September 14. In Zope the arrows load other months through <code>?month=YYYY-MM</code>; this static prototype only holds September. Hover, focus or tap a title for details; narrow the window below 768px for the agenda list.
+</div>
+
+</body>
+</html>

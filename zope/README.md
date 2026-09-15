@@ -547,6 +547,83 @@ The status check is deliberately asymmetric:
 - **The Phase 2 extension slots are hidden** with `tal:condition="nothing"`.
   The markup stays in the template, so restoring them is deleting one attribute.
 
+## Staff calendar page (/staff/calendar)
+
+A full month calendar with event and announcement titles inside each day, and a
+details popup on hover, keyboard focus or tap. It lives in the Page Template
+Embed block of `/staff/calendar/index_html`, the same arrangement as the
+dashboard.
+
+### Installing it
+
+Four pieces, plus the shared stylesheet:
+
+| Repo file | ZMI object | Where |
+|---|---|---|
+| `scripts/get_staff_calendar_month.py` | Script (Python) `get_staff_calendar_month` | `/staff` (acquired from `/staff/calendar`) |
+| `calendar_page.pt` | Page Template, e.g. `pt_calendar` | `/staff/calendar`, named in the block |
+| `../prototype/staff-calendar.css` | append to `local.css` **after** the dashboard styles | `/staff` |
+| `../prototype/staff-calendar.js` | File `staff-calendar.js`, Content-Type `text/javascript` | `/staff` |
+
+The template links `${here/absolute_url}/staff-calendar.js`, i.e.
+`/staff/calendar/staff-calendar.js`, which acquires the File from `/staff`. If
+that URL 404s, the Event Manager is intercepting the name; put the File in
+`/staff/calendar` instead.
+
+Run `python3 tools/check_template.py` first - it now checks these files too.
+
+### How it works
+
+- **One month per request.** `?month=YYYY-MM` picks the month; the arrows are
+  plain links. No navigation limit, months are bookmarkable, the back button
+  works, and the page carries one month of markup rather than twelve. A missing,
+  malformed or out-of-range value (outside 1970-2100) shows the current month.
+- **Events and dated announcements.** Both managers are read; announcements
+  appear only when they carry an `event_date`. Events are black bars,
+  announcements Boilermaker gold with an Aged gold edge, and each title carries a
+  hidden "Event:" or "Announcement:" prefix so the distinction is not colour
+  alone. The popup names the type too.
+- **Multi-day items** repeat on every day they cover, including spans that
+  enter from the previous month or run into the next. Continuation days drop
+  the bar's left rounding so the run reads as one bar.
+- **Busy days** show three titles and a "+N more" button. All titles are in the
+  markup; JavaScript collapses the rest, so without it every title shows.
+- **Popups** hold the type, date or date range, time, location, intro text
+  (clamped to six lines), "View details" and, for events, "Add to Outlook".
+  Mouse: short hover delay, stays open while the pointer is over the link or
+  popup (WCAG 1.4.13). Keyboard: opens on focus, Tab continues into the popup's
+  links, Escape closes. Touch: first tap opens, second follows the link.
+- **Phones** (under 768px) get an agenda list of the days that have items, with
+  every detail inline, because hover does not exist there.
+- **Past days** use the dashboard widget's treatment: Cool gray numerals, past
+  events in Cool gray bars (white text 4.81:1), past announcements outlined.
+
+### Decisions worth knowing
+
+- **`hide_date` is ignored here** (`RESPECT_HIDE_DATE = 0`). The dashboard hides
+  an item after its hide_date; on a calendar that would empty every past month.
+  Publication status and `show_date` still apply, so drafts and unannounced
+  items never appear. Flip the constant if hide_date is meant to retract items.
+- **Never name a data key `items`.** A TAL path such as `cell/items` finds the
+  dictionary's `items()` method before the key and iterates tuples, which fails
+  the render. The same applies to `keys`, `values`, `get`, `copy`, `pop` and
+  `update`. The script uses `entries`.
+- **`event_length` without `event_end_date`** needs the object loaded, so items
+  starting more than three months before the viewed month
+  (`LOOKBACK_MONTHS`) are not loaded just to check.
+- Helpers are **copied** from `get_staff_dashboard_data`; Script (Python) objects
+  cannot import one another. Fix both when fixing either.
+
+### Verified
+
+- 34 fixture tests against the real script: month parsing and fallbacks, year
+  rollover, grids for 84 months against Python's `calendar` module, spans into
+  and out of the month, `event_length`-only spans, drafts, undated and
+  unannounced items, a document that raises, time ordering, overflow flags,
+  unique popup ids, and the ok/failed states.
+- The real template rendered with that output; the prototype page
+  `prototype/calendar.html` is built from the render.
+
 ## Troubleshooting
 
 ### The Page Template Embed renders nothing at all
