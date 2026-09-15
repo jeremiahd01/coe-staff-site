@@ -555,6 +555,7 @@ except Exception:
 # result has to be able to reach position one.
 # ---------------------------------------------------------------------------
 announcements_ok = 1
+ann_brains = []
 try:
     ann_folder, ann_brains = query('announcements', 'show_date', 'descending')
 
@@ -671,6 +672,31 @@ def next_day(year, month, day):
     return (year + 1, 1, 1)
 
 
+def entry_order(entry):
+    return (entry['stamp'], entry['title'].lower())
+
+
+def count_phrase(entries):
+    """'2 events', '1 announcement', '4 events and 1 announcement'."""
+    event_count = 0
+    announcement_count = 0
+    for entry in entries:
+        if entry['kind'] == 'announcement':
+            announcement_count = announcement_count + 1
+        else:
+            event_count = event_count + 1
+    parts = []
+    if event_count == 1:
+        parts.append(u'1 event')
+    elif event_count:
+        parts.append(u'%d events' % event_count)
+    if announcement_count == 1:
+        parts.append(u'1 announcement')
+    elif announcement_count:
+        parts.append(u'%d announcements' % announcement_count)
+    return u' and '.join(parts)
+
+
 def ymd(dt):
     """(year, month, day) as ints from a Zope DateTime or a datetime."""
     if dt is None:
@@ -704,9 +730,19 @@ try:
     last_iso = iso_of(window[-1][0], window[-1][1],
                       month_length(window[-1][0], window[-1][1]))
 
-    # Every event day inside the window, mapped to its entries.
-    by_day = {}
+    # Every event day inside the window, mapped to its entries. Dated
+    # announcements (usually deadlines) join the events, on their event_date
+    # or across their range. Both lists come from the reads above, so this
+    # costs no extra catalog query.
+    tagged = []
     for brain in cal_brains:
+        tagged.append((brain, 'event'))
+    for brain in ann_brains:
+        tagged.append((brain, 'announcement'))
+
+    by_day = {}
+    for row in tagged:
+        brain = row[0]
         if not visible(brain, now):
             continue
         start = meta(brain, 'event_date')
@@ -737,7 +773,8 @@ try:
             parts.append(when)
         if where:
             parts.append(where)
-        entry = {'title': title, 'url': url, 'meta': u' | '.join(parts)}
+        entry = {'title': title, 'url': url, 'meta': u' | '.join(parts),
+                 'kind': row[1], 'stamp': stamp(start)}
 
         # a multi-day event is listed on every day it covers
         cursor = start_ymd
@@ -752,6 +789,11 @@ try:
                 by_day[key].append(entry)
             cursor = next_day(cursor[0], cursor[1], cursor[2])
             steps = steps + 1
+
+    # Two sources were appended one after the other; put each day back in
+    # time order so a 9 AM event is not listed after a 5 PM deadline.
+    for key in by_day.keys():
+        by_day[key].sort(key=entry_order)
 
     position = 0
     for pair in window:
@@ -789,10 +831,8 @@ try:
             count_here = len(entries)
             label = u'%s, %s %d' % (WEEKDAY_NAMES[(lead + day_num - 1) % 7],
                                     month_name, day_num)
-            if count_here == 1:
-                aria = label + u', 1 event'
-            elif count_here:
-                aria = u'%s, %d events' % (label, count_here)
+            if count_here:
+                aria = u'%s, %s' % (label, count_phrase(entries))
             else:
                 aria = label
             is_selected = key == selected_iso and 1 or 0
@@ -820,7 +860,7 @@ try:
             'visible': position == 0 and 1 or 0,
             'weeks': weeks,
             'days': panels,
-            'empty': u'No events in %s.' % month_name,
+            'empty': u'No events or announcements in %s.' % month_name,
         })
         position = position + 1
 except Exception:

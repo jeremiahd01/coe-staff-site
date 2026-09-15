@@ -854,6 +854,25 @@ button.staff-cal__day.is-past[aria-pressed="true"]:hover {
   font-size: 0.8125rem;
   color: var(--steel-gray);
 }
+/* Marks a dated announcement (usually a deadline) among the day's events.
+   Gold for announcements, as on the full calendar page; black text on
+   Boilermaker gold is 11:1. The word itself carries the meaning, so colour
+   is not the only cue. */
+.staff-cal__tag {
+  display: inline-block;
+  margin-right: 0.4rem;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--boiler-gold);
+  color: #000;
+  font-family: var(--acumin-pro);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
 
 /* Shown when a widget genuinely has nothing to display - distinct from the
    placeholder content, which only appears when the query could not run. */

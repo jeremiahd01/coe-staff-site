@@ -455,7 +455,15 @@ against the white card, under the 3:1 minimum for a state indicator. A small
 legend under the grid explains the marks; it is `aria-hidden` because each
 day button already announces its events, pressed state and `aria-current`.
 
-- Built from the **same catalog read** as Upcoming Events - no extra query.
+- Built from the **same catalog reads** as Upcoming Events and New &
+  Important - no extra query. **Dated announcements are included**: an
+  announcement with an `event_date` (usually a deadline) marks its day, or
+  every day of its range, exactly like an event. Undated announcements and
+  drafts never appear.
+- Circles stay one colour. In the list below the grid an announcement
+  carries a gold "Announcement" tag, and a day button announces its mix,
+  e.g. "Tuesday, September 22, 1 event and 1 announcement". Each day is
+  sorted by time across both sources.
 - All twelve months are rendered and eleven carry `hidden`; `dashboard.js`
   pages between them, so the chevrons need no request. At either end the arrow
   disables, and focus moves to the other arrow rather than being lost.

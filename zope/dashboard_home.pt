@@ -447,6 +447,8 @@
                 <h4 class="staff-cal__day-heading" tal:content="day/heading">Thursday, October 1</h4>
                 <ul class="staff-cal__events">
                   <li tal:repeat="event day/events">
+                    <span class="staff-cal__tag"
+                          tal:condition="python:event.get('kind') == 'announcement'">Announcement</span>
                     <a class="staff-cal__link"
                        tal:attributes="href event/url"
                        tal:content="event/title">Event title</a>
