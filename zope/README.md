@@ -437,12 +437,16 @@ the same thing):
 | Has events | Black circle, white numeral |
 | Selected (listed below) | Boilermaker gold circle, black numeral, thin Aged gold edge |
 | Today | Bold numeral, short Aged gold bar under the circle |
-| Past | Plain numerals and event circles dimmed to Cool gray (`#6f727b`) |
+| Upcoming, no events | Black, semibold numeral |
+| Past | Regular-weight Cool gray (`#6f727b`) numerals; event circles Cool gray |
 
 Past days use a named colour, not opacity, so their contrast does not drift
 with the background: Cool gray is 4.81:1 on white, passing AA for the 14px
 numerals, and a white numeral on a Cool gray circle is the same. Railway gray
-(2.88:1) and Steam (1.82:1) were rejected. A past day that is selected stays
+(2.88:1) and Steam (1.82:1) were rejected. Cool gray against the original Steel gray
+upcoming numerals (7.04:1) was too close to see, and past days cannot get
+lighter, so upcoming numerals went to black semibold instead (21:1 plus a
+weight change, so the cue is not colour alone). A past day that is selected stays
 gold. The script flags each cell `past`; the template reads it with
 `cell.get('past')`, so an older script without the flag still renders.
 

@@ -712,6 +712,15 @@
   color: var(--steel-gray);
 }
 
+/* Upcoming plain days: black and semibold. Past days cannot go lighter than
+   Cool gray without failing AA, so the gap between past and upcoming is
+   widened from this side instead - black (21:1) against Cool gray (4.81:1),
+   plus a weight change so the difference does not rest on colour alone. */
+span.staff-cal__day {
+  color: #000;
+  font-weight: 600;
+}
+
 /* A day with events: the black circle from the mockup. */
 button.staff-cal__day {
   padding: 0;
@@ -757,7 +766,10 @@ span.staff-cal__day.is-today { color: #000; }
    white, which passes AA for the 14px numerals; a white numeral on a Cool gray
    circle is the same 4.81:1. (Railway gray, 2.88:1, and Steam, 1.82:1, fail.)
    The selected day keeps its gold even when past: selection wins. */
-span.staff-cal__day.is-past { color: var(--cool-gray, #6f727b); }
+span.staff-cal__day.is-past {
+  color: var(--cool-gray, #6f727b);
+  font-weight: 400;
+}
 button.staff-cal__day.is-past { background: var(--cool-gray, #6f727b); }
 button.staff-cal__day.is-past:hover { background: var(--steel-gray); }
 button.staff-cal__day.is-past[aria-pressed="true"],
