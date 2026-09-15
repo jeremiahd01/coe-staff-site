@@ -752,6 +752,20 @@ span.staff-cal__day.is-today { color: #000; }
   background: var(--aged-gold);
 }
 
+/* Past days: dimmed to Cool gray, a named colour rather than opacity so the
+   contrast is fixed whatever sits behind the card. Cool gray is 4.81:1 on
+   white, which passes AA for the 14px numerals; a white numeral on a Cool gray
+   circle is the same 4.81:1. (Railway gray, 2.88:1, and Steam, 1.82:1, fail.)
+   The selected day keeps its gold even when past: selection wins. */
+span.staff-cal__day.is-past { color: var(--cool-gray, #6f727b); }
+button.staff-cal__day.is-past { background: var(--cool-gray, #6f727b); }
+button.staff-cal__day.is-past:hover { background: var(--steel-gray); }
+button.staff-cal__day.is-past[aria-pressed="true"],
+button.staff-cal__day.is-past[aria-pressed="true"]:hover {
+  background: var(--boiler-gold);
+  color: #000;
+}
+
 /* Key to the three marks. Decorative for screen readers: each day button
    already announces its events, pressed state and aria-current. */
 .staff-cal__legend {

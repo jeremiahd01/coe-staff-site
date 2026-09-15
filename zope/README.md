@@ -437,6 +437,14 @@ the same thing):
 | Has events | Black circle, white numeral |
 | Selected (listed below) | Boilermaker gold circle, black numeral, thin Aged gold edge |
 | Today | Bold numeral, short Aged gold bar under the circle |
+| Past | Plain numerals and event circles dimmed to Cool gray (`#6f727b`) |
+
+Past days use a named colour, not opacity, so their contrast does not drift
+with the background: Cool gray is 4.81:1 on white, passing AA for the 14px
+numerals, and a white numeral on a Cool gray circle is the same. Railway gray
+(2.88:1) and Steam (1.82:1) were rejected. A past day that is selected stays
+gold. The script flags each cell `past`; the template reads it with
+`cell.get('past')`, so an older script without the flag still renders.
 
 The Aged gold edge is there for contrast: Boilermaker gold alone is 1.9:1
 against the white card, under the 3:1 minimum for a state indicator. A small

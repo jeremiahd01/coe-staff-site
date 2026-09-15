@@ -417,14 +417,14 @@
                     <tal:day tal:condition="not:cell/blank">
                       <button type="button"
                               tal:condition="cell/count"
-                              tal:attributes="class python:cell['today'] and 'staff-cal__day is-today' or 'staff-cal__day';
+                              tal:attributes="class python:'staff-cal__day' + (cell['today'] and ' is-today' or '') + (cell.get('past') and ' is-past' or '');
                                               aria-pressed python:cell['selected'] and 'true' or 'false';
                                               aria-current python:cell['today'] and 'date' or None;
                                               aria-controls string:staff-cal-${cell/iso};
                                               aria-label cell/aria"
                               tal:content="cell/num">8</button>
                       <span tal:condition="not:cell/count"
-                            tal:attributes="class python:cell['today'] and 'staff-cal__day is-today' or 'staff-cal__day';
+                            tal:attributes="class python:'staff-cal__day' + (cell['today'] and ' is-today' or '') + (cell.get('past') and ' is-past' or '');
                                             aria-current python:cell['today'] and 'date' or None"
                             tal:content="cell/num">9</span>
                     </tal:day>

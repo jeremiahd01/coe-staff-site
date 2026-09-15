@@ -798,6 +798,7 @@ try:
             is_selected = key == selected_iso and 1 or 0
             cells.append({'blank': 0, 'num': u'%d' % day_num, 'iso': key,
                           'today': key == today_iso and 1 or 0,
+                          'past': key < today_iso and 1 or 0,
                           'count': count_here, 'selected': is_selected,
                           'aria': aria})
             if count_here:
