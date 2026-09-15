@@ -190,9 +190,9 @@
                {'label': 'Travel Resources',
                 'icon': 'fa-plane',
                 'url': 'https://www.purdue.edu/operations/travel/'},
-               {'label': 'Engineering Forms',
+               {'label': 'Resource Toolkit',
                 'icon': 'fa-clipboard-list',
-                'url': 'resources/forms'}]">
+                'url': 'resources'}]">
 
           <div class="motion-line mh-gold">
             <h2 class="motion-heading mh-gold">Quick Links</h2>

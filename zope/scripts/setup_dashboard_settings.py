@@ -33,8 +33,8 @@ SEED = {
          'url': 'https://www.purdue.edu/operations/procurement/supplier-resources/'},
         {'label': 'Travel Resources', 'icon': 'fa-plane',
          'url': 'https://www.purdue.edu/operations/travel/'},
-        {'label': 'Engineering Forms', 'icon': 'fa-clipboard-list',
-         'url': 'resources/forms'},
+        {'label': 'Resource Toolkit', 'icon': 'fa-clipboard-list',
+         'url': 'resources'},
     ],
     'explore': [
         {'label': 'AI Resources', 'icon': 'fa-microchip', 'url': 'resources/ai',
