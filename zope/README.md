@@ -147,7 +147,7 @@ and only to read `redirect_url`, which is not catalog metadata.
 | `intro` | Summary line |
 | `event_date` | Event date; on announcements it is the deadline, giving "Closes Oct 2" |
 | `event_end_date` | Catalog metadata only; used for a time range when present |
-| `show_date` / `hide_date` | Publication window, honoured by both widgets |
+| `show_date` / `hide_date` | Publication window. `show_date` is honoured everywhere; `hide_date` only by New & Important and Upcoming Events - both calendars ignore it |
 | `keywords` | Drives the announcement icon via substring match |
 | `redirect_url` | Overrides the card link when set |
 | `event_length`, `priority`, `people`, `author`, `source` | Available, unused so far |
@@ -459,7 +459,8 @@ day button already announces its events, pressed state and `aria-current`.
   Important - no extra query. **Dated announcements are included**: an
   announcement with an `event_date` (usually a deadline) marks its day, or
   every day of its range, exactly like an event. Undated announcements and
-  drafts never appear.
+  drafts never appear. Like the full calendar page, the widget ignores
+  `hide_date`, so past items stay on their days.
 - Circles stay one colour. In the list below the grid an announcement
   carries a gold "Announcement" tag, and a day button announces its mix,
   e.g. "Tuesday, September 22, 1 event and 1 announcement". Each day is
@@ -608,10 +609,13 @@ Run `python3 tools/check_template.py` first - it now checks these files too.
 
 ### Decisions worth knowing
 
-- **`hide_date` is ignored here** (`RESPECT_HIDE_DATE = 0`). The dashboard hides
-  an item after its hide_date; on a calendar that would empty every past month.
+- **`hide_date` is ignored on both calendars** - this page
+  (`RESPECT_HIDE_DATE = 0`) and the dashboard's Events Calendar widget
+  (`visible(brain, now, 0)`). On a calendar it would empty every past month.
   Publication status and `show_date` still apply, so drafts and unannounced
-  items never appear. Flip the constant if hide_date is meant to retract items.
+  items never appear. New & Important and Upcoming Events still drop an item
+  after its hide_date. If hide_date is ever used to retract an item, a hidden
+  item will stay on both calendars; flip both switches together to change that.
 - **Never name a data key `items`.** A TAL path such as `cell/items` finds the
   dictionary's `items()` method before the key and iterates tuples, which fails
   the render. The same applies to `keys`, `values`, `get`, `copy`, `pop` and

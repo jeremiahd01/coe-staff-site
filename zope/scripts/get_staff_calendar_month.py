@@ -50,9 +50,10 @@ SPAN_LIMIT = 92
 # this are not loaded just to find out; nobody enters a quarter-long event.
 LOOKBACK_MONTHS = 3
 
-# The dashboard hides an item after its hide_date. On a calendar that would
-# empty every past month, so here hide_date is ignored by default and only
-# publication status and show_date apply. Set to 1 to honour hide_date too.
+# hide_date is ignored: on a calendar it would empty every past month. Only
+# publication status and show_date apply. The dashboard's Events Calendar
+# widget does the same; its New & Important and Upcoming Events lists still
+# honour hide_date. Set to 1 here to honour it on this page.
 RESPECT_HIDE_DATE = 0
 
 PUBLISHED_STATUS = 'published'

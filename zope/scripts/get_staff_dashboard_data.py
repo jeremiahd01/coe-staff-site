@@ -364,8 +364,12 @@ def order_key(row):
     return (row[0], row[1], row[2])
 
 
-def visible(brain, now):
+def visible(brain, now, respect_hide=1):
     """Published, and inside its show_date / hide_date window.
+
+    respect_hide=0 skips the hide_date check. The Events Calendar passes it:
+    a calendar keeps history, as the full calendar page does, whereas the
+    New & Important and Upcoming Events lists drop an item once hidden.
 
     Status is checked only when the catalog actually reports one. An explicit
     status that is not "published" hides the item, so a future 'archived' or
@@ -387,7 +391,7 @@ def visible(brain, now):
                 return 0
         except Exception:
             pass
-    if hide is not None:
+    if hide is not None and respect_hide:
         try:
             if hide < now:
                 return 0
@@ -743,7 +747,8 @@ try:
     by_day = {}
     for row in tagged:
         brain = row[0]
-        if not visible(brain, now):
+        # hide_date ignored, matching the full calendar page
+        if not visible(brain, now, 0):
             continue
         start = meta(brain, 'event_date')
         start_ymd = ymd(start)
