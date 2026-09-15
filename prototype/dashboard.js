@@ -4,19 +4,27 @@
    Keep it pure ASCII: Zope may serve it with a Latin-1 charset. */
 
 /* Full-text tooltip for clamped announcement summaries.
-   The summary text is the hover and tap target. The small "More" control stays
-   as the keyboard affordance and as a visible hint that there is more to read.
-   Hover opens after a delay; keyboard focus opens at once; Escape closes; the
-   tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
-   The trigger is revealed only when the text is actually clipped.
-   Originally inline in the template, which is why it avoids ampersand and
-   less-than characters; that constraint no longer applies here. */
+   The summary text is the only trigger - the PM removed the "More" control:
+     mouse    - hover the text for two seconds;
+     touch    - tap the text to toggle (hover does not exist there);
+     keyboard - a clipped summary is made focusable, and focus opens it at once;
+                Enter or Space toggles, Escape closes.
+   The tooltip stays open while the pointer or focus is inside it (WCAG 1.4.13).
+   Screen readers already get the whole text: the clamp only hides it visually,
+   so the tooltip is a visual aid and carries no ARIA state (aria-expanded is
+   not permitted on a plain div, and a button role would announce the whole
+   summary as a button label).
+   Only summaries that are actually clipped become interactive. */
 (function () {
-  var OPEN_DELAY = 1000;
+  var OPEN_DELAY = 2000;
+  var CLOSE_DELAY = 200;
   var groups = document.querySelectorAll('.staff-news__summary');
   if (!groups.length) { return; }
 
   var current = null, openTimer = null, closeTimer = null, entries = [];
+  /* True between a pointer press and its click, so the focus a click gives the
+     summary does not open the tooltip only for the click to close it again. */
+  var pointerPress = false;
 
   function place(tip) {
     tip.style.left = '0px';
@@ -33,76 +41,54 @@
     window.clearTimeout(closeTimer);
     if (!current) { return; }
     current.tip.hidden = true;
-    current.btn.setAttribute('aria-expanded', 'false');
     if (current.card) { current.card.classList.remove('has-open-tip'); }
     current = null;
   }
 
   function open(entry) {
+    window.clearTimeout(closeTimer);
     if (current) {
       if (current === entry) { return; }
       close();
     }
     entry.tip.hidden = false;
-    entry.btn.setAttribute('aria-expanded', 'true');
     /* Raise the owning card so later cards cannot paint over the tooltip. */
     if (entry.card) { entry.card.classList.add('has-open-tip'); }
     place(entry.tip);
     current = entry;
   }
 
+  function toggle(entry) {
+    window.clearTimeout(openTimer);
+    if (current === entry) { close(); } else { open(entry); }
+  }
+
   function scheduleClose() {
     window.clearTimeout(closeTimer);
-    closeTimer = window.setTimeout(close, 200);
+    closeTimer = window.setTimeout(close, CLOSE_DELAY);
   }
 
   function measure(entry) {
     var clipped = entry.clamp.scrollHeight > entry.clamp.clientHeight + 1;
     entry.clipped = clipped;
-    entry.btn.hidden = !clipped;
     if (clipped) {
       entry.clamp.classList.add('is-clipped');
+      entry.clamp.setAttribute('tabindex', '0');
     } else {
       entry.clamp.classList.remove('is-clipped');
+      entry.clamp.removeAttribute('tabindex');
       if (current === entry) { close(); }
     }
   }
 
   Array.prototype.forEach.call(groups, function (summary) {
     var clamp = summary.querySelector('.staff-news__clamp');
-    var btn = summary.querySelector('.staff-news__more');
     var tip = summary.querySelector('.staff-news__tip');
     if (!clamp) { return; }
-    if (!btn) { return; }
     if (!tip) { return; }
-    var entry = { clamp: clamp, btn: btn, tip: tip,
+    var entry = { clamp: clamp, tip: tip,
                   card: summary.closest ? summary.closest('.staff-card') : null };
     entries.push(entry);
-
-    btn.addEventListener('mouseenter', function () {
-      window.clearTimeout(closeTimer);
-      window.clearTimeout(openTimer);
-      openTimer = window.setTimeout(function () { open(entry); }, OPEN_DELAY);
-    });
-    btn.addEventListener('mouseleave', function () {
-      window.clearTimeout(openTimer);
-      scheduleClose();
-    });
-    /* Keyboard users get it immediately: a one second wait on focus would
-       feel broken. */
-    btn.addEventListener('focus', function () { open(entry); });
-    btn.addEventListener('blur', function (ev) {
-      if (ev.relatedTarget) {
-        if (tip.contains(ev.relatedTarget)) { return; }
-      }
-      scheduleClose();
-    });
-    /* Click covers touch, where hover does not exist. */
-    btn.addEventListener('click', function (ev) {
-      ev.preventDefault();
-      window.clearTimeout(openTimer);
-      if (current === entry) { close(); } else { open(entry); }
-    });
 
     clamp.addEventListener('mouseenter', function () {
       if (!entry.clipped) { return; }
@@ -114,10 +100,30 @@
       window.clearTimeout(openTimer);
       scheduleClose();
     });
+
+    clamp.addEventListener('pointerdown', function () { pointerPress = true; });
+    clamp.addEventListener('focus', function () {
+      if (!entry.clipped || pointerPress) { return; }
+      open(entry);
+    });
+    clamp.addEventListener('blur', function (ev) {
+      pointerPress = false;      /* a press that never became a click */
+      if (ev.relatedTarget && tip.contains(ev.relatedTarget)) { return; }
+      scheduleClose();
+    });
+
+    /* Click covers touch, where hover does not exist. */
     clamp.addEventListener('click', function () {
+      pointerPress = false;
       if (!entry.clipped) { return; }
-      window.clearTimeout(openTimer);
-      if (current === entry) { close(); } else { open(entry); }
+      toggle(entry);
+    });
+    clamp.addEventListener('keydown', function (ev) {
+      if (!entry.clipped) { return; }
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        toggle(entry);
+      }
     });
 
     tip.addEventListener('mouseenter', function () { window.clearTimeout(closeTimer); });
@@ -125,7 +131,7 @@
     tip.addEventListener('focusout', function (ev) {
       if (ev.relatedTarget) {
         if (tip.contains(ev.relatedTarget)) { return; }
-        if (ev.relatedTarget === btn) { return; }
+        if (ev.relatedTarget === clamp) { return; }
       }
       scheduleClose();
     });
@@ -139,9 +145,7 @@
   document.addEventListener('click', function (ev) {
     if (!current) { return; }
     if (current.tip.contains(ev.target)) { return; }
-    if (current.btn.contains(ev.target)) { return; }
-    /* The summary text opens the tooltip, so a click on it must not also be
-       treated as a click outside - that closed it again immediately. */
+    /* The summary toggles itself, so a click on it is not a click outside. */
     if (current.clamp.contains(ev.target)) { return; }
     close();
   });

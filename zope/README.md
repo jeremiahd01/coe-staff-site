@@ -292,9 +292,9 @@ Two things to know before editing these rules:
   matter how late it appears in the file.
 
 Consequence worth knowing: at one or two announcements the summary no longer
-exceeds four lines, so the clamp does not engage and the "more" trigger does not
-appear. That is correct - there is nothing hidden to reveal - but it does mean
-the affordance comes and goes with the number of announcements published.
+exceeds four lines, so the clamp does not engage and the summary is not
+interactive. That is correct - there is nothing hidden to reveal - but it does
+mean the tooltip comes and goes with the number of announcements published.
 
 ### Summary text: four-line clamp with a full-text tooltip
 
@@ -307,23 +307,23 @@ The preview is clamped to four lines. Block elements inside the clamp are
 flattened to inline, because each one would otherwise start a new line and blow
 the height; the tooltip renders them normally.
 
-**The summary text itself is the target.** Hovering it opens the tooltip after a
-second; clicking or tapping it toggles, which is what makes this work on touch
-where hover does not exist. Only clipped summaries are interactive - the state is
-measured at runtime and re-measured on resize.
+**The summary text is the only trigger.** The PM removed the "More" control.
+Hovering the text opens the tooltip after **two seconds**; clicking or tapping it
+toggles, which is what makes this work on touch where hover does not exist. Only
+clipped summaries are interactive - the state is measured at runtime and
+re-measured on resize.
 
-A small borderless "More" control sits below the text. It is a real `<button>`,
-so it stays in the tab order and opens the tooltip immediately on keyboard focus;
-it also doubles as the visible hint that there is more to read. It carries a
-`min-height` of 24px to satisfy WCAG 2.5.8 without drawing a box - the bordered
-chip it replaced was what the PM disliked.
+**Keyboard access is kept without the button.** A clipped summary is given
+`tabindex="0"` at runtime, so it joins the tab order: focus opens the tooltip at
+once, Enter or Space toggles it, and a gold focus outline shows where you are. A
+click does not double-fire through that focus. Screen readers need none of this -
+the clamp only hides text visually, so the whole summary is already read out.
 
 Escape closes, and the tooltip stays open while the pointer or focus is inside it
-(WCAG 1.4.13). The title link wraps the title only, because a `<button>` cannot
-live inside an `<a>`.
+(WCAG 1.4.13).
 
-Note the clamp renders its own trailing ellipsis, so truncation is signalled even
-before the "More" control is noticed.
+With the control gone, the clamp's own trailing ellipsis and the pointer cursor
+are the only visual hints that there is more to read.
 
 Two things worth knowing:
 
@@ -331,7 +331,7 @@ Two things worth knowing:
   later in the DOM painted over it, because the tooltip's own card establishes
   no stacking context and `z-index` alone cannot escape one. The script raises
   the owning card while a tooltip is open.
-- Without JavaScript the clamp still applies and no trigger appears, so long
+- Without JavaScript the clamp still applies and the summary is not interactive, so long
   summaries are truncated with no way to expand them in place. The title links
   to the full announcement, so nothing is unreachable.
 

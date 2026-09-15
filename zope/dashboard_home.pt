@@ -153,12 +153,6 @@
                 <div class="staff-news__clamp"
                      tal:content="structure item/summary">One-line summary.</div>
 
-                <button type="button" class="staff-news__more" hidden="hidden"
-                        aria-expanded="false"
-                        tal:attributes="aria-describedby string:staff-tip-${repeat/item/number}">
-                  More<span class="staff-visually-hidden"> of this announcement</span>
-                </button>
-
                 <div class="staff-news__tip" role="tooltip" hidden="hidden"
                      tal:attributes="id string:staff-tip-${repeat/item/number}"
                      tal:content="structure item/summary">Full description.</div>

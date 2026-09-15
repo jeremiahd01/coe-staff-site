@@ -15,6 +15,12 @@
      Cool gray past date numerals          4.81:1
    ========================================================================== */
 
+/* Breathing room between the calendar card and the site footer. Padding on the
+   section, not a margin on the card: the section has no bottom padding of its
+   own, so a card margin would collapse through it and the gray band would stop
+   flush with the card. */
+.block.staff-fullcal-page { padding-bottom: 2rem; }
+
 .staff-fullcal {
   position: relative;                 /* popups are positioned against this */
   padding-bottom: 1.75rem;
